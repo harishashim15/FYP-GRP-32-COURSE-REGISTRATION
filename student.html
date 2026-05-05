@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Student Page</title>
 </head>
 <body>
-    <h1> THis is student page </h1>
+    <h1>This is student page</h1>
+
+    <button onclick="logout()">Logout</button>
+
+    <script>
+        function logout() {
+            // why: remove stored session/auth data
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // why: redirect user after logout
+            window.location.href = "login.html";
+        }
+    </script>
 </body>
 </html>
