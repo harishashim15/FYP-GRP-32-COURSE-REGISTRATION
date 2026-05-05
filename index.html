@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-
+<!--Comment-->
     <div class="container vh-100 d-flex justify-content-center align-items-center">
         <div class="card shadow p-4" style="width: 350px;">
             <h3 class="text-center mb-4">Login</h3>
@@ -36,31 +36,39 @@
         </div>
     </div>
 
-    <script>
-        function login(event) {
-            event.preventDefault();
+  <script>
+function login(event) {
+    event.preventDefault();
 
-            let username = document.getElementById("username").value;
-            let password = document.getElementById("password").value;
+  let username = document.getElementById("name").value;
+    let password = document.getElementById("password").value;
 
-            if (password === "pass") {
-                if (username === "student") {
-                    window.location.href = "student.html";
-                } 
-                else if (username === "academic") {
-                    window.location.href = "advisor.html";
-                } 
-                else if (username === "admin") {
-                    window.location.href = "admin.html";
-                } 
-                else {
-                    alert("Invalid username");
-                }
-            } else {
-                alert("Incorrect password");
-            }
+    fetch("login.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `username=${username}&password=${password}`
+    })
+    .then(response => response.text())
+    .then(role => {
+        role = role.trim();
+
+        if (role === "student") {
+            window.location.href = "student.html";
+        } 
+        else if (role === "advisor") {
+            window.location.href = "advisor.html";
+        } 
+        else if (role === "admin") {
+            window.location.href = "admin.html";
+        } 
+        else {
+            alert("Invalid username or password");
         }
-    </script>
+    });
+}
+</script>
 
 </body>
 </html>
