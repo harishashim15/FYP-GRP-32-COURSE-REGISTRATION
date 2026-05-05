@@ -11,7 +11,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$name = $_POST['username']; // keep this if your input field is still "username"
+$name = $_POST['username']; 
 $password = $_POST['password'];
 
 $sql = "SELECT role FROM users WHERE name=? AND password=?";
