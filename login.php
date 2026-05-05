@@ -11,12 +11,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$username = $_POST['username'];
+$name = $_POST['username']; // keep this if your input field is still "username"
 $password = $_POST['password'];
 
-$sql = "SELECT role FROM users WHERE username=? AND password=?";
+$sql = "SELECT role FROM users WHERE name=? AND password=?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ss", $username, $password);
+$stmt->bind_param("ss", $name, $password);
 $stmt->execute();
 
 $result = $stmt->get_result();
