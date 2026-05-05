@@ -40,7 +40,8 @@
 function login(event) {
     event.preventDefault();
 
-  let username = document.getElementById("name").value;
+    // Fixed the ID here
+    let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
     fetch("login.php", {
@@ -48,25 +49,24 @@ function login(event) {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         },
-        body: `username=${username}&password=${password}`
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
     })
     .then(response => response.text())
     .then(role => {
         role = role.trim();
+        const routes = {
+            "student": "student.html",
+            "advisor": "advisor.html",
+            "admin": "admin.html"
+        };
 
-        if (role === "student") {
-            window.location.href = "student.html";
-        } 
-        else if (role === "advisor") {
-            window.location.href = "advisor.html";
-        } 
-        else if (role === "admin") {
-            window.location.href = "admin.html";
-        } 
-        else {
+        if (routes[role]) {
+            window.location.href = routes[role];
+        } else {
             alert("Invalid username or password");
         }
-    });
+    })
+    .catch(err => console.error("Error:", err));
 }
 </script>
 
