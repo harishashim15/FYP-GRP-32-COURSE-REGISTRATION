@@ -38,30 +38,54 @@
 function login(event) {
     event.preventDefault();
 
-    const username = document.getElementById("username").value;
+    const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
     const errorMsg = document.getElementById("error-msg");
+    const loginBtn = document.getElementById("login-btn");
+
+    errorMsg.style.display = "none";
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in...";
+
+    const body = new URLSearchParams({ username, password });
 
     fetch("login.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `username=${username}&password=${password}`
+        body: body.toString()
     })
-    .then(res => res.text())
+    .then(response => {
+        if (!response.ok) throw new Error("Server error " + response.status);
+        return response.text();
+    })
     .then(role => {
-        role = role.trim();
+        role = role.trim().toLowerCase();
+        console.log("Server response:", JSON.stringify(role)); // helpful for debugging
 
         const routes = {
-            student: "student_dashboard.php",
+            student: "student.html",
             advisor: "advisor.html",
-            admin: "admin.html"
+            admin:   "admin.html"
         };
 
-        if(routes[role]){
+        if (routes[role]) {
             window.location.href = routes[role];
         } else {
+            errorMsg.textContent = "Invalid email or password.";
             errorMsg.style.display = "block";
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Login";
         }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+        errorMsg.textContent = "A server error occurred. Please try again.";
+        errorMsg.style.display = "block";
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
     });
 }
 </script>
+
+</body>
+</html>
