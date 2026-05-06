@@ -41,48 +41,27 @@ function login(event) {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
     const errorMsg = document.getElementById("error-msg");
-    const loginBtn = document.getElementById("login-btn");
-
-    // Reset error, show loading
-    errorMsg.style.display = "none";
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Logging in...";
-
-    // Properly encode form data — handles special characters in passwords
-    const body = new URLSearchParams({ username, password });
 
     fetch("login.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString()
+        body: `username=${username}&password=${password}`
     })
-    .then(response => {
-        if (!response.ok) throw new Error("Server error");
-        return response.text();
-    })
+    .then(res => res.text())
     .then(role => {
         role = role.trim();
+
         const routes = {
-            student: "student.html",
+            student: "student_dashboard.php",
             advisor: "advisor.html",
-            admin:   "admin.html"
+            admin: "admin.html"
         };
-        if (routes[role]) {
+
+        if(routes[role]){
             window.location.href = routes[role];
         } else {
             errorMsg.style.display = "block";
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
         }
-    })
-    .catch(() => {
-        errorMsg.textContent = "A server error occurred. Please try again.";
-        errorMsg.style.display = "block";
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Login";
     });
 }
 </script>
-
-</body>
-</html>

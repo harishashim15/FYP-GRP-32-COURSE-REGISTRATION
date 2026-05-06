@@ -1,5 +1,12 @@
 <?php
 include("db.php");
+session_start();
+
+if(!isset($_SESSION['user_id'])){
+    header("Location: index.html");
+    exit();
+}
+
 $result = mysqli_query($conn,"SELECT * FROM courses");
 ?>
 
@@ -17,4 +24,5 @@ $result = mysqli_query($conn,"SELECT * FROM courses");
     </div>
 <?php } ?>
 
+<a href="student_dashboard.php" class="btn btn-secondary mt-3">Back</a>
 </div>
