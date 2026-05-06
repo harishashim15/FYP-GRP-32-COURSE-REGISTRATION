@@ -2,12 +2,14 @@
 ini_set('display_errors', 0);
 error_reporting(0);
 
+session_start(); // ADD THIS
+
 header("Content-Type: text/plain; charset=utf-8");
 
 $host = "127.0.0.1";
 $user = "root";
-$pass = "";           // XAMPP default — no password
-$db   = "dummyfyp";
+$pass = "";
+$db   = "dummyfyp";  // keep as is
 $port = 3306;
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
@@ -25,7 +27,7 @@ if (empty($email) || empty($password)) {
     exit;
 }
 
-$sql  = "SELECT role, password FROM users WHERE email = ?";
+$sql  = "SELECT id, role, password FROM users WHERE email = ?"; // added id
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
@@ -39,7 +41,9 @@ $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
     if (password_verify($password, $row['password']) || $password === $row['password']) {
-        echo $row['role'];   // returns: student | advisor | admin
+        $_SESSION['user_id'] = $row['id'];   // ADD THIS
+        $_SESSION['role']    = $row['role']; // ADD THIS
+        echo $row['role'];
     } else {
         echo "invalid";
     }
