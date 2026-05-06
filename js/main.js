@@ -17,14 +17,15 @@
 
         if (!check) return;
 
-        var email    = $('input[name="email"]').val().trim();
+        // GET ID + PASSWORD
+        var id       = $('input[name="id"]').val().trim();
         var password = $('input[name="pass"]').val();
 
         $.ajax({
             url: 'login.php',
             type: 'POST',
             data: {
-                username: email,
+                username: id,
                 password: password
             },
             success: function (response) {
@@ -37,7 +38,7 @@
                 } else if (response === 'student') {
                     window.location.href = 'student.html';
                 } else if (response === 'invalid') {
-                    showErrorMessage('Invalid email or password. Please try again.');
+                    showErrorMessage('Invalid ID or password. Please try again.');
                 } else {
                     showErrorMessage('Unexpected response: [' + response + ']');
                 }
@@ -55,15 +56,10 @@
         });
     });
 
+    // SIMPLE VALIDATION (NO EMAIL CHECK ANYMORE)
     function validate(input) {
-        if ($(input).attr('type') == 'email' || $(input).attr('name') == 'email') {
-            if ($(input).val().trim().match(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
-                return false;
-            }
-        } else {
-            if ($(input).val().trim() == '') {
-                return false;
-            }
+        if ($(input).val().trim() == '') {
+            return false;
         }
     }
 
