@@ -3,27 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>My Registration</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+        body{
+            background: #f8f6f4;
+            font-family: Poppins;
+        }
+
+        .sidebar{
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed;
+            padding: 30px 20px;
+        }
+
+        .sidebar a{
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a:hover,
+        .active{
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+
+        .main{
+            margin-left: 280px;
+            padding: 40px;
+        }
+
+        .registration-card{
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+        }
+
+    </style>
+
 </head>
+
 <body>
 
-<div class="container mt-5">
+<div class="sidebar">
 
-    <h3>My Registration</h3>
+    <h3 class="text-white mb-5">Student Portal</h3>
 
-    <div class="card p-3 mb-2">
-        <p>Web Programming - Pending</p>
-    </div>
-
-    <div class="card p-3 mb-2">
-        <p>Database - Approved</p>
-    </div>
-
-    <a href="student_dashboard.html" class="btn btn-secondary">
-        Back
+    <a href="student_dashboard.html">
+        Dashboard
     </a>
+
+    <a href="profile.html">
+        Profile
+    </a>
+
+    <a href="courses.html">
+        Courses
+    </a>
+
+    <a href="my_registration.html" class="active">
+        Registration
+    </a>
+
+</div>
+
+<div class="main">
+
+    <h2 class="mb-4">My Registration</h2>
+
+    <div class="registration-card">
+
+        <h4>Web Programming</h4>
+
+        <span class="badge bg-warning">
+            Pending
+        </span>
+
+    </div>
+
+    <div class="registration-card">
+
+        <h4>Database</h4>
+
+        <span class="badge bg-success">
+            Approved
+        </span>
+
+    </div>
 
 </div>
 
