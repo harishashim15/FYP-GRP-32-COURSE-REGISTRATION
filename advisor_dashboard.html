@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>UTM Academic Advisor Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body{
+            background: #f8f6f4;
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar{
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed;
+            padding: 30px 20px;
+            color: white;
+        }
+
+        .logo{
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo img{
+            width: 130px;
+        }
+
+        .system-title{
+            color: #ffc107;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .menu a{
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .menu a:hover,
+        .menu .active{
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+
+        .menu i{
+            font-size: 20px;
+        }
+
+        .logout{
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
+        }
+
+        .logout a{
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 16px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .logout a:hover{
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+
+        .logout img{
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        /* MAIN */
+        .main-content{
+            margin-left: 280px;
+            padding: 30px;
+        }
+
+        .topbar{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .profile-box{
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-box img{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        /* HERO */
+        .hero{
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            border: 1px solid #eee;
+        }
+
+        .hero h1{
+            font-size: 40px;
+            font-weight: 700;
+            color: #670019;
+        }
+
+        .hero p{
+            color: #666;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .hero img{
+            width: 200px;
+        }
+
+        /* CARDS */
+        .dashboard-card{
+            border: none;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            height: 100%;
+            background: white;
+        }
+
+        .dashboard-card:hover{
+            transform: translateY(-5px);
+        }
+
+        .card-icon{
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .yellow{
+            background: #fff2cc;
+            color: #d48a00;
+        }
+
+        .red{
+            background: #ffe0e0;
+            color: #b00020;
+        }
+
+        .green{
+            background: #e4f7df;
+            color: #2e7d32;
+        }
+
+        .dashboard-card h2{
+            font-size: 36px;
+            font-weight: 700;
+            color: #670019;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-card h5{
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .dashboard-card p{
+            color: #666;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        /* REGISTRATION PERIOD CARD */
+        .period-card{
+            background: white;
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .period-card h4{
+            color: #670019;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .period-status{
+            display: inline-block;
+            padding: 5px 12px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* PENDING REQUESTS TABLE */
+        .pending-requests{
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            margin-top: 35px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .pending-requests h3{
+            color: #670019;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .status-badge{
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-pending{
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved{
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected{
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-approve{
+            background: #d4edda;
+            color: #155724;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .btn-reject{
+            background: #f8d7da;
+            color: #721c24;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .action-link{
+            color: #670019;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .action-link:hover{
+            text-decoration: underline;
+        }
+
+        /* TABLE STYLES */
+        .table-custom{
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-custom th{
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .table-custom td{
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        /* QUICK ACTIONS */
+        .quick-actions{
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            margin-top: 35px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .quick-actions h3{
+            color: #670019;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .action-btn{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            text-decoration: none;
+            color: black;
+            transition: 0.3s;
+        }
+
+        .action-btn:hover{
+            background: #fff7ef;
+        }
+
+        .action-left{
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .action-icon{
+            width: 45px;
+            height: 45px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #670019;
+            color: white;
+            font-size: 20px;
+        }
+
+        .action-left h5{
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .action-left small{
+            font-size: 11px;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="images/utmlogo.png" alt="UTM Logo">
+            <div class="system-title">
+                COURSE REGISTRATION SYSTEM
+            </div>
+        </div>
+
+        <div class="menu">
+            <a href="#" class="active">
+                <i class="bi bi-house-fill"></i>
+                Dashboard
+            </a>
+            <a href="advisor_my_students.html">
+                <i class="bi bi-people-fill"></i>
+                My Students
+            </a>
+            <a href="advisor_registrations.html">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                Registrations
+            </a>
+            <a href="advisor_profile.html">
+                <i class="bi bi-person-fill"></i>
+                Profile
+            </a>
+            <a href="advisor_change_password.html">
+                <i class="bi bi-lock-fill"></i>
+                Change Password
+            </a>
+        </div>
+
+        <div class="logout">
+            <a href="index.html">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <h4>
+                <i class="bi bi-list"></i>
+            </h4>
+
+            <div class="profile-box">
+                <i class="bi bi-bell fs-5"></i>
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+                <div>
+                    <h6 class="mb-0">Miss Nurul Asyikin</h6>
+                    <small class="text-muted">Academic Advisor</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- HERO -->
+        <div class="hero">
+            <div>
+                <h1>Welcome back, Miss Nurul 👩‍🏫</h1>
+                <p>
+                    Manage your students' course registrations here.
+                </p>
+            </div>
+            <img src="https://cdn-icons-png.flaticon.com/512/3976/3976626.png">
+        </div>
+
+        <!-- STATS CARDS ROW -->
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <div class="card-icon yellow">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h2>24</h2>
+                    <h5>Total Students</h5>
+                    <p>Students under your guidance</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <div class="card-icon red">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h2>7</h2>
+                    <h5>Pending Approvals</h5>
+                    <p>Waiting for your review</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <div class="card-icon green">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <h2>15</h2>
+                    <h5>Approved</h5>
+                    <p>Registrations approved this week</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGISTRATION PERIOD ROW -->
+        <div class="row g-4 mt-2">
+            <div class="col-md-12">
+                <div class="period-card">
+                    <h4><i class="bi bi-calendar-event"></i> Registration Period</h4>
+                    <span class="period-status">🟢 Currently open</span>
+                    <div class="mt-3">
+                        <strong>1 May – 15 May 2026</strong>
+                        <div class="mt-2">
+                            <span class="badge bg-light text-dark me-1">Semester 2</span>
+                            <span class="badge bg-light text-dark me-1">2025/2026</span>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PENDING REQUESTS TABLE -->
+        <div class="pending-requests">
+            <h3><i class="bi bi-clock-history"></i> Recent Registration Requests</h3>
+            <div style="overflow-x: auto;">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>ID</th>
+                            <th>Courses</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Ahmad Mirza</strong><br><small>A24DW0112</small></td>
+                            <td>A24DW0112</small></td>
+                            <td>5 courses</small></td>
+                            <td><span class="status-badge status-pending">Pending</span></small></td>
+                            <td>
+                                <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
+                                <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
+                             </small>
+                        </tr>
+                        <tr>
+                            <td><strong>Siti Rahmah</strong><br><small>A24DW0204</small></small>
+                            <td>A24DW0204</small></small>
+                            <td>6 courses</small></small>
+                            <td><span class="status-badge status-approved">Approved</span></small></small>
+                            <td><a href="advisor_verify_registration.html" class="action-link">View Details</a></small></small>
+                        </tr>
+                        <tr>
+                            <td><strong>Khairul Haziq</strong><br><small>A24DW0339</small></small>
+                            <td>A24DW0339</small></small>
+                            <td>4 courses</small></small>
+                            <td><span class="status-badge status-pending">Pending</span></small></small>
+                            <td>
+                                <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
+                                <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
+                             </small>
+                        </tr>
+                        <tr>
+                            <td><strong>Nora Nabila</strong><br><small>A24DW0451</small></small>
+                            <td>A24DW0451</small></small>
+                            <td>3 courses</small></small>
+                            <td><span class="status-badge status-rejected">Rejected</span></small></small>
+                            <td><a href="advisor_verify_registration.html" class="action-link">View Details</a></small></small>
+                        </tr>
+                        <tr>
+                            <td><strong>Faiz Zulkifli</strong><br><small>A24DW0512</small></small>
+                            <td>A24DW0512</small></small>
+                            <td>5 courses</small></small>
+                            <td><span class="status-badge status-pending">Pending</span></small></small>
+                            <td>
+                                <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
+                                <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
+                             </small>
+                        </tr>
+                        <tr>
+                            <td><strong>Ain Izzati</strong><br><small>A24DW0612</small></small>
+                            <td>A24DW0612</small></small>
+                            <td>4 courses</small></small>
+                            <td><span class="status-badge status-pending">Pending</span></small></small>
+                            <td>
+                                <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
+                                <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
+                             </small>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-3">
+                <a href="advisor_registrations.html" class="action-link">View all requests →</a>
+            </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+            <h3><i class="bi bi-lightning-charge"></i> Quick Actions</h3>
+
+            <a href="advisor_my_students.html" class="action-btn">
+                <div class="action-left">
+                    <div class="action-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">View All Students</h5>
+                        <small>See all students under your guidance</small>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+
+            <a href="advisor_registrations.html" class="action-btn">
+                <div class="action-left">
+                    <div class="action-icon">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Review Registrations</h5>
+                        <small>Approve or reject student registrations</small>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+
+            <a href="advisor_profile.html" class="action-btn">
+                <div class="action-left">
+                    <div class="action-icon">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">My Profile</h5>
+                        <small>Update your personal information</small>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>
