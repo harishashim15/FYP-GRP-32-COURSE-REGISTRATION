@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Students - UTM Academic Advisor</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f8f6f4;
+            overflow-x: hidden;
+        }
+
+        /* ── SIDEBAR (matched to dashboard) ── */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed;
+            padding: 30px 20px;
+            color: white;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo img {
+            width: 130px;
+        }
+
+        .system-title {
+            color: #ffc107;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .menu a:hover,
+        .menu .active {
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+
+        .menu i {
+            font-size: 20px;
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
+        }
+
+        .logout a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 16px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .logout a:hover {
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+
+        /* ── MAIN ── */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+        }
+
+        /* ── TOPBAR (matched to dashboard) ── */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-box img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 35px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+        }
+
+        .page-header h2 {
+            font-size: 34px;
+            font-weight: 700;
+            color: #670019;
+        }
+
+        .page-header p {
+            color: #666;
+            margin-top: 8px;
+            font-size: 15px;
+        }
+
+        .page-header img {
+            width: 180px;
+        }
+
+        /* ── SEARCH BAR ── */
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 25px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            background: white;
+            transition: 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #670019;
+            box-shadow: 0 0 0 4px rgba(103,0,25,0.08);
+        }
+
+        .search-bar button {
+            padding: 12px 25px;
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .search-bar button:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+        }
+
+        /* ── TABLE CARD ── */
+        .students-table {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .students-table h3 {
+            color: #670019;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .students-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .students-table th {
+            text-align: left;
+            padding: 12px 12px;
+            background: #f8f6f4;
+            color: #670019;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .students-table th:first-child { border-radius: 10px 0 0 10px; }
+        .students-table th:last-child  { border-radius: 0 10px 10px 0; }
+
+        .students-table td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .students-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .students-table tbody tr:hover td {
+            background: #fdf9f7;
+        }
+
+        /* ── STATUS BADGES ── */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approval {
+            background: #ffe0e0;
+            color: #b00020;
+        }
+
+        /* ── VIEW BUTTON ── */
+        .view-btn {
+            background: none;
+            border: 1.5px solid #670019;
+            color: #670019;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .view-btn:hover {
+            background: #670019;
+            color: white;
+        }
+
+        /* ── SUMMARY STRIP ── */
+        .summary-strip {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .strip-item {
+            background: white;
+            border-radius: 14px;
+            padding: 10px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .strip-item strong {
+            color: #670019;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .strip-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- ── SIDEBAR ── -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="images/utmlogo.png" alt="UTM Logo">
+            <div class="system-title">COURSE REGISTRATION SYSTEM</div>
+        </div>
+
+        <div class="menu">
+            <a href="advisor_dashboard.html">
+                <i class="bi bi-house-fill"></i>
+                Dashboard
+            </a>
+            <a href="#" class="active">
+                <i class="bi bi-people-fill"></i>
+                My Students
+            </a>
+            <a href="advisor_registrations.html">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                Registrations
+            </a>
+            <a href="advisor_profile.html">
+                <i class="bi bi-person-fill"></i>
+                Profile
+            </a>
+            <a href="advisor_change_password.html">
+                <i class="bi bi-lock-fill"></i>
+                Change Password
+            </a>
+        </div>
+
+        <div class="logout">
+            <a href="index.html">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- ── MAIN ── -->
+    <div class="main-content">
+
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <h4><i class="bi bi-list"></i></h4>
+            <div class="profile-box">
+                <i class="bi bi-bell fs-5"></i>
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+                <div>
+                    <h6 class="mb-0">Miss Nurul Asyikin</h6>
+                    <small class="text-muted">Academic Advisor</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+            <div>
+                <h2>My Students 👩‍🎓</h2>
+                <p>View and manage all students under your guidance</p>
+            </div>
+            <img src="https://cdn-icons-png.flaticon.com/512/3976/3976626.png" alt="Students">
+        </div>
+
+        <!-- SUMMARY STRIP -->
+        <div class="summary-strip">
+            <div class="strip-item">
+                <span class="strip-dot" style="background:#670019;"></span>
+                Total &nbsp;<strong>8</strong>&nbsp; students
+            </div>
+            <div class="strip-item">
+                <span class="strip-dot" style="background:#2e7d32;"></span>
+                Completed &nbsp;<strong>3</strong>
+            </div>
+            <div class="strip-item">
+                <span class="strip-dot" style="background:#856404;"></span>
+                Pending Registration &nbsp;<strong>4</strong>
+            </div>
+            <div class="strip-item">
+                <span class="strip-dot" style="background:#b00020;"></span>
+                Pending Approval &nbsp;<strong>1</strong>
+            </div>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search by name or student ID..." oninput="filterTable()">
+            <button onclick="filterTable()"><i class="bi bi-search"></i> Search</button>
+        </div>
+
+        <!-- STUDENTS TABLE -->
+        <div class="students-table">
+            <h3><i class="bi bi-people-fill me-2"></i>Student List</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Student ID</th>
+                            <th>Programme</th>
+                            <th>Year</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <tr>
+                            <td><strong>Ahmad Mirza</strong> bin Abdullah</td>
+                            <td>A24DW0112</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 2</td>
+                            <td><span class="status-badge status-pending">Pending Registration</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Siti Rahmah</strong> binti Abdullah</td>
+                            <td>A24DW0204</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 2</td>
+                            <td><span class="status-badge status-active">Completed</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Khairul Haziq</strong> bin Mohd</td>
+                            <td>A24DW0339</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 2</td>
+                            <td><span class="status-badge status-pending">Pending Registration</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nora Nabila</strong> binti Zainal</td>
+                            <td>A24DW0451</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 3</td>
+                            <td><span class="status-badge status-approval">Pending Approval</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Faiz Zulkifli</strong> bin Ahmad</td>
+                            <td>A24DW0512</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 2</td>
+                            <td><span class="status-badge status-active">Completed</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ain Izzati</strong> binti Rashid</td>
+                            <td>A24DW0612</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 1</td>
+                            <td><span class="status-badge status-pending">Pending Registration</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Muhammad Faiz</strong> bin Zainal</td>
+                            <td>A24DW0712</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 3</td>
+                            <td><span class="status-badge status-active">Completed</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sofiah</strong> binti Yusoff</td>
+                            <td>A24DW0812</td>
+                            <td>Diploma Computer Science</td>
+                            <td>Year 1</td>
+                            <td><span class="status-badge status-pending">Pending Registration</span></td>
+                            <td><button class="view-btn" onclick="location.href='advisor_student_details.html'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function filterTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#studentTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+    </script>
+
+</body>
+</html>
