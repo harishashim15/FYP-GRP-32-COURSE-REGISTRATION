@@ -32,7 +32,7 @@
                 response = response.trim();
 
                 if (response === 'admin') {
-                    window.location.href = 'admin/template/admin.html';
+                    window.location.href = 'admin/template/admin_dashboard.html';
                 } else if (response === 'advisor') {
                     window.location.href = 'advisor.html';
                 } else if (response === 'student') {
