@@ -36,6 +36,11 @@
             position: fixed;
             padding: 30px 20px;
             color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed{
+            transform: translateX(-280px);
         }
 
         .logo{
@@ -100,16 +105,15 @@
             background: linear-gradient(to right, #f4a000, #e08700);
         }
 
-        .logout img{
-            width: 20px;
-            height: 20px;
-            filter: brightness(0) invert(1);
-        }
-
         /* MAIN */
         .main-content{
             margin-left: 280px;
             padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded{
+            margin-left: 0;
         }
 
         .topbar{
@@ -121,6 +125,16 @@
             padding: 15px 25px;
             border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .toggle-btn{
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #333;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
         }
 
         .profile-box{
@@ -189,20 +203,9 @@
             margin-bottom: 15px;
         }
 
-        .yellow{
-            background: #fff2cc;
-            color: #d48a00;
-        }
-
-        .red{
-            background: #ffe0e0;
-            color: #b00020;
-        }
-
-        .green{
-            background: #e4f7df;
-            color: #2e7d32;
-        }
+        .yellow{ background: #fff2cc; color: #d48a00; }
+        .red   { background: #ffe0e0; color: #b00020; }
+        .green { background: #e4f7df; color: #2e7d32; }
 
         .dashboard-card h2{
             font-size: 36px;
@@ -272,20 +275,9 @@
             display: inline-block;
         }
 
-        .status-pending{
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-approved{
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-rejected{
-            background: #f8d7da;
-            color: #721c24;
-        }
+        .status-pending  { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
 
         .btn-approve{
             background: #d4edda;
@@ -315,15 +307,10 @@
             font-size: 13px;
         }
 
-        .action-link:hover{
-            text-decoration: underline;
-        }
+        .action-link:hover{ text-decoration: underline; }
 
         /* TABLE STYLES */
-        .table-custom{
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .table-custom{ width: 100%; border-collapse: collapse; }
 
         .table-custom th{
             text-align: left;
@@ -368,9 +355,7 @@
             transition: 0.3s;
         }
 
-        .action-btn:hover{
-            background: #fff7ef;
-        }
+        .action-btn:hover{ background: #fff7ef; }
 
         .action-left{
             display: flex;
@@ -390,14 +375,8 @@
             font-size: 20px;
         }
 
-        .action-left h5{
-            font-size: 15px;
-            margin-bottom: 2px;
-        }
-
-        .action-left small{
-            font-size: 11px;
-        }
+        .action-left h5{ font-size: 15px; margin-bottom: 2px; }
+        .action-left small{ font-size: 11px; }
     </style>
 
 </head>
@@ -407,9 +386,7 @@
     <div class="sidebar">
         <div class="logo">
             <img src="images/utmlogo.png" alt="UTM Logo">
-            <div class="system-title">
-                COURSE REGISTRATION SYSTEM
-            </div>
+            <div class="system-title">COURSE REGISTRATION SYSTEM</div>
         </div>
 
         <div class="menu">
@@ -448,9 +425,9 @@
 
         <!-- TOPBAR -->
         <div class="topbar">
-            <h4>
+            <button class="toggle-btn" onclick="toggleSidebar()">
                 <i class="bi bi-list"></i>
-            </h4>
+            </button>
 
             <div class="profile-box">
                 <i class="bi bi-bell fs-5"></i>
@@ -466,9 +443,7 @@
         <div class="hero">
             <div>
                 <h1>Welcome back, Miss Nurul 👩‍🏫</h1>
-                <p>
-                    Manage your students' course registrations here.
-                </p>
+                <p>Manage your students' course registrations here.</p>
             </div>
             <img src="https://cdn-icons-png.flaticon.com/512/3976/3976626.png">
         </div>
@@ -480,7 +455,7 @@
                     <div class="card-icon yellow">
                         <i class="bi bi-people-fill"></i>
                     </div>
-                    <h2>24</h2>
+                    <h2>8</h2>
                     <h5>Total Students</h5>
                     <p>Students under your guidance</p>
                 </div>
@@ -491,7 +466,7 @@
                     <div class="card-icon red">
                         <i class="bi bi-clock-history"></i>
                     </div>
-                    <h2>7</h2>
+                    <h2>4</h2>
                     <h5>Pending Approvals</h5>
                     <p>Waiting for your review</p>
                 </div>
@@ -502,7 +477,7 @@
                     <div class="card-icon green">
                         <i class="bi bi-check-circle"></i>
                     </div>
-                    <h2>15</h2>
+                    <h2>1</h2>
                     <h5>Approved</h5>
                     <p>Registrations approved this week</p>
                 </div>
@@ -544,57 +519,57 @@
                     <tbody>
                         <tr>
                             <td><strong>Ahmad Mirza</strong><br><small>A24DW0112</small></td>
-                            <td>A24DW0112</small></td>
-                            <td>5 courses</small></td>
-                            <td><span class="status-badge status-pending">Pending</span></small></td>
+                            <td>A24DW0112</td>
+                            <td>5 courses</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
                             <td>
                                 <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
                                 <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
-                             </small>
+                            </td>
                         </tr>
                         <tr>
-                            <td><strong>Siti Rahmah</strong><br><small>A24DW0204</small></small>
-                            <td>A24DW0204</small></small>
-                            <td>6 courses</small></small>
-                            <td><span class="status-badge status-approved">Approved</span></small></small>
-                            <td><a href="advisor_verify_registration.html" class="action-link">View Details</a></small></small>
+                            <td><strong>Siti Rahmah</strong><br><small>A24DW0204</small></td>
+                            <td>A24DW0204</td>
+                            <td>6 courses</td>
+                            <td><span class="status-badge status-approved">Approved</span></td>
+                            <td><a href="advisor_verify_registration.html" class="action-link">View Details</a></td>
                         </tr>
                         <tr>
-                            <td><strong>Khairul Haziq</strong><br><small>A24DW0339</small></small>
-                            <td>A24DW0339</small></small>
-                            <td>4 courses</small></small>
-                            <td><span class="status-badge status-pending">Pending</span></small></small>
+                            <td><strong>Khairul Haziq</strong><br><small>A24DW0339</small></td>
+                            <td>A24DW0339</td>
+                            <td>4 courses</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
                             <td>
                                 <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
                                 <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
-                             </small>
+                            </td>
                         </tr>
                         <tr>
-                            <td><strong>Nora Nabila</strong><br><small>A24DW0451</small></small>
-                            <td>A24DW0451</small></small>
-                            <td>3 courses</small></small>
-                            <td><span class="status-badge status-rejected">Rejected</span></small></small>
-                            <td><a href="advisor_verify_registration.html" class="action-link">View Details</a></small></small>
+                            <td><strong>Nora Nabila</strong><br><small>A24DW0451</small></td>
+                            <td>A24DW0451</td>
+                            <td>3 courses</td>
+                            <td><span class="status-badge status-rejected">Rejected</span></td>
+                            <td><a href="advisor_verify_registration.html" class="action-link">View Details</a></td>
                         </tr>
                         <tr>
-                            <td><strong>Faiz Zulkifli</strong><br><small>A24DW0512</small></small>
-                            <td>A24DW0512</small></small>
-                            <td>5 courses</small></small>
-                            <td><span class="status-badge status-pending">Pending</span></small></small>
+                            <td><strong>Faiz Zulkifli</strong><br><small>A24DW0512</small></td>
+                            <td>A24DW0512</td>
+                            <td>5 courses</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
                             <td>
                                 <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
                                 <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
-                             </small>
+                            </td>
                         </tr>
                         <tr>
-                            <td><strong>Ain Izzati</strong><br><small>A24DW0612</small></small>
-                            <td>A24DW0612</small></small>
-                            <td>4 courses</small></small>
-                            <td><span class="status-badge status-pending">Pending</span></small></small>
+                            <td><strong>Ain Izzati</strong><br><small>A24DW0612</small></td>
+                            <td>A24DW0612</td>
+                            <td>4 courses</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
                             <td>
                                 <button class="btn-approve" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-check"></i> Approve</button>
                                 <button class="btn-reject" onclick="location.href='advisor_verify_registration.html'"><i class="bi bi-x"></i> Reject</button>
-                             </small>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -610,9 +585,7 @@
 
             <a href="advisor_my_students.html" class="action-btn">
                 <div class="action-left">
-                    <div class="action-icon">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
+                    <div class="action-icon"><i class="bi bi-people-fill"></i></div>
                     <div>
                         <h5 class="mb-0">View All Students</h5>
                         <small>See all students under your guidance</small>
@@ -623,9 +596,7 @@
 
             <a href="advisor_registrations.html" class="action-btn">
                 <div class="action-left">
-                    <div class="action-icon">
-                        <i class="bi bi-file-earmark-text-fill"></i>
-                    </div>
+                    <div class="action-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
                     <div>
                         <h5 class="mb-0">Review Registrations</h5>
                         <small>Approve or reject student registrations</small>
@@ -636,9 +607,7 @@
 
             <a href="advisor_profile.html" class="action-btn">
                 <div class="action-left">
-                    <div class="action-icon">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
+                    <div class="action-icon"><i class="bi bi-person-fill"></i></div>
                     <div>
                         <h5 class="mb-0">My Profile</h5>
                         <small>Update your personal information</small>
@@ -649,6 +618,25 @@
         </div>
 
     </div>
+
+    <script>
+        // Apply saved sidebar state on every page load
+        (function() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.querySelector('.sidebar').classList.add('collapsed');
+                document.querySelector('.main-content').classList.add('expanded');
+            }
+        })();
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const main = document.querySelector('.main-content');
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+            // Save state
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+    </script>
 
 </body>
 </html>

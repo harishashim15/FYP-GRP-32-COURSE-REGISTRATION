@@ -129,6 +129,29 @@
             font-size: 14px; transition: 0.3s;
         }
         .btn-reject:hover { background: #f5c6cb; }
+    
+        /* ── SIDEBAR TOGGLE ── */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.collapsed {
+            transform: translateX(-280px);
+        }
+        .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #333;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
@@ -154,7 +177,7 @@
     <!-- ── MAIN ── -->
     <div class="main-content">
         <div class="topbar">
-            <h4><i class="bi bi-list"></i></h4>
+            <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
             <div class="profile-box">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
@@ -172,7 +195,7 @@
             <div class="student-avatar">AM</div>
             <div class="student-info">
                 <h3>Ahmad Mirza bin Abdullah</h3>
-                <p>A24DW0112 · Diploma Computer Science · Year 2 · Sem 2</p>
+                <p>A24DW0112 · Diploma Computer Science · Year 2 · Sem 3</p>
             </div>
         </div>
 
@@ -183,11 +206,11 @@
                     <tr><th>Course Code</th><th>Course Name</th><th>Credit Hours</th><th>Section</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>SCSR1013</td><td>Introduction to Programming</td><td>3</td><td>01</td></tr>
-                    <tr><td>SCSR1023</td><td>Web Technology</td><td>3</td><td>02</td></tr>
-                    <tr><td>SCSR1033</td><td>Database Systems</td><td>3</td><td>01</td></tr>
-                    <tr><td>SCSR1043</td><td>Network Fundamentals</td><td>3</td><td>03</td></tr>
-                    <tr><td>SCSJ1013</td><td>Mathematics for Computing</td><td>3</td><td>01</td></tr>
+                    <tr><td>DSPD1483</td><td>Database</td><td>3</td><td>43</td></tr>
+                    <tr><td>DSPD1693</td><td>Discrete Mathematics</td><td>3</td><td>43</td></tr>
+                    <tr><td>DSPD2353</td><td>IT Support and Maintenance</td><td>3</td><td>43</td></tr>
+                    <tr><td>DSPD2533</td><td>Computer Graphics</td><td>3</td><td>43</td></tr>
+                    <tr><td>DSPD2713</td><td>Mobile Programming</td><td>3</td><td>43</td></tr>
                 </tbody>
             </table>
             <div class="total-credits">Total credit hours: <strong>15</strong></div>
@@ -205,5 +228,23 @@
         </form>
     </div>
 
+    <script>
+        // Apply saved sidebar state on every page load
+        (function() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.querySelector('.sidebar').classList.add('collapsed');
+                document.querySelector('.main-content').classList.add('expanded');
+            }
+        })();
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const main = document.querySelector('.main-content');
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+            // Save state
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+    </script>
 </body>
 </html>

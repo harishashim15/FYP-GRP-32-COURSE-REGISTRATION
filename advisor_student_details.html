@@ -108,13 +108,66 @@
             margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .courses-card h4 { color: #670019; font-weight: 600; margin-bottom: 20px; }
+
+        /* Current Semester Info Strip */
+        .sem-info-strip {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px; margin-bottom: 25px;
+        }
+        .sem-info-item label {
+            display: block; font-size: 12px; color: #888; margin-bottom: 6px; font-weight: 500;
+        }
+        .sem-info-item .sem-info-val {
+            background: #f0f4f8; border: 1px solid #dce3ea;
+            border-radius: 10px; padding: 10px 14px;
+            font-size: 14px; color: #333; font-weight: 500;
+        }
+
+        /* Semester History Table */
+        .table-controls {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
+        }
+        .table-controls-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
+        .table-controls-left select {
+            padding: 4px 10px; border: 1px solid #ddd; border-radius: 8px;
+            font-family: 'Poppins', sans-serif; font-size: 13px;
+        }
+        .table-controls-right { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
+        .table-controls-right input {
+            padding: 5px 12px; border: 1px solid #ddd; border-radius: 8px;
+            font-family: 'Poppins', sans-serif; font-size: 13px; outline: none;
+        }
+        .table-controls-right input:focus { border-color: #670019; }
+
         table { width: 100%; border-collapse: collapse; }
         th {
-            text-align: left; padding: 12px; background: #f8f6f4;
-            color: #670019; font-weight: 600;
+            text-align: center; padding: 11px 12px; background: #f0f4f8;
+            color: #555; font-weight: 600; font-size: 13px;
+            border: 1px solid #dce3ea;
         }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        .total-credits { margin-top: 15px; text-align: right; font-weight: 600; color: #670019; }
+        td {
+            padding: 11px 12px; border: 1px solid #eee;
+            font-size: 13px; text-align: center; color: #333;
+        }
+        tbody tr:hover td { background: #fdf9f7; }
+
+        /* Pagination */
+        .table-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 15px; flex-wrap: wrap; gap: 10px;
+        }
+        .table-footer small { font-size: 13px; color: #666; }
+        .pagination-btns { display: flex; gap: 6px; align-items: center; }
+        .page-btn {
+            padding: 5px 14px; border: 1px solid #ddd; border-radius: 8px;
+            background: white; font-size: 13px; cursor: pointer;
+            font-family: 'Poppins', sans-serif; transition: 0.2s;
+        }
+        .page-btn:hover { background: #f0f0f0; }
+        .page-btn.active {
+            background: #670019; color: white; border-color: #670019;
+        }
 
         /* Action Buttons */
         .action-buttons {
@@ -131,6 +184,29 @@
             background: #670019; color: white; border: none;
             padding: 10px 25px; border-radius: 25px; cursor: pointer;
             text-decoration: none; display: inline-block;
+        }
+    
+        /* ── SIDEBAR TOGGLE ── */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.collapsed {
+            transform: translateX(-280px);
+        }
+        .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #333;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
         }
     </style>
 </head>
@@ -157,7 +233,7 @@
     <!-- MAIN -->
     <div class="main-content">
         <div class="topbar">
-            <h4><i class="bi bi-list"></i></h4>
+            <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
             <div class="profile-box">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
@@ -200,22 +276,64 @@
             </div>
         </div>
 
-        <!-- Registered Courses Card -->
+        <!-- Semester History Card -->
         <div class="courses-card">
-            <h4><i class="bi bi-book"></i> Registered Courses (5)</h4>
-            <table>
-                <thead>
-                    <tr><th>Course Code</th><th>Course Name</th><th>Credit Hours</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>SCSR1013</td><td>Introduction to Programming</td><td>3</td><td><span class="status-badge status-pending">Pending</span></td></tr>
-                    <tr><td>SCSR1023</td><td>Web Technology</td><td>3</td><td><span class="status-badge status-pending">Pending</span></td></tr>
-                    <tr><td>SCSR1033</td><td>Database Systems</td><td>3</td><td><span class="status-badge status-pending">Pending</span></td></tr>
-                    <tr><td>SCSR1043</td><td>Network Fundamentals</td><td>3</td><td><span class="status-badge status-pending">Pending</span></td></tr>
-                    <tr><td>SCSJ1013</td><td>Mathematics for Computing</td><td>3</td><td><span class="status-badge status-pending">Pending</span></td></tr>
-                </tbody>
-            </table>
-            <div class="total-credits">Total Credit Hours: <strong>15</strong></div>
+            <h4><i class="bi bi-journal-text"></i> Semester</h4>
+
+            <!-- Current Semester Info -->
+            <div class="sem-info-strip">
+                <div class="sem-info-item">
+                    <label>Current Semester</label>
+                    <div class="sem-info-val">202520262</div>
+                </div>
+                <div class="sem-info-item">
+                    <label>Year / Programme</label>
+                    <div class="sem-info-val">2 / DSPD</div>
+                </div>
+                <div class="sem-info-item">
+                    <label>Active Code</label>
+                    <div class="sem-info-val">A - Active</div>
+                </div>
+            </div>
+
+            <!-- Semester Histories -->
+            <div style="font-size:14px; font-weight:600; color:#333; margin-bottom:10px;">Semester Histories</div>
+            <div class="table-controls">
+                <div class="table-controls-left">
+                    Show
+                    <select id="entriesSelect" onchange="renderTable()">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                    </select>
+                    entries
+                </div>
+                <div class="table-controls-right">
+                    Search:
+                    <input type="text" id="searchInput" placeholder="" oninput="renderTable()">
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table id="semTable">
+                    <thead>
+                        <tr>
+                            <th>Session Semester</th>
+                            <th>Programme</th>
+                            <th>No. Semester</th>
+                            <th>Course Reg. Date</th>
+                            <th>Active Code</th>
+                            <th>CPA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="semTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="table-footer">
+                <small id="tableInfo"></small>
+                <div class="pagination-btns" id="pagination"></div>
+            </div>
         </div>
 
         <!-- Action Buttons -->
@@ -225,5 +343,95 @@
         </div>
     </div>
 
+    <script>
+        const semData = [
+            { session: '2024/2025-1', programme: '1 / DSPD', noSem: 1, regDate: '27 Jul 2024', activeCode: 'A-Active', cpa: '3.67' },
+            { session: '2024/2025-2', programme: '1 / DSPD', noSem: 2, regDate: '26 Dec 2024', activeCode: 'A-Active', cpa: '3.70' },
+            { session: '2024/2025-3', programme: '1 / DSPD', noSem: 3, regDate: '16 May 2025', activeCode: 'A-Active', cpa: '3.76' },
+            { session: '2025/2026-1', programme: '2 / DSPD', noSem: 4, regDate: '10 Jul 2025', activeCode: 'A-Active', cpa: '3.77' },
+            { session: '2025/2026-2', programme: '2 / DSPD', noSem: 5, regDate: '08 Dec 2025', activeCode: 'A-Active', cpa: '3.83' },
+            { session: '2025/2026-3', programme: '2 / DSPD', noSem: 6, regDate: '06 May 2026', activeCode: 'A-Active', cpa: '' },
+        ];
+
+        let currentPage = 1;
+
+        function renderTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const perPage = parseInt(document.getElementById('entriesSelect').value);
+
+            const filtered = semData.filter(r =>
+                Object.values(r).join(' ').toLowerCase().includes(query)
+            );
+
+            const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * perPage;
+            const pageData = filtered.slice(start, start + perPage);
+
+            const tbody = document.getElementById('semTableBody');
+            tbody.innerHTML = pageData.map(r => `
+                <tr>
+                    <td>${r.session}</td>
+                    <td>${r.programme}</td>
+                    <td>${r.noSem}</td>
+                    <td>${r.regDate}</td>
+                    <td>${r.activeCode}</td>
+                    <td>${r.cpa}</td>
+                </tr>
+            `).join('');
+
+            // Footer info
+            const from = filtered.length === 0 ? 0 : start + 1;
+            const to = Math.min(start + perPage, filtered.length);
+            document.getElementById('tableInfo').textContent =
+                `Showing ${from} to ${to} of ${filtered.length} entries`;
+
+            // Pagination
+            const pg = document.getElementById('pagination');
+            pg.innerHTML = '';
+            const prev = document.createElement('button');
+            prev.className = 'page-btn';
+            prev.textContent = 'Previous';
+            prev.disabled = currentPage === 1;
+            prev.onclick = () => { currentPage--; renderTable(); };
+            pg.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+                btn.textContent = i;
+                btn.onclick = (function(p) { return () => { currentPage = p; renderTable(); }; })(i);
+                pg.appendChild(btn);
+            }
+
+            const next = document.createElement('button');
+            next.className = 'page-btn';
+            next.textContent = 'Next';
+            next.disabled = currentPage === totalPages;
+            next.onclick = () => { currentPage++; renderTable(); };
+            pg.appendChild(next);
+        }
+
+        renderTable();
+    </script>
+    <script>
+        // Apply saved sidebar state on every page load
+        (function() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.querySelector('.sidebar').classList.add('collapsed');
+                document.querySelector('.main-content').classList.add('expanded');
+            }
+        })();
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const main = document.querySelector('.main-content');
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+            // Save state
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+    </script>
 </body>
 </html>

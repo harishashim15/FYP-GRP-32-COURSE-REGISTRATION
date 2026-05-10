@@ -320,6 +320,29 @@
             border-radius: 50%;
             display: inline-block;
         }
+    
+        /* ── SIDEBAR TOGGLE ── */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.collapsed {
+            transform: translateX(-280px);
+        }
+        .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #333;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
     </style>
 
 </head>
@@ -368,7 +391,7 @@
 
         <!-- TOPBAR -->
         <div class="topbar">
-            <h4><i class="bi bi-list"></i></h4>
+            <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
             <div class="profile-box">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
@@ -512,5 +535,23 @@
         }
     </script>
 
+    <script>
+        // Apply saved sidebar state on every page load
+        (function() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.querySelector('.sidebar').classList.add('collapsed');
+                document.querySelector('.main-content').classList.add('expanded');
+            }
+        })();
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const main = document.querySelector('.main-content');
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+            // Save state
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
+    </script>
 </body>
 </html>
