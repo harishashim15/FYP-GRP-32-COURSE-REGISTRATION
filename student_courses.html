@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses - UTM Student</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: #f8f6f4;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed;
+            padding: 30px 20px;
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .sidebar.collapsed {
+            transform: translateX(-280px);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .logo img {
+            width: 130px;
+        }
+        
+        .system-title {
+            color: #ffc107;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        
+        .menu a:hover,
+        .menu .active {
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+        
+        .menu i {
+            font-size: 20px;
+        }
+        
+        .logout {
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
+        }
+        
+        .logout a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout a:hover {
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* Topbar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #333;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .profile-box img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 35px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+        }
+        
+        .page-header h2 {
+            font-size: 34px;
+            font-weight: 700;
+            color: #670019;
+        }
+        
+        .page-header p {
+            color: #666;
+            margin-top: 8px;
+            font-size: 15px;
+        }
+        
+        .page-header img {
+            width: 150px;
+        }
+        
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 25px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: 0.3s;
+        }
+        
+        .search-bar input:focus {
+            border-color: #670019;
+            box-shadow: 0 0 0 4px rgba(103, 0, 25, 0.08);
+        }
+        
+        .search-bar button {
+            padding: 12px 25px;
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        
+        .search-bar button:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+        }
+        
+        /* Course Card */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .course-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+            border: 1px solid #f0e8e8;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .course-code {
+            background: #670019;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .course-card h4 {
+            color: #670019;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .course-info {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 12px 0;
+            border-top: 1px solid #f0e8e8;
+            border-bottom: 1px solid #f0e8e8;
+        }
+        
+        .course-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .register-btn {
+            width: 100%;
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 15px;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .register-btn:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-280px);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .page-header img {
+                margin-top: 20px;
+            }
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="logo">
+        <img src="images/utmlogo.png" alt="UTM Logo">
+        <div class="system-title">COURSE REGISTRATION SYSTEM</div>
+    </div>
+    <div class="menu">
+        <a href="student_dashboard.html">
+            <i class="bi bi-house-fill"></i>
+            Dashboard
+        </a>
+        <a href="student_profile.html">
+            <i class="bi bi-person-fill"></i>
+            Profile
+        </a>
+        <a href="student_courses.html" class="active">
+            <i class="bi bi-book-fill"></i>
+            Courses
+        </a>
+        <a href="student_registration.html">
+            <i class="bi bi-file-earmark-text-fill"></i>
+            My Registration
+        </a>
+        <a href="student_change_password.html">
+            <i class="bi bi-lock-fill"></i>
+            Change Password
+        </a>
+    </div>
+    <div class="logout">
+        <a href="index.html">
+            <i class="bi bi-box-arrow-right"></i>
+            Logout
+        </a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content" id="mainContent">
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="profile-box">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div>
+                <h6 class="mb-0">Student</h6>
+                <small class="text-muted">View Courses</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <h2>Available Courses</h2>
+            <p>Browse and register for courses for the current semester</p>
+        </div>
+        <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="Courses">
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by course name or code..." onkeyup="filterCourses()">
+        <button onclick="filterCourses()"><i class="bi bi-search"></i> Search</button>
+    </div>
+
+    <!-- COURSES GRID -->
+    <div class="courses-grid" id="coursesGrid">
+        <div class="course-card" data-name="web programming" data-code="SECJ2154">
+            <span class="course-code">SECJ2154</span>
+            <h4>Web Programming</h4>
+            <div class="course-info">
+                <div class="course-info-item">
+                    <i class="bi bi-clock"></i>
+                    <span>3 Credit Hours</span>
+                </div>
+                <div class="course-info-item">
+                    <i class="bi bi-people"></i>
+                    <span>42 Students</span>
+                </div>
+            </div>
+            <a href="#" class="register-btn" onclick="return confirm('Register for Web Programming?')">
+                <i class="bi bi-plus-circle me-1"></i> Register for Course
+            </a>
+        </div>
+        
+        <div class="course-card" data-name="database" data-code="SECJ2153">
+            <span class="course-code">SECJ2153</span>
+            <h4>Database</h4>
+            <div class="course-info">
+                <div class="course-info-item">
+                    <i class="bi bi-clock"></i>
+                    <span>3 Credit Hours</span>
+                </div>
+                <div class="course-info-item">
+                    <i class="bi bi-people"></i>
+                    <span>38 Students</span>
+                </div>
+            </div>
+            <a href="#" class="register-btn" onclick="return confirm('Register for Database?')">
+                <i class="bi bi-plus-circle me-1"></i> Register for Course
+            </a>
+        </div>
+        
+        <div class="course-card" data-name="software engineering" data-code="SECJ2152">
+            <span class="course-code">SECJ2152</span>
+            <h4>Software Engineering</h4>
+            <div class="course-info">
+                <div class="course-info-item">
+                    <i class="bi bi-clock"></i>
+                    <span>4 Credit Hours</span>
+                </div>
+                <div class="course-info-item">
+                    <i class="bi bi-people"></i>
+                    <span>35 Students</span>
+                </div>
+            </div>
+            <a href="#" class="register-btn" onclick="return confirm('Register for Software Engineering?')">
+                <i class="bi bi-plus-circle me-1"></i> Register for Course
+            </a>
+        </div>
+        
+        <div class="course-card" data-name="data structures" data-code="SECJ2123">
+            <span class="course-code">SECJ2123</span>
+            <h4>Data Structures</h4>
+            <div class="course-info">
+                <div class="course-info-item">
+                    <i class="bi bi-clock"></i>
+                    <span>3 Credit Hours</span>
+                </div>
+                <div class="course-info-item">
+                    <i class="bi bi-people"></i>
+                    <span>40 Students</span>
+                </div>
+            </div>
+            <a href="#" class="register-btn" onclick="return confirm('Register for Data Structures?')">
+                <i class="bi bi-plus-circle me-1"></i> Register for Course
+            </a>
+        </div>
+        
+        <div class="course-card" data-name="operating systems" data-code="SECJ2183">
+            <span class="course-code">SECJ2183</span>
+            <h4>Operating Systems</h4>
+            <div class="course-info">
+                <div class="course-info-item">
+                    <i class="bi bi-clock"></i>
+                    <span>3 Credit Hours</span>
+                </div>
+                <div class="course-info-item">
+                    <i class="bi bi-people"></i>
+                    <span>35 Students</span>
+                </div>
+            </div>
+            <a href="#" class="register-btn" onclick="return confirm('Register for Operating Systems?')">
+                <i class="bi bi-plus-circle me-1"></i> Register for Course
+            </a>
+        </div>
+        
+        <div class="course-card" data-name="computer networks" data-code="SECJ2213">
+            <span class="course-code">SECJ2213</span>
+            <h4>Computer Networks</h4>
+            <div class="course-info">
+                <div class="course-info-item">
+                    <i class="bi bi-clock"></i>
+                    <span>3 Credit Hours</span>
+                </div>
+                <div class="course-info-item">
+                    <i class="bi bi-people"></i>
+                    <span>32 Students</span>
+                </div>
+            </div>
+            <a href="#" class="register-btn" onclick="return confirm('Register for Computer Networks?')">
+                <i class="bi bi-plus-circle me-1"></i> Register for Course
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+
+    function filterCourses() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const courses = document.querySelectorAll('.course-card');
+        
+        courses.forEach(course => {
+            const name = course.getAttribute('data-name');
+            const code = course.getAttribute('data-code');
+            
+            if (name.includes(searchTerm) || code.includes(searchTerm)) {
+                course.style.display = 'block';
+            } else {
+                course.style.display = 'none';
+            }
+        });
+    }
+</script>
+</body>
+</html>
