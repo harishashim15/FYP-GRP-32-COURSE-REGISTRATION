@@ -28,21 +28,133 @@ $result_status = mysqli_stmt_get_result($stmt_status);
 $reg = mysqli_fetch_assoc($result_status);
 $reg_status = $reg ? $reg['status'] : 'pending';
 
-$sql_courses = "SELECT c.*, r.status as reg_status FROM registrations r JOIN courses c ON r.course_id = c.id WHERE r.student_matrix = ?";
+$sql_courses = "SELECT c.*, r.status as reg_status, r.registration_date
+                FROM registrations r 
+                JOIN courses c ON r.course_id = c.id 
+                WHERE r.student_matrix = ?";
 $stmt_courses = mysqli_prepare($conn, $sql_courses);
 mysqli_stmt_bind_param($stmt_courses, "s", $student_matrix);
 mysqli_stmt_execute($stmt_courses);
 $result_courses = mysqli_stmt_get_result($stmt_courses);
 $courses = mysqli_fetch_all($result_courses, MYSQLI_ASSOC);
 
-$semester_history = [
-    ['session' => '2024/2025-1', 'programme' => '1 / DSPD', 'noSem' => 1, 'regDate' => '27 Jul 2024', 'activeCode' => 'A-Active', 'cpa' => '3.67'],
-    ['session' => '2024/2025-2', 'programme' => '1 / DSPD', 'noSem' => 2, 'regDate' => '26 Dec 2024', 'activeCode' => 'A-Active', 'cpa' => '3.70'],
-    ['session' => '2024/2025-3', 'programme' => '1 / DSPD', 'noSem' => 3, 'regDate' => '16 May 2025', 'activeCode' => 'A-Active', 'cpa' => '3.76'],
-    ['session' => '2025/2026-1', 'programme' => '2 / DSPD', 'noSem' => 4, 'regDate' => '10 Jul 2025', 'activeCode' => 'A-Active', 'cpa' => '3.77'],
-    ['session' => '2025/2026-2', 'programme' => '2 / DSPD', 'noSem' => 5, 'regDate' => '08 Dec 2025', 'activeCode' => 'A-Active', 'cpa' => '3.83'],
-    ['session' => '2025/2026-3', 'programme' => '2 / DSPD', 'noSem' => 6, 'regDate' => '06 May 2026', 'activeCode' => 'A-Active', 'cpa' => ''],
-];
+// DYNAMIC SEMESTER HISTORY BASED ON STUDENT
+$student_year = $student['year'];
+$student_id_num = (int)substr($student['matrix'], -4); // Get last 4 digits (0112, 0204, etc.)
+
+// Generate unique CPA values based on student ID (different for each student)
+$base_cpa = 2.50 + ($student_id_num % 150) / 100; // Range: 2.50 to 4.00
+$cpa_improvement = 0.03; // Slight improvement each semester
+
+// Current semester code based on year (last digit indicates year)
+// Format: YYYY + Semester number + Year
+$current_semester_code = "20252026" . $student_year;
+
+// Get student's earliest registration date from their courses
+$earliest_reg_date = !empty($courses) ? $courses[0]['registration_date'] : '2026-05-06';
+$reg_timestamp = strtotime($earliest_reg_date);
+
+// Generate semester history based on year
+$semester_history = [];
+
+if ($student_year == 1) {
+    // Year 1 student - 3 semesters
+    $semester_dates = [
+        date('d M Y', strtotime('-10 months', $reg_timestamp)),
+        date('d M Y', strtotime('-5 months', $reg_timestamp)),
+        date('d M Y', $reg_timestamp)
+    ];
+    
+    $semester_history = [
+        ['session' => '2025/2026-1', 'programme' => '1 / DSPD', 'noSem' => 1, 
+         'regDate' => $semester_dates[0], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa, 2)],
+        ['session' => '2025/2026-2', 'programme' => '1 / DSPD', 'noSem' => 2, 
+         'regDate' => $semester_dates[1], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa + $cpa_improvement, 2)],
+        ['session' => '2025/2026-3', 'programme' => '1 / DSPD', 'noSem' => 3, 
+         'regDate' => $semester_dates[2], 'activeCode' => 'A-Active', 
+         'cpa' => ''],
+    ];
+    
+} elseif ($student_year == 2) {
+    // Year 2 student - 6 semesters
+    $semester_dates = [
+        date('d M Y', strtotime('-22 months', $reg_timestamp)),
+        date('d M Y', strtotime('-19 months', $reg_timestamp)),
+        date('d M Y', strtotime('-16 months', $reg_timestamp)),
+        date('d M Y', strtotime('-10 months', $reg_timestamp)),
+        date('d M Y', strtotime('-5 months', $reg_timestamp)),
+        date('d M Y', $reg_timestamp)
+    ];
+    
+    $semester_history = [
+        ['session' => '2024/2025-1', 'programme' => '1 / DSPD', 'noSem' => 1, 
+         'regDate' => $semester_dates[0], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.20, 2)],
+        ['session' => '2024/2025-2', 'programme' => '1 / DSPD', 'noSem' => 2, 
+         'regDate' => $semester_dates[1], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.15, 2)],
+        ['session' => '2024/2025-3', 'programme' => '1 / DSPD', 'noSem' => 3, 
+         'regDate' => $semester_dates[2], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.10, 2)],
+        ['session' => '2025/2026-1', 'programme' => '2 / DSPD', 'noSem' => 4, 
+         'regDate' => $semester_dates[3], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.05, 2)],
+        ['session' => '2025/2026-2', 'programme' => '2 / DSPD', 'noSem' => 5, 
+         'regDate' => $semester_dates[4], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa, 2)],
+        ['session' => '2025/2026-3', 'programme' => '2 / DSPD', 'noSem' => 6, 
+         'regDate' => $semester_dates[5], 'activeCode' => 'A-Active', 
+         'cpa' => ''],
+    ];
+    
+} elseif ($student_year == 3) {
+    // Year 3 student - 9 semesters
+    $semester_dates = [
+        date('d M Y', strtotime('-34 months', $reg_timestamp)),
+        date('d M Y', strtotime('-31 months', $reg_timestamp)),
+        date('d M Y', strtotime('-28 months', $reg_timestamp)),
+        date('d M Y', strtotime('-22 months', $reg_timestamp)),
+        date('d M Y', strtotime('-19 months', $reg_timestamp)),
+        date('d M Y', strtotime('-16 months', $reg_timestamp)),
+        date('d M Y', strtotime('-10 months', $reg_timestamp)),
+        date('d M Y', strtotime('-5 months', $reg_timestamp)),
+        date('d M Y', $reg_timestamp)
+    ];
+    
+    $semester_history = [
+        ['session' => '2023/2024-1', 'programme' => '1 / DSPD', 'noSem' => 1, 
+         'regDate' => $semester_dates[0], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.40, 2)],
+        ['session' => '2023/2024-2', 'programme' => '1 / DSPD', 'noSem' => 2, 
+         'regDate' => $semester_dates[1], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.35, 2)],
+        ['session' => '2023/2024-3', 'programme' => '1 / DSPD', 'noSem' => 3, 
+         'regDate' => $semester_dates[2], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.30, 2)],
+        ['session' => '2024/2025-1', 'programme' => '2 / DSPD', 'noSem' => 4, 
+         'regDate' => $semester_dates[3], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.25, 2)],
+        ['session' => '2024/2025-2', 'programme' => '2 / DSPD', 'noSem' => 5, 
+         'regDate' => $semester_dates[4], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.20, 2)],
+        ['session' => '2024/2025-3', 'programme' => '2 / DSPD', 'noSem' => 6, 
+         'regDate' => $semester_dates[5], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.15, 2)],
+        ['session' => '2025/2026-1', 'programme' => '3 / DSPD', 'noSem' => 7, 
+         'regDate' => $semester_dates[6], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.10, 2)],
+        ['session' => '2025/2026-2', 'programme' => '3 / DSPD', 'noSem' => 8, 
+         'regDate' => $semester_dates[7], 'activeCode' => 'A-Active', 
+         'cpa' => number_format($base_cpa - 0.05, 2)],
+        ['session' => '2025/2026-3', 'programme' => '3 / DSPD', 'noSem' => 9, 
+         'regDate' => $semester_dates[8], 'activeCode' => 'A-Active', 
+         'cpa' => ''],
+    ];
+}
+
+$current_programme = $student_year . ' / DSPD';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -182,8 +294,8 @@ $semester_history = [
         <div class="courses-card">
             <h4><i class="bi bi-journal-text"></i> Semester History</h4>
             <div class="sem-info-strip">
-                <div class="sem-info-item"><label>Current Semester</label><div class="sem-info-val">202520262</div></div>
-                <div class="sem-info-item"><label>Year / Programme</label><div class="sem-info-val"><?php echo $student['year']; ?> / DSPD</div></div>
+                <div class="sem-info-item"><label>Current Semester</label><div class="sem-info-val"><?php echo $current_semester_code; ?></div></div>
+                <div class="sem-info-item"><label>Year / Programme</label><div class="sem-info-val"><?php echo $current_programme; ?></div></div>
                 <div class="sem-info-item"><label>Active Code</label><div class="sem-info-val">A - Active</div></div>
             </div>
             <div style="font-size:14px; font-weight:600; margin-bottom:10px;">Semester Histories</div>
@@ -212,7 +324,7 @@ $semester_history = [
             if (currentPage > totalPages) currentPage = totalPages;
             const start = (currentPage - 1) * perPage;
             const pageData = filtered.slice(start, start + perPage);
-            document.getElementById('semTableBody').innerHTML = pageData.map(r => `<tr><td>${r.session}</td><td>${r.programme}</td><td>${r.noSem}</td><td>${r.regDate}</td><td>${r.activeCode}</td><td>${r.cpa}</td></tr>`).join('');
+            document.getElementById('semTableBody').innerHTML = pageData.map(r => `<tr><td>${r.session}</td><td>${r.programme}</td><td>${r.noSem}</td><td>${r.regDate}</td><td>${r.activeCode}</td><td>${r.cpa}</td>`).join('');
             const from = filtered.length === 0 ? 0 : start + 1;
             const to = Math.min(start + perPage, filtered.length);
             document.getElementById('tableInfo').textContent = `Showing ${from} to ${to} of ${filtered.length} entries`;
