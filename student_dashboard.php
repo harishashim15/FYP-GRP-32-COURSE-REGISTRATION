@@ -6,9 +6,15 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// For demo purposes - in production, fetch from database
-$student_name = "Ahmad Mirza bin Abdullah";
-$student_id = "A24DW0112";
+include("db.php");
+
+// Fetch student name from database
+$user_id = $_SESSION['user_id'];
+$query = "SELECT name FROM users WHERE id = '$user_id'";
+$result = mysqli_query($conn, $query);
+$user = mysqli_fetch_assoc($result);
+$student_name = $user ? $user['name'] : "Student";
+$first_name = explode(' ', $student_name)[0];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -161,14 +167,11 @@ $student_id = "A24DW0112";
             object-fit: cover;
         }
         
-        /* ========== HERO SECTION ========== */
+        /* ========== HERO SECTION (IMAGE REMOVED) ========== */
         .hero {
             background: #f7f2ee;
             border-radius: 25px;
             padding: 35px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 35px;
             border: 1px solid #eee;
         }
@@ -183,10 +186,6 @@ $student_id = "A24DW0112";
             color: #666;
             margin-top: 8px;
             font-size: 15px;
-        }
-        
-        .hero img {
-            width: 180px;
         }
         
         /* ========== DASHBOARD CARDS ========== */
@@ -359,11 +358,7 @@ $student_id = "A24DW0112";
                 margin-left: 0;
             }
             .hero {
-                flex-direction: column;
                 text-align: center;
-            }
-            .hero img {
-                margin-top: 20px;
             }
         }
     </style>
@@ -423,13 +418,12 @@ $student_id = "A24DW0112";
         </div>
     </div>
 
-    <!-- HERO SECTION -->
+    <!-- HERO SECTION - IMAGE REMOVED -->
     <div class="hero">
         <div>
-            <h1>Welcome back, <?php echo explode(' ', $student_name)[0]; ?>!</h1>
+            <h1>Welcome back, <?php echo htmlspecialchars($first_name); ?>!</h1>
             <p>Manage your course registration and academic progress here.</p>
         </div>
-        <img src="https://cdn-icons-png.flaticon.com/512/3976/3976626.png" alt="Student">
     </div>
 
     <!-- STATS CARDS ROW -->

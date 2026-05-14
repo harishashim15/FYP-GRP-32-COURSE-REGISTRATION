@@ -8,6 +8,13 @@ if (!isset($_SESSION['user_id'])) {
 
 include("db.php");
 
+// Fetch student name from database
+$user_id = $_SESSION['user_id'];
+$query = "SELECT name FROM users WHERE id = '$user_id'";
+$result = mysqli_query($conn, $query);
+$user = mysqli_fetch_assoc($result);
+$student_name = $user ? $user['name'] : "Student";
+
 // Fetch all courses
 $courses_query = "SELECT * FROM courses";
 $courses_result = mysqli_query($conn, $courses_query);
@@ -160,14 +167,11 @@ $courses_result = mysqli_query($conn, $courses_query);
             object-fit: cover;
         }
         
-        /* Page Header */
+        /* Page Header - IMAGE REMOVED */
         .page-header {
             background: #f7f2ee;
             border-radius: 25px;
             padding: 35px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 30px;
             border: 1px solid #eee;
         }
@@ -182,10 +186,6 @@ $courses_result = mysqli_query($conn, $courses_query);
             color: #666;
             margin-top: 8px;
             font-size: 15px;
-        }
-        
-        .page-header img {
-            width: 150px;
         }
         
         /* Search Bar */
@@ -296,17 +296,15 @@ $courses_result = mysqli_query($conn, $courses_query);
             cursor: pointer;
             transition: 0.3s;
             margin-top: 15px;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
         }
         
         .register-btn:hover {
             background: linear-gradient(to right, #8b0022, #a80028);
             transform: translateY(-2px);
-        }
-        
-        .register-btn.disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
+            color: white;
         }
         
         @media (max-width: 992px) {
@@ -317,11 +315,7 @@ $courses_result = mysqli_query($conn, $courses_query);
                 margin-left: 0;
             }
             .page-header {
-                flex-direction: column;
                 text-align: center;
-            }
-            .page-header img {
-                margin-top: 20px;
             }
             .courses-grid {
                 grid-template-columns: 1fr;
@@ -378,19 +372,18 @@ $courses_result = mysqli_query($conn, $courses_query);
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
-                <h6 class="mb-0">Student</h6>
-                <small class="text-muted">View Courses</small>
+                <h6 class="mb-0"><?php echo htmlspecialchars($student_name); ?></h6>
+                <small class="text-muted">Student</small>
             </div>
         </div>
     </div>
 
-    <!-- PAGE HEADER -->
+    <!-- PAGE HEADER - IMAGE REMOVED -->
     <div class="page-header">
         <div>
             <h2>Available Courses</h2>
             <p>Browse and register for courses for the current semester</p>
         </div>
-        <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="Courses">
     </div>
 
     <!-- SEARCH BAR -->
@@ -415,7 +408,7 @@ $courses_result = mysqli_query($conn, $courses_query);
                     <span>45 Students</span>
                 </div>
             </div>
-            <a href="register_course.php?id=<?php echo $course['course_code']; ?>" class="register-btn">
+            <a href="register_course.php?id=<?php echo $course['course_code']; ?>" class="register-btn" onclick="return confirm('Register for <?php echo addslashes($course['course_name']); ?>?')">
                 <i class="bi bi-plus-circle me-1"></i> Register for Course
             </a>
         </div>

@@ -8,7 +8,12 @@ if (!isset($_SESSION['user_id'])) {
 
 include("db.php");
 
+// Fetch student name from database
 $user_id = $_SESSION['user_id'];
+$user_query = "SELECT name FROM users WHERE id = '$user_id'";
+$user_result = mysqli_query($conn, $user_query);
+$user = mysqli_fetch_assoc($user_result);
+$student_name = $user ? $user['name'] : "Student";
 
 // Fetch user's registered courses with status
 $query = "SELECT r.course_id, r.status, c.course_name, c.course_code 
@@ -170,9 +175,6 @@ $result = mysqli_query($conn, $query);
             background: #f7f2ee;
             border-radius: 25px;
             padding: 35px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 30px;
             border: 1px solid #eee;
         }
@@ -187,10 +189,6 @@ $result = mysqli_query($conn, $query);
             color: #666;
             margin-top: 8px;
             font-size: 15px;
-        }
-        
-        .page-header img {
-            width: 150px;
         }
         
         /* Summary Strip */
@@ -338,11 +336,7 @@ $result = mysqli_query($conn, $query);
                 margin-left: 0;
             }
             .page-header {
-                flex-direction: column;
                 text-align: center;
-            }
-            .page-header img {
-                margin-top: 20px;
             }
             table {
                 font-size: 12px;
@@ -402,8 +396,8 @@ $result = mysqli_query($conn, $query);
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
-                <h6 class="mb-0">Student</h6>
-                <small class="text-muted">Registration Status</small>
+                <h6 class="mb-0"><?php echo htmlspecialchars($student_name); ?></h6>
+                <small class="text-muted">Student</small>
             </div>
         </div>
     </div>
@@ -414,7 +408,6 @@ $result = mysqli_query($conn, $query);
             <h2>My Registration</h2>
             <p>Track your course registration requests and their status</p>
         </div>
-        <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="Registration">
     </div>
 
     <!-- SUMMARY STRIP -->
@@ -456,7 +449,7 @@ $result = mysqli_query($conn, $query);
                     while ($row = mysqli_fetch_assoc($result)): 
                         $has_results = true;
                     ?>
-                    <tr>
+                    <tr data-status="<?php echo $row['status']; ?>">
                         <td><strong><?php echo htmlspecialchars($row['course_code']); ?></strong></td>
                         <td><?php echo htmlspecialchars($row['course_name']); ?></td>
                         <td><?php echo date('d M Y'); ?></td>
@@ -507,13 +500,13 @@ $result = mysqli_query($conn, $query);
         let total = 0, pending = 0, approved = 0, rejected = 0;
         
         rows.forEach(row => {
-            const statusCell = row.querySelector('.status-badge');
-            if (statusCell) {
+            const statusSpan = row.querySelector('.status-badge');
+            if (statusSpan) {
                 total++;
-                const status = statusCell.innerText.toLowerCase().trim();
-                if (status === 'pending') pending++;
-                else if (status === 'approved') approved++;
-                else if (status === 'rejected') rejected++;
+                const statusText = statusSpan.innerText.toLowerCase().trim();
+                if (statusText === 'pending') pending++;
+                else if (statusText === 'approved') approved++;
+                else if (statusText === 'rejected') rejected++;
             }
         });
         

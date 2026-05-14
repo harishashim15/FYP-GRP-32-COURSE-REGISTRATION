@@ -6,13 +6,19 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+include("db.php");
+
+// Fetch student name from database
+$user_id = $_SESSION['user_id'];
+$user_query = "SELECT name FROM users WHERE id = '$user_id'";
+$user_result = mysqli_query($conn, $user_query);
+$user = mysqli_fetch_assoc($user_result);
+$student_name = $user ? $user['name'] : "Student";
+
 $message = '';
 $message_type = '';
 
 if (isset($_POST['update'])) {
-    include("db.php");
-    
-    $user_id = $_SESSION['user_id'];
     $current_password = $_POST['current_password'];
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
@@ -199,9 +205,6 @@ if (isset($_POST['update'])) {
             background: #f7f2ee;
             border-radius: 25px;
             padding: 35px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 35px;
             border: 1px solid #eee;
         }
@@ -216,10 +219,6 @@ if (isset($_POST['update'])) {
             color: #666;
             margin-top: 8px;
             font-size: 15px;
-        }
-        
-        .page-header img {
-            width: 80px;
         }
         
         /* Form Card */
@@ -260,6 +259,7 @@ if (isset($_POST['update'])) {
             font-size: 14px;
             font-family: 'Poppins', sans-serif;
             transition: 0.3s;
+            width: 100%;
         }
         
         .input-wrapper .form-control:focus {
@@ -343,10 +343,6 @@ if (isset($_POST['update'])) {
             color: #2e7d32;
         }
         
-        .req-item.met i {
-            color: #2e7d32;
-        }
-        
         /* Buttons */
         .btn-save {
             background: linear-gradient(to right, #670019, #8b0022);
@@ -401,20 +397,19 @@ if (isset($_POST['update'])) {
             margin-bottom: 20px;
             align-items: center;
             gap: 10px;
+            display: flex;
         }
         
         .alert-success-custom {
             background: #d4edda;
             border: 1px solid #c3e6cb;
             color: #155724;
-            display: none;
         }
         
         .alert-error-custom {
             background: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
-            display: none;
         }
         
         /* Tip Card */
@@ -492,11 +487,7 @@ if (isset($_POST['update'])) {
                 margin-left: 0;
             }
             .page-header {
-                flex-direction: column;
                 text-align: center;
-            }
-            .page-header img {
-                margin-top: 20px;
             }
             .d-flex.gap-4 {
                 flex-direction: column;
@@ -556,8 +547,8 @@ if (isset($_POST['update'])) {
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
-                <h6 class="mb-0">Student</h6>
-                <small class="text-muted">Change Password</small>
+                <h6 class="mb-0"><?php echo htmlspecialchars($student_name); ?></h6>
+                <small class="text-muted">Student</small>
             </div>
         </div>
     </div>
@@ -568,7 +559,6 @@ if (isset($_POST['update'])) {
             <h1>Change Password</h1>
             <p>Keep your account secure by updating your password regularly.</p>
         </div>
-        <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="Security">
     </div>
 
     <!-- CONTENT ROW -->
@@ -579,12 +569,12 @@ if (isset($_POST['update'])) {
             
             <!-- Alert Messages -->
             <?php if ($message && $message_type == 'success'): ?>
-            <div class="alert-custom alert-success-custom d-flex" id="successAlert" style="display: flex; background: #d4edda; border-color: #c3e6cb; color: #155724;">
+            <div class="alert-custom alert-success-custom" id="successAlert">
                 <i class="bi bi-check-circle-fill fs-5 me-2"></i>
                 <span><?php echo $message; ?></span>
             </div>
             <?php elseif ($message && $message_type == 'error'): ?>
-            <div class="alert-custom alert-error-custom d-flex" id="errorAlert" style="display: flex; background: #f8d7da; border-color: #f5c6cb; color: #721c24;">
+            <div class="alert-custom alert-error-custom" id="errorAlert">
                 <i class="bi bi-exclamation-circle-fill fs-5 me-2"></i>
                 <span><?php echo $message; ?></span>
             </div>
@@ -655,7 +645,7 @@ if (isset($_POST['update'])) {
                     
                     <!-- Action Buttons -->
                     <div class="d-flex gap-3 flex-wrap mt-2">
-                        <button type="submit" name="update" class="btn-save" onclick="return validateForm()">
+                        <button type="submit" name="update" class="btn-save">
                             <i class="bi bi-shield-check"></i>
                             Update Password
                         </button>
@@ -696,6 +686,15 @@ if (isset($_POST['update'])) {
                 <div class="tip-text">
                     <h6>Never share your password</h6>
                     <small>UTM staff will never ask for your password via email or phone.</small>
+                </div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon">
+                    <i class="bi bi-shield-fill-check"></i>
+                </div>
+                <div class="tip-text">
+                    <h6>Mix characters</h6>
+                    <small>Combine uppercase, lowercase, numbers, and symbols for a strong password.</small>
                 </div>
             </div>
         </div>
@@ -780,23 +779,6 @@ if (isset($_POST['update'])) {
         }
     }
     
-    function validateForm() {
-        const np = document.getElementById('newPassword').value;
-        const cp = document.getElementById('confirmPassword').value;
-        
-        if (np !== cp) {
-            alert('New passwords do not match.');
-            return false;
-        }
-        
-        if (np.length < 6) {
-            alert('New password must be at least 6 characters.');
-            return false;
-        }
-        
-        return true;
-    }
-    
     (function() {
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.querySelector('.sidebar').classList.add('collapsed');
@@ -816,9 +798,9 @@ if (isset($_POST['update'])) {
     setTimeout(() => {
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
-        if (successAlert) successAlert.style.display = 'none';
-        if (errorAlert) errorAlert.style.display = 'none';
-    }, 4000);
+        if (successAlert) setTimeout(() => { successAlert.style.display = 'none'; }, 4000);
+        if (errorAlert) setTimeout(() => { errorAlert.style.display = 'none'; }, 4000);
+    }, 100);
 </script>
 </body>
 </html>

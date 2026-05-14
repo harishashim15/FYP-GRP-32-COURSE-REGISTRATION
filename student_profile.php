@@ -9,8 +9,12 @@ if (!isset($_SESSION['user_id'])) {
 include("db.php");
 
 $user_id = $_SESSION['user_id'];
-$result = mysqli_query($conn, "SELECT * FROM users WHERE id = '$user_id'");
+
+// Fetch user data
+$query = "SELECT * FROM users WHERE id = '$user_id'";
+$result = mysqli_query($conn, $query);
 $user = mysqli_fetch_assoc($result);
+$student_name = $user ? $user['name'] : "Student";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,7 +40,7 @@ $user = mysqli_fetch_assoc($result);
             overflow-x: hidden;
         }
         
-        /* Sidebar Styles (same as dashboard) */
+        /* Sidebar Styles */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -169,6 +173,12 @@ $user = mysqli_fetch_assoc($result);
             color: #670019;
             font-weight: 700;
             font-size: 34px;
+        }
+        
+        .page-header p {
+            color: #666;
+            margin-top: 5px;
+            font-size: 15px;
         }
         
         /* Profile Card */
@@ -329,7 +339,7 @@ $user = mysqli_fetch_assoc($result);
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
-                <h6 class="mb-0"><?php echo htmlspecialchars($user['name']); ?></h6>
+                <h6 class="mb-0"><?php echo htmlspecialchars($student_name); ?></h6>
                 <small class="text-muted">Student</small>
             </div>
         </div>
@@ -374,7 +384,7 @@ $user = mysqli_fetch_assoc($result);
                 </div>
                 <div class="form-group">
                     <label><i class="bi bi-flag-fill"></i> Role</label>
-                    <input type="text" value="Student" disabled>
+                    <input type="text" value="<?php echo ucfirst($user['role']); ?>" disabled>
                 </div>
             </div>
             <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
