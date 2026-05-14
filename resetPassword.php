@@ -168,7 +168,7 @@ function sendResetEmail(string $email, string $name, string $token): bool {
         $mail->Port       = 587;
 
         // ── Email ──
-        $mail->setFrom('ariefiqmal2006@gmail.com', 'Haris Corp');
+        $mail->setFrom('ariefiqmal2006@gmail.com', 'UTM SYSTEM ADMIN');
         $mail->addAddress($email, $name);
         $mail->isHTML(true);
         $mail->Subject = 'Password Reset Request';
@@ -179,7 +179,7 @@ function sendResetEmail(string $email, string $name, string $token): bool {
             <a href='{$resetUrl}'>{$resetUrl}</a><br><br>
             If you did not request this, you can safely ignore this email.<br><br>
             Regards,<br>
-            <b>Haris Corp</b>
+            <b>UTM SYSTEM ADMIN/b>
         ";
 
         $mail->send();

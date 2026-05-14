@@ -1,272 +1,309 @@
 <?php
 session_start();
 
-// Simple guard (dummy auth for now)
-if (!isset($_SESSION['user_id'])) {
-  header('Location: ../index.html');
-  exit();
+// 1. Include database connection
+include '../db_connect.php';
+
+// 2. Security check: Only admin allowed
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login.html");
+    exit();
 }
 
-$adminName = $_SESSION['name'] ?? 'Admin User';
-$adminRole = $_SESSION['role'] ?? 'admin';
+// 3. Fetch dynamic counts
+// Note: You need tables 'students', 'advisors', 'subjects' in your DB
+$students_count = 0;
+$advisors_count = 0;
+$subjects_count = 0;
 
-// Hardcoded dummy dashboard data (no DB)
-$studentsRegistered = 128;
-$advisorsRegistered  = 8;
-$subjectsRegistered  = 36;
+if ($conn) {
+    // Count students from 'users' table if role = 'student'
+    $stmt1 = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'student'");
+    $stmt1->execute();
+    $result1 = $stmt1->get_result();
+    $students_count = $result1->fetch_assoc()['total'];
+
+    // Count advisors from 'users' table if role = 'advisor'
+    $stmt2 = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'advisor'");
+    $stmt2->execute();
+    $result2 = $stmt2->get_result();
+    $advisors_count = $result2->fetch_assoc()['total'];
+
+    // Count subjects – You need a 'subjects' table. This will return 0 if table doesn't exist.
+    $subjects_check = $conn->query("SHOW TABLES LIKE 'subjects'");
+    if ($subjects_check->num_rows > 0) {
+        $stmt3 = $conn->prepare("SELECT COUNT(*) as total FROM subjects");
+        $stmt3->execute();
+        $result3 = $stmt3->get_result();
+        $subjects_count = $result3->fetch_assoc()['total'];
+    }
+}
+
+// 4. Get admin name
+$user_id = $_SESSION['user_id'];
+$name_query = "SELECT name FROM users WHERE id = ?";
+$stmt_name = $conn->prepare($name_query);
+$stmt_name->bind_param("i", $user_id);
+$stmt_name->execute();
+$name_result = $stmt_name->get_result();
+$admin_name = $name_result->fetch_assoc()['name'] ?? 'Admin';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Admin Dashboard</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ---------- RESET ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    <link rel="stylesheet" href="template/assets/vendors/mdi/css/materialdesignicons.min.css" />
-    <link rel="stylesheet" href="template/assets/vendors/flag-icon-css/css/flag-icon.min.css" />
-    <link rel="stylesheet" href="template/assets/vendors/css/vendor.bundle.base.css" />
-    <link rel="stylesheet" href="template/assets/vendors/font-awesome/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="template/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css" />
-    <link rel="stylesheet" href="template/assets/css/style.css" />
-    <link rel="shortcut icon" href="template/assets/images/favicon.png" />
-  </head>
-  <body>
-    <div class="container-scroller">
-      <?php /* Reuse existing admin template (lightly customized inline) */ ?>
-      <nav class="sidebar sidebar-offcanvas" id="sidebar">
-        <div class="text-center sidebar-brand-wrapper d-flex align-items-center">
-          <a class="sidebar-brand brand-logo" href="admin_dashboard.php"><img src="template/assets/images/logo.svg" alt="logo" /></a>
-          <a class="sidebar-brand brand-logo-mini pl-4 pt-3" href="admin_dashboard.php"><img src="template/assets/images/logo-mini.svg" alt="logo" /></a>
-        </div>
+        body {
+            display: flex;
+            background-color: #f4f6f9;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        <ul class="nav">
-          <li class="nav-item nav-profile">
-            <a href="#" class="nav-link">
-              <div class="nav-profile-image">
-                <img src="template/assets/images/faces/face1.jpg" alt="profile" />
-                <span class="login-status online"></span>
-              </div>
-              <div class="nav-profile-text d-flex flex-column pr-3">
-                <span class="font-weight-medium mb-2"><?php echo htmlspecialchars($adminName); ?></span>
-                <span class="font-weight-normal"><?php echo htmlspecialchars($adminRole); ?></span>
-              </div>
-            </a>
-          </li>
+        /* ---------- SIDEBAR ---------- */
+        .sidebar {
+            width: 250px;
+            background-color: #7A0D2A; /* Dark maroon */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
 
-          <li class="nav-item">
-            <a class="nav-link" href="admin_dashboard.php">
-              <i class="mdi mdi-home menu-icon"></i>
-              <span class="menu-title">Dashboard</span>
-            </a>
-          </li>
+        .sidebar h1 {
+            font-size: 24px;
+            font-weight: 600;
+            padding: 0 25px 30px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
 
-          <li class="nav-item">
-            <a class="nav-link" href="profile.php">
-              <i class="mdi mdi-account-circle menu-icon"></i>
-              <span class="menu-title">View Profile</span>
-            </a>
-          </li>
+        .sidebar nav ul {
+            list-style: none;
+            padding: 20px 15px;
+        }
 
-          <li class="nav-item">
-            <a class="nav-link" href="edit_profile.php">
-              <i class="mdi mdi-pencil menu-icon"></i>
-              <span class="menu-title">Edit Profile</span>
-            </a>
-          </li>
+        .sidebar nav ul li {
+            margin-bottom: 12px;
+        }
 
-          <li class="nav-item">
-            <a class="nav-link" href="forgot_password.php">
-              <i class="mdi mdi-lock-reset menu-icon"></i>
-              <span class="menu-title">Forgot Password</span>
-            </a>
-          </li>
+        .sidebar nav ul li a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: 0.3s ease;
+            font-size: 16px;
+        }
 
-          <li class="nav-item sidebar-actions">
-            <div class="nav-link">
-              <div class="mt-4">
-                <div class="border-none">
-                  <p class="text-black">Account</p>
-                </div>
-                <ul class="mt-4 pl-0">
-                  <li><a href="../logout.php" class="text-dark">Sign Out</a></li>
-                </ul>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </nav>
+        .sidebar nav ul li a i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
 
-      <div class="container-fluid page-body-wrapper">
-        <nav class="navbar col-lg-12 col-12 p-lg-0 fixed-top d-flex flex-row">
-          <div class="navbar-menu-wrapper d-flex align-items-stretch justify-content-between">
-            <button class="navbar-toggler navbar-toggler align-self-center mr-2" type="button" data-toggle="minimize">
-              <i class="mdi mdi-menu"></i>
-            </button>
-            <ul class="navbar-nav">
-              <li class="nav-item nav-search border-0 ml-1 ml-md-3 ml-lg-5 d-none d-md-flex">
-                <form class="nav-link form-inline mt-2 mt-md-0">
-                  <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search" />
-                    <div class="input-group-append">
-                      <span class="input-group-text"><i class="mdi mdi-magnify"></i></span>
-                    </div>
-                  </div>
-                </form>
-              </li>
+        .sidebar nav ul li a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .sidebar nav ul li a.active {
+            background-color: #DE9E1F; /* Orange gold */
+            color: #fff;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .sidebar nav ul li a.logout {
+            margin-top: 60px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            border-radius: 0;
+        }
+
+        /* ---------- MAIN CONTENT ---------- */
+        .main-content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 30px;
+            background-color: #f4f6f9;
+        }
+
+        /* ---------- TOP CARDS ---------- */
+        .welcome-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+
+        .welcome-card h2 {
+            font-size: 32px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .welcome-card h2 span {
+            display: inline-block;
+        }
+
+        .welcome-card p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        /* ---------- STATS CARDS ---------- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .stat-card i {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .stat-icon-student { color: #F59E0B; }
+        .stat-icon-advisor { color: #E53E3E; }
+        .stat-icon-subject { color: #047857; }
+
+        .stat-card h3 {
+            font-size: 42px;
+            color: #7A0D2A;
+            margin: 10px 0 5px 0;
+            font-weight: 700;
+        }
+
+        .stat-card p {
+            color: #4b5563;
+            font-weight: 500;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+                padding: 20px;
+            }
+        }
+        @media (max-width: 576px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 15px;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <h1>Admin Portal</h1>
+        <nav>
+            <ul>
+                <li><a href="admin_dashboard.php" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
+
+                <!-- Changed: 'Add Student' → 'Manage Students' -->
+                <li><a href="manage_students.php"><i class="fas fa-user-graduate"></i> Manage Students</a></li>
+
+                <!-- Changed: 'Add Advisor' → 'Manage Advisors' -->
+                <li><a href="manage_advisors.php"><i class="fas fa-users"></i> Manage Advisors</a></li>
+
+                <!-- Changed: 'Add Subject' → 'Manage Subjects' -->
+                <li><a href="manage_subjects.php"><i class="fas fa-book"></i> Manage Subjects</a></li>
+
+                <li><a href="../forgot_password.php"><i class="fas fa-key"></i> Forgot Password</a></li>
+                <li><a href="logout.php" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
-
-            <ul class="navbar-nav navbar-nav-right ml-lg-auto">
-              <li class="nav-item nav-profile dropdown border-0">
-                <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown">
-                  <img class="nav-profile-img mr-2" alt="" src="template/assets/images/faces/face1.jpg" />
-                  <span class="profile-name"><?php echo htmlspecialchars($adminName); ?></span>
-                </a>
-                <div class="dropdown-menu navbar-dropdown w-100" aria-labelledby="profileDropdown">
-                  <a class="dropdown-item" href="profile.php"><i class="mdi mdi-account-circle mr-2 text-success"></i> Profile</a>
-                  <a class="dropdown-item" href="../logout.php"><i class="mdi mdi-logout mr-2 text-primary"></i> Signout</a>
-                </div>
-              </li>
-            </ul>
-
-            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
-              <span class="mdi mdi-menu"></span>
-            </button>
-          </div>
         </nav>
+    </aside>
 
-        <div class="main-panel">
-          <div class="content-wrapper pb-0">
-            <div class="page-header flex-wrap">
-              <h3 class="mb-0">Admin Dashboard</h3>
-              <div class="d-flex">
-                <a class="btn btn-sm bg-white btn-icon-text border" href="profile.php">
-                  <i class="mdi mdi-account btn-icon-prepend"></i> Profile
-                </a>
-                <a class="btn btn-sm bg-white btn-icon-text border ml-3" href="edit_profile.php">
-                  <i class="mdi mdi-pencil btn-icon-prepend"></i> Edit
-                </a>
-              </div>
-            </div>
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
 
-            <div class="row">
-              <div class="col-xl-3 col-lg-12 stretch-card grid-margin">
-                <div class="card bg-warning">
-                  <div class="card-body px-3 py-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                      <div class="color-card">
-                        <p class="mb-0 color-card-head">Students Registered</p>
-                        <h2 class="text-white"><?php echo (int)$studentsRegistered; ?></h2>
-                      </div>
-                      <i class="card-icon-indicator mdi mdi-account-multiple bg-inverse-icon-warning"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-xl-3 col-lg-12 stretch-card grid-margin">
-                <div class="card bg-danger">
-                  <div class="card-body px-3 py-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                      <div class="color-card">
-                        <p class="mb-0 color-card-head">Academic Advisors</p>
-                        <h2 class="text-white"><?php echo (int)$advisorsRegistered; ?></h2>
-                      </div>
-                      <i class="card-icon-indicator mdi mdi-account-circle bg-inverse-icon-danger"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-xl-3 col-lg-12 stretch-card grid-margin">
-                <div class="card bg-primary">
-                  <div class="card-body px-3 py-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                      <div class="color-card">
-                        <p class="mb-0 color-card-head">Subjects Registered</p>
-                        <h2 class="text-white"><?php echo (int)$subjectsRegistered; ?></h2>
-                      </div>
-                      <i class="card-icon-indicator mdi mdi-book-open bg-inverse-icon-primary"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-xl-3 col-lg-12 stretch-card grid-margin">
-                <div class="card bg-success">
-                  <div class="card-body px-3 py-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                      <div class="color-card">
-                        <p class="mb-0 color-card-head">Quick Actions</p>
-                        <h2 class="text-white">Go</h2>
-                      </div>
-                      <i class="card-icon-indicator mdi mdi-lightning-bolt bg-inverse-icon-success"></i>
-                    </div>
-                    <div class="mt-3">
-                      <a class="btn btn-light btn-sm" href="forgot_password.php">Forgot Password</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-xl-12 stretch-card grid-margin">
-                <div class="card">
-                  <div class="card-body">
-                    <h4 class="card-title">Dashboard Overview</h4>
-                    <p class="text-muted">Dummy data for now (replace with real DB queries later).</p>
-                    <div class="row">
-                      <div class="col-md-4">
-                        <div class="border rounded p-3">
-                          <h5 class="mb-1">Students Registered</h5>
-                          <div class="display-6"><?php echo (int)$studentsRegistered; ?></div>
-                        </div>
-                      </div>
-                      <div class="col-md-4">
-                        <div class="border rounded p-3">
-                          <h5 class="mb-1">Academic Advisors</h5>
-                          <div class="display-6"><?php echo (int)$advisorsRegistered; ?></div>
-                        </div>
-                      </div>
-                      <div class="col-md-4">
-                        <div class="border rounded p-3">
-                          <h5 class="mb-1">Subjects Registered</h5>
-                          <div class="display-6"><?php echo (int)$subjectsRegistered; ?></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <footer class="footer">
-            <div class="d-sm-flex justify-content-center justify-content-sm-between">
-              <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bootstrapdash.com 2020</span>
-              <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"> Free <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap dashboard template</a> from Bootstrapdash.com</span>
-            </div>
-          </footer>
+        <!-- WELCOME CARD -->
+        <div class="welcome-card">
+            <h2>Welcome Admin 👋</h2>
+            <p>Manage students, advisors and subjects here.</p>
         </div>
-      </div>
 
-    <!-- plugins:js -->
-    <script src="template/assets/vendors/js/vendor.bundle.base.js"></script>
-    <script src="template/assets/vendors/chart.js/Chart.min.js"></script>
-    <script src="template/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
-    <script src="template/assets/vendors/flot/jquery.flot.js"></script>
-    <script src="template/assets/vendors/flot/jquery.flot.resize.js"></script>
-    <script src="template/assets/vendors/flot/jquery.flot.categories.js"></script>
-    <script src="template/assets/vendors/flot/jquery.flot.fillbetween.js"></script>
-    <script src="template/assets/vendors/flot/jquery.flot.stack.js"></script>
-    <script src="template/assets/vendors/flot/jquery.flot.pie.js"></script>
+        <!-- STATS CARDS -->
+        <div class="stats-grid">
 
-    <script src="template/assets/js/off-canvas.js"></script>
-    <script src="template/assets/js/hoverable-collapse.js"></script>
-    <script src="template/assets/js/misc.js"></script>
-    <script src="template/assets/js/dashboard.js"></script>
-  </body>
+            <div class="stat-card">
+                <i class="fas fa-users stat-icon-student"></i>
+                <h3><?php echo number_format($students_count); ?></h3>
+                <p>Students Registered</p>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-user-tie stat-icon-advisor"></i>
+                <h3><?php echo number_format($advisors_count); ?></h3>
+                <p>Academic Advisors</p>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-book-open stat-icon-subject"></i>
+                <h3><?php echo number_format($subjects_count); ?></h3>
+                <p>Subjects Registered</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
 </html>
-

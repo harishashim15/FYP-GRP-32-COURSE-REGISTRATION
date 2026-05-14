@@ -19,7 +19,9 @@
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
+            transition: transform 0.3s ease;
         }
+        .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
@@ -43,395 +45,293 @@
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
 
         /* MAIN */
-        .main-content { margin-left: 280px; padding: 30px; }
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 30px; background: white; padding: 15px 25px;
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .profile-box { display: flex; align-items: center; gap: 15px; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
 
         /* PAGE HEADER */
-        .page-header {
-            display: flex; align-items: center; gap: 20px;
-            margin-bottom: 25px; flex-wrap: wrap;
-        }
-        .back-btn {
-            background: none; border: none; font-size: 24px;
-            color: #670019; cursor: pointer;
-        }
+        .page-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+        .back-btn { background: none; border: none; font-size: 24px; color: #670019; cursor: pointer; }
         .page-header h2 { color: #670019; font-weight: 700; margin: 0; }
 
-        /* Status Badge */
-        .status-badge {
-            display: inline-block; padding: 5px 12px; border-radius: 20px;
-            font-size: 12px; font-weight: 500;
-        }
+        /* STATUS BADGE */
+        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
         .status-pending { background: #fff3cd; color: #856404; }
         .status-approved { background: #d4edda; color: #155724; }
         .status-rejected { background: #f8d7da; color: #721c24; }
 
-        /* Profile Card */
-        .profile-card {
-            background: white; border-radius: 20px; padding: 25px;
-            margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .profile-header {
-            display: flex; align-items: center; gap: 25px; flex-wrap: wrap;
-        }
-        .student-avatar {
-            width: 80px; height: 80px; border-radius: 50%;
-            background: #670019; color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 32px; font-weight: 600;
-        }
+        /* PROFILE CARD */
+        .profile-card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .profile-header { display: flex; align-items: center; gap: 25px; flex-wrap: wrap; }
+        .student-avatar { width: 80px; height: 80px; border-radius: 50%; background: #670019; color: white; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 600; }
         .student-basic h3 { margin: 0 0 5px 0; font-size: 22px; }
         .student-basic p { margin: 0; color: #666; font-size: 14px; }
-        .student-details-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px; margin-top: 20px; padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
+        .student-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
         .detail-item { display: flex; align-items: center; gap: 10px; }
-        .detail-icon {
-            width: 35px; height: 35px; background: #f8f6f4;
-            border-radius: 10px; display: flex; align-items: center;
-            justify-content: center; color: #670019; font-size: 16px;
-        }
+        .detail-icon { width: 35px; height: 35px; background: #f8f6f4; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #670019; font-size: 16px; }
         .detail-text small { display: block; color: #999; font-size: 11px; }
         .detail-text strong { font-size: 14px; }
 
-        /* Courses Card */
-        .courses-card {
-            background: white; border-radius: 20px; padding: 25px;
-            margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
+        /* COURSES CARD */
+        .courses-card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .courses-card h4 { color: #670019; font-weight: 600; margin-bottom: 20px; }
 
-        /* Current Semester Info Strip */
-        .sem-info-strip {
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px; margin-bottom: 25px;
-        }
-        .sem-info-item label {
-            display: block; font-size: 12px; color: #888; margin-bottom: 6px; font-weight: 500;
-        }
-        .sem-info-item .sem-info-val {
-            background: #f0f4f8; border: 1px solid #dce3ea;
-            border-radius: 10px; padding: 10px 14px;
-            font-size: 14px; color: #333; font-weight: 500;
-        }
+        /* SEMESTER INFO STRIP */
+        .sem-info-strip { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .sem-info-item label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; font-weight: 500; }
+        .sem-info-item .sem-info-val { background: #f0f4f8; border: 1px solid #dce3ea; border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #333; font-weight: 500; }
 
-        /* Semester History Table */
-        .table-controls {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
-        }
-        .table-controls-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
-        .table-controls-left select {
-            padding: 4px 10px; border: 1px solid #ddd; border-radius: 8px;
-            font-family: 'Poppins', sans-serif; font-size: 13px;
-        }
-        .table-controls-right { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
-        .table-controls-right input {
-            padding: 5px 12px; border: 1px solid #ddd; border-radius: 8px;
-            font-family: 'Poppins', sans-serif; font-size: 13px; outline: none;
-        }
-        .table-controls-right input:focus { border-color: #670019; }
-
+        /* TABLE */
+        .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .table-controls-left select, .table-controls-right input { padding: 4px 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; }
-        th {
-            text-align: center; padding: 11px 12px; background: #f0f4f8;
-            color: #555; font-weight: 600; font-size: 13px;
-            border: 1px solid #dce3ea;
-        }
-        td {
-            padding: 11px 12px; border: 1px solid #eee;
-            font-size: 13px; text-align: center; color: #333;
-        }
+        th { text-align: center; padding: 11px 12px; background: #f0f4f8; color: #555; font-weight: 600; font-size: 13px; border: 1px solid #dce3ea; }
+        td { padding: 11px 12px; border: 1px solid #eee; font-size: 13px; text-align: center; color: #333; }
         tbody tr:hover td { background: #fdf9f7; }
 
-        /* Pagination */
-        .table-footer {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 15px; flex-wrap: wrap; gap: 10px;
-        }
-        .table-footer small { font-size: 13px; color: #666; }
+        /* PAGINATION */
+        .table-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px; }
         .pagination-btns { display: flex; gap: 6px; align-items: center; }
-        .page-btn {
-            padding: 5px 14px; border: 1px solid #ddd; border-radius: 8px;
-            background: white; font-size: 13px; cursor: pointer;
-            font-family: 'Poppins', sans-serif; transition: 0.2s;
-        }
-        .page-btn:hover { background: #f0f0f0; }
-        .page-btn.active {
-            background: #670019; color: white; border-color: #670019;
-        }
+        .page-btn { padding: 5px 14px; border: 1px solid #ddd; border-radius: 8px; background: white; font-size: 13px; cursor: pointer; }
+        .page-btn.active { background: #670019; color: white; border-color: #670019; }
 
-        /* Action Buttons */
-        .action-buttons {
-            background: white; border-radius: 20px; padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: flex; gap: 15px; flex-wrap: wrap;
-        }
-        .btn-back {
-            background: #6c757d; color: white; border: none;
-            padding: 10px 25px; border-radius: 25px; cursor: pointer;
-            text-decoration: none; display: inline-block;
-        }
-        .btn-review {
-            background: #670019; color: white; border: none;
-            padding: 10px 25px; border-radius: 25px; cursor: pointer;
-            text-decoration: none; display: inline-block;
-        }
-    
-        /* ── SIDEBAR TOGGLE ── */
-        .sidebar {
-            transition: transform 0.3s ease;
-        }
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-        .main-content {
-            transition: margin-left 0.3s ease;
-        }
-        .main-content.expanded {
-            margin-left: 0;
-        }
-        .toggle-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #333;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-        }
+        /* ACTION BUTTONS */
+        .action-buttons { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; gap: 15px; flex-wrap: wrap; }
+        .btn-back { background: #6c757d; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-review { background: #670019; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="logo">
-            <img src="images/utmlogo.png" alt="UTM Logo">
-            <div class="system-title">COURSE REGISTRATION SYSTEM</div>
-        </div>
-        <div class="menu">
-            <a href="advisor_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
-            <a href="advisor_my_students.html" class="active"><i class="bi bi-people-fill"></i> My Students</a>
-            <a href="advisor_registrations.html"><i class="bi bi-file-earmark-text-fill"></i> Registrations</a>
-            <a href="advisor_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
-            <a href="advisor_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
-        </div>
-        <div class="logout">
-            <a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="logo">
+        <img src="images/utmlogo.png" alt="UTM Logo">
+        <div class="system-title">COURSE REGISTRATION SYSTEM</div>
+    </div>
+    <div class="menu">
+        <a href="advisor_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="advisor_my_students.html" class="active"><i class="bi bi-people-fill"></i> My Students</a>
+        <a href="advisor_registrations.html"><i class="bi bi-file-earmark-text-fill"></i> Registrations</a>
+        <a href="advisor_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="advisor_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
+    </div>
+    <div class="logout">
+        <a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+            <div><h6 class="mb-0" id="advisorName">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
         </div>
     </div>
 
-    <!-- MAIN -->
-    <div class="main-content">
-        <div class="topbar">
-            <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
-                <i class="bi bi-bell fs-5"></i>
-                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+    <div class="page-header">
+        <button class="back-btn" onclick="history.back()"><i class="bi bi-arrow-left"></i></button>
+        <h2>Student Details</h2>
+        <span class="status-badge" id="studentStatusBadge">Loading...</span>
+    </div>
+
+    <!-- Student Profile Card -->
+    <div class="profile-card" id="profileCard">
+        <div class="profile-header">
+            <div class="student-avatar" id="studentAvatar">--</div>
+            <div class="student-basic">
+                <h3 id="studentName">Loading...</h3>
+                <p id="studentEmail"><i class="bi bi-envelope"></i> --</p>
             </div>
         </div>
-
-        <div class="page-header">
-            <button class="back-btn" onclick="history.back()"><i class="bi bi-arrow-left"></i></button>
-            <h2>Student Details</h2>
-            <span class="status-badge status-pending">Pending</span>
-        </div>
-
-        <!-- Student Profile Card -->
-        <div class="profile-card">
-            <div class="profile-header">
-                <div class="student-avatar">AM</div>
-                <div class="student-basic">
-                    <h3>Ahmad Mirza bin Abdullah</h3>
-                    <p><i class="bi bi-envelope"></i> ahmad@utm.my</p>
-                </div>
-            </div>
-            <div class="student-details-grid">
-                <div class="detail-item">
-                    <div class="detail-icon"><i class="bi bi-card-text"></i></div>
-                    <div class="detail-text"><small>Student ID</small><strong>A24DW0112</strong></div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-icon"><i class="bi bi-mortarboard"></i></div>
-                    <div class="detail-text"><small>Programme</small><strong>Diploma Computer Science</strong></div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-icon"><i class="bi bi-calendar"></i></div>
-                    <div class="detail-text"><small>Year</small><strong>Year 2</strong></div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-icon"><i class="bi bi-person-badge"></i></div>
-                    <div class="detail-text"><small>Advisor ID</small><strong>2</strong></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Semester History Card -->
-        <div class="courses-card">
-            <h4><i class="bi bi-journal-text"></i> Semester</h4>
-
-            <!-- Current Semester Info -->
-            <div class="sem-info-strip">
-                <div class="sem-info-item">
-                    <label>Current Semester</label>
-                    <div class="sem-info-val">202520262</div>
-                </div>
-                <div class="sem-info-item">
-                    <label>Year / Programme</label>
-                    <div class="sem-info-val">2 / DSPD</div>
-                </div>
-                <div class="sem-info-item">
-                    <label>Active Code</label>
-                    <div class="sem-info-val">A - Active</div>
-                </div>
-            </div>
-
-            <!-- Semester Histories -->
-            <div style="font-size:14px; font-weight:600; color:#333; margin-bottom:10px;">Semester Histories</div>
-            <div class="table-controls">
-                <div class="table-controls-left">
-                    Show
-                    <select id="entriesSelect" onchange="renderTable()">
-                        <option value="5">5</option>
-                        <option value="10" selected>10</option>
-                        <option value="25">25</option>
-                    </select>
-                    entries
-                </div>
-                <div class="table-controls-right">
-                    Search:
-                    <input type="text" id="searchInput" placeholder="" oninput="renderTable()">
-                </div>
-            </div>
-
-            <div style="overflow-x:auto;">
-                <table id="semTable">
-                    <thead>
-                        <tr>
-                            <th>Session Semester</th>
-                            <th>Programme</th>
-                            <th>No. Semester</th>
-                            <th>Course Reg. Date</th>
-                            <th>Active Code</th>
-                            <th>CPA</th>
-                        </tr>
-                    </thead>
-                    <tbody id="semTableBody"></tbody>
-                </table>
-            </div>
-
-            <div class="table-footer">
-                <small id="tableInfo"></small>
-                <div class="pagination-btns" id="pagination"></div>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <a href="advisor_my_students.html" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Students</a>
-            <a href="advisor_verify_registration.html" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
+        <div class="student-details-grid" id="studentDetailsGrid">
+            <!-- Filled by JS -->
         </div>
     </div>
 
-    <script>
-        const semData = [
-            { session: '2024/2025-1', programme: '1 / DSPD', noSem: 1, regDate: '27 Jul 2024', activeCode: 'A-Active', cpa: '3.67' },
-            { session: '2024/2025-2', programme: '1 / DSPD', noSem: 2, regDate: '26 Dec 2024', activeCode: 'A-Active', cpa: '3.70' },
-            { session: '2024/2025-3', programme: '1 / DSPD', noSem: 3, regDate: '16 May 2025', activeCode: 'A-Active', cpa: '3.76' },
-            { session: '2025/2026-1', programme: '2 / DSPD', noSem: 4, regDate: '10 Jul 2025', activeCode: 'A-Active', cpa: '3.77' },
-            { session: '2025/2026-2', programme: '2 / DSPD', noSem: 5, regDate: '08 Dec 2025', activeCode: 'A-Active', cpa: '3.83' },
-            { session: '2025/2026-3', programme: '2 / DSPD', noSem: 6, regDate: '06 May 2026', activeCode: 'A-Active', cpa: '' },
-        ];
+    <!-- Semester History Card -->
+    <div class="courses-card">
+        <h4><i class="bi bi-journal-text"></i> Semester</h4>
 
-        let currentPage = 1;
+        <!-- Current Semester Info -->
+        <div class="sem-info-strip" id="semInfoStrip">
+            <div class="sem-info-item"><label>Current Semester</label><div class="sem-info-val" id="currentSemester">--</div></div>
+            <div class="sem-info-item"><label>Year / Programme</label><div class="sem-info-val" id="yearProgramme">--</div></div>
+            <div class="sem-info-item"><label>Active Code</label><div class="sem-info-val" id="activeCode">--</div></div>
+        </div>
 
-        function renderTable() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const perPage = parseInt(document.getElementById('entriesSelect').value);
+        <!-- Semester Histories -->
+        <div style="font-size:14px; font-weight:600; color:#333; margin-bottom:10px;">Semester Histories</div>
+        <div class="table-controls">
+            <div class="table-controls-left">Show <select id="entriesSelect" onchange="renderTable()"><option value="5">5</option><option value="10" selected>10</option><option value="25">25</option></select> entries</div>
+            <div class="table-controls-right">Search: <input type="text" id="searchInput" placeholder="" oninput="renderTable()"></div>
+        </div>
+        <div style="overflow-x:auto;">
+            <table id="semTable">
+                <thead><tr><th>Session Semester</th><th>Programme</th><th>No. Semester</th><th>Course Reg. Date</th><th>Active Code</th><th>CPA</th></tr></thead>
+                <tbody id="semTableBody"></tbody>
+            </table>
+        </div>
+        <div class="table-footer"><small id="tableInfo"></small><div class="pagination-btns" id="pagination"></div></div>
+    </div>
 
-            const filtered = semData.filter(r =>
-                Object.values(r).join(' ').toLowerCase().includes(query)
-            );
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="advisor_my_students.html" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Students</a>
+        <a href="advisor_verify_registration.html" class="btn-review" id="reviewRegistrationBtn"><i class="bi bi-pencil"></i> Review Registration</a>
+    </div>
+</div>
 
-            const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-            if (currentPage > totalPages) currentPage = totalPages;
+<script src="js/common.js"></script>
+<script>
+    let semData = [];      // will hold semester history
+    let currentPage = 1;
 
-            const start = (currentPage - 1) * perPage;
-            const pageData = filtered.slice(start, start + perPage);
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
 
-            const tbody = document.getElementById('semTableBody');
-            tbody.innerHTML = pageData.map(r => `
-                <tr>
-                    <td>${r.session}</td>
-                    <td>${r.programme}</td>
-                    <td>${r.noSem}</td>
-                    <td>${r.regDate}</td>
-                    <td>${r.activeCode}</td>
-                    <td>${r.cpa}</td>
-                </tr>
-            `).join('');
+    // Get student ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const studentId = urlParams.get('id');
 
-            // Footer info
-            const from = filtered.length === 0 ? 0 : start + 1;
-            const to = Math.min(start + perPage, filtered.length);
-            document.getElementById('tableInfo').textContent =
-                `Showing ${from} to ${to} of ${filtered.length} entries`;
+    async function loadStudentDetails() {
+        if (!studentId) {
+            alert('No student ID provided');
+            return;
+        }
+        try {
+            const student = await apiGet(`students/details.php?id=${studentId}`);
+            // Avatar initials
+            const initials = student.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+            document.getElementById('studentAvatar').innerText = initials;
+            document.getElementById('studentName').innerText = student.name;
+            document.getElementById('studentEmail').innerHTML = `<i class="bi bi-envelope"></i> ${student.email}`;
+            document.getElementById('advisorName').innerText = student.advisor_name || 'Miss Nurul Asyikin';
 
-            // Pagination
-            const pg = document.getElementById('pagination');
-            pg.innerHTML = '';
-            const prev = document.createElement('button');
-            prev.className = 'page-btn';
-            prev.textContent = 'Previous';
-            prev.disabled = currentPage === 1;
-            prev.onclick = () => { currentPage--; renderTable(); };
-            pg.appendChild(prev);
+            // Status badge
+            const statusSpan = document.getElementById('studentStatusBadge');
+            const status = student.registration_status || 'pending';
+            statusSpan.className = `status-badge status-${status}`;
+            statusSpan.innerText = status.charAt(0).toUpperCase() + status.slice(1);
 
-            for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
-                btn.textContent = i;
-                btn.onclick = (function(p) { return () => { currentPage = p; renderTable(); }; })(i);
-                pg.appendChild(btn);
+            // Details grid
+            const grid = document.getElementById('studentDetailsGrid');
+            grid.innerHTML = `
+                <div class="detail-item"><div class="detail-icon"><i class="bi bi-card-text"></i></div><div class="detail-text"><small>Student ID</small><strong>${escapeHtml(student.matrix)}</strong></div></div>
+                <div class="detail-item"><div class="detail-icon"><i class="bi bi-mortarboard"></i></div><div class="detail-text"><small>Programme</small><strong>${escapeHtml(student.programme)}</strong></div></div>
+                <div class="detail-item"><div class="detail-icon"><i class="bi bi-calendar"></i></div><div class="detail-text"><small>Year</small><strong>Year ${student.year}</strong></div></div>
+                <div class="detail-item"><div class="detail-icon"><i class="bi bi-person-badge"></i></div><div class="detail-text"><small>Advisor ID</small><strong>${student.advisor_id || '-'}</strong></div></div>
+            `;
+
+            // Current semester info
+            document.getElementById('currentSemester').innerText = student.current_semester || '--';
+            document.getElementById('yearProgramme').innerText = student.year_programme || '--';
+            document.getElementById('activeCode').innerText = student.active_code || 'A - Active';
+
+            // Review button: point to verify page with student ID (or registration ID)
+            const regId = student.active_registration_id;
+            if (regId && student.registration_status === 'pending') {
+                document.getElementById('reviewRegistrationBtn').href = `advisor_verify_registration.html?id=${regId}`;
+            } else {
+                document.getElementById('reviewRegistrationBtn').style.display = 'none';
             }
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load student details');
+        }
+    }
 
-            const next = document.createElement('button');
-            next.className = 'page-btn';
-            next.textContent = 'Next';
-            next.disabled = currentPage === totalPages;
-            next.onclick = () => { currentPage++; renderTable(); };
-            pg.appendChild(next);
+    async function loadSemesterHistory() {
+        try {
+            const history = await apiGet(`students/semesters.php?id=${studentId}`);
+            semData = history;
+            renderTable();
+        } catch (err) {
+            console.error(err);
+            document.getElementById('semTableBody').innerHTML = '<tr><td colspan="6">Failed to load semester history</td></tr>';
+        }
+    }
+
+    function renderTable() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const perPage = parseInt(document.getElementById('entriesSelect').value);
+        const filtered = semData.filter(r => Object.values(r).join(' ').toLowerCase().includes(query));
+        const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+        const start = (currentPage - 1) * perPage;
+        const pageData = filtered.slice(start, start + perPage);
+
+        const tbody = document.getElementById('semTableBody');
+        tbody.innerHTML = pageData.map(r => `
+            <tr><td>${escapeHtml(r.session)}</td><td>${escapeHtml(r.programme)}</td><td>${r.noSem}</td><td>${escapeHtml(r.regDate)}</td><td>${escapeHtml(r.activeCode)}</td><td>${r.cpa || ''}</td></tr>
+        `).join('');
+
+        const from = filtered.length === 0 ? 0 : start + 1;
+        const to = Math.min(start + perPage, filtered.length);
+        document.getElementById('tableInfo').textContent = `Showing ${from} to ${to} of ${filtered.length} entries`;
+
+        const pg = document.getElementById('pagination');
+        pg.innerHTML = '';
+        const prev = document.createElement('button');
+        prev.className = 'page-btn';
+        prev.textContent = 'Previous';
+        prev.disabled = currentPage === 1;
+        prev.onclick = () => { currentPage--; renderTable(); };
+        pg.appendChild(prev);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+            btn.textContent = i;
+            btn.onclick = (function(p) { return () => { currentPage = p; renderTable(); }; })(i);
+            pg.appendChild(btn);
         }
 
-        renderTable();
-    </script>
-    <script>
-        // Apply saved sidebar state on every page load
-        (function() {
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                document.querySelector('.sidebar').classList.add('collapsed');
-                document.querySelector('.main-content').classList.add('expanded');
-            }
-        })();
+        const next = document.createElement('button');
+        next.className = 'page-btn';
+        next.textContent = 'Next';
+        next.disabled = currentPage === totalPages;
+        next.onclick = () => { currentPage++; renderTable(); };
+        pg.appendChild(next);
+    }
 
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const main = document.querySelector('.main-content');
-            sidebar.classList.toggle('collapsed');
-            main.classList.toggle('expanded');
-            // Save state
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        }
-    </script>
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    if (studentId) {
+        loadStudentDetails();
+        loadSemesterHistory();
+    } else {
+        alert('Student ID missing');
+    }
+</script>
 </body>
 </html>

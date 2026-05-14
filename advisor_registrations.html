@@ -14,12 +14,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
 
-        /* ── SIDEBAR (matched to dashboard) ── */
+        /* SIDEBAR */
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
+            transition: transform 0.3s ease;
         }
+        .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
@@ -42,31 +44,34 @@
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
 
-        /* ── MAIN ── */
-        .main-content { margin-left: 280px; padding: 30px; }
+        /* MAIN */
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 30px; background: white; padding: 15px 25px;
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .profile-box { display: flex; align-items: center; gap: 15px; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
 
-        /* ── PAGE HEADER ── */
+        /* PAGE HEADER */
         .page-header { margin-bottom: 30px; }
         .page-header h2 { color: #670019; font-weight: 700; }
         .page-header p { color: #666; margin-top: 5px; }
 
-        /* ── FILTER TABS ── */
+        /* FILTER TABS */
         .filter-tabs { display: flex; gap: 15px; margin-bottom: 25px; }
         .filter-tab {
             padding: 8px 25px; background: white; border: 1px solid #ddd;
             border-radius: 25px; cursor: pointer; font-size: 14px;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', sans-serif; transition: 0.3s;
         }
         .filter-tab.active { background: #670019; color: white; border-color: #670019; }
+        .filter-tab:hover:not(.active) { background: #f0f0f0; }
 
-        /* ── TABLE ── */
+        /* TABLE */
         .registrations-table {
             background: white; border-radius: 25px; padding: 25px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
@@ -76,13 +81,10 @@
             text-align: left; padding: 12px 12px; background: #f8f6f4;
             color: #670019; font-weight: 600; font-size: 13px;
         }
-        .registrations-table th:first-child { border-radius: 10px 0 0 10px; }
-        .registrations-table th:last-child  { border-radius: 0 10px 10px 0; }
         .registrations-table td { padding: 13px 12px; border-bottom: 1px solid #eee; font-size: 13px; }
-        .registrations-table tbody tr:last-child td { border-bottom: none; }
         .registrations-table tbody tr:hover td { background: #fdf9f7; }
 
-        /* ── STATUS BADGES ── */
+        /* STATUS BADGES */
         .status-badge {
             padding: 5px 12px; border-radius: 20px; font-size: 12px;
             font-weight: 500; display: inline-block;
@@ -91,7 +93,7 @@
         .status-pending  { background: #fff3cd; color: #856404; }
         .status-rejected { background: #f8d7da; color: #721c24; }
 
-        /* ── BUTTONS ── */
+        /* BUTTONS */
         .review-btn {
             background: #670019; color: white; border: none;
             padding: 5px 20px; border-radius: 20px; cursor: pointer;
@@ -99,7 +101,6 @@
             transition: 0.3s;
         }
         .review-btn:hover { background: #8b0022; }
-
         .view-btn {
             background: none; border: 1.5px solid #670019; color: #670019;
             padding: 5px 20px; border-radius: 20px; cursor: pointer;
@@ -107,170 +108,150 @@
             transition: 0.3s;
         }
         .view-btn:hover { background: #670019; color: white; }
-    
-        /* ── SIDEBAR TOGGLE ── */
-        .sidebar {
-            transition: transform 0.3s ease;
-        }
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-        .main-content {
-            transition: margin-left 0.3s ease;
-        }
-        .main-content.expanded {
-            margin-left: 0;
-        }
-        .toggle-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #333;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-        }
     </style>
 </head>
 <body>
 
-    <!-- ── SIDEBAR ── -->
-    <div class="sidebar">
-        <div class="logo">
-            <img src="images/utmlogo.png" alt="UTM Logo">
-            <div class="system-title">COURSE REGISTRATION SYSTEM</div>
-        </div>
-        <div class="menu">
-            <a href="advisor_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
-            <a href="advisor_my_students.html"><i class="bi bi-people-fill"></i> My Students</a>
-            <a href="#" class="active"><i class="bi bi-file-earmark-text-fill"></i> Registrations</a>
-            <a href="advisor_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
-            <a href="advisor_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
-        </div>
-        <div class="logout">
-            <a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="logo">
+        <img src="images/utmlogo.png" alt="UTM Logo">
+        <div class="system-title">COURSE REGISTRATION SYSTEM</div>
+    </div>
+    <div class="menu">
+        <a href="advisor_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="advisor_my_students.html"><i class="bi bi-people-fill"></i> My Students</a>
+        <a href="advisor_registrations.html" class="active"><i class="bi bi-file-earmark-text-fill"></i> Registrations</a>
+        <a href="advisor_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="advisor_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
+    </div>
+    <div class="logout">
+        <a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+            <div><h6 class="mb-0" id="advisorName">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
         </div>
     </div>
 
-    <!-- ── MAIN ── -->
-    <div class="main-content">
-        <div class="topbar">
-            <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
-                <i class="bi bi-bell fs-5"></i>
-                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
-            </div>
-        </div>
-
-        <div class="page-header">
-            <h2>Student Registrations</h2>
-            <p>Review and manage student course registrations (Pending: 4)</p>
-        </div>
-
-        <div class="filter-tabs">
-            <div class="filter-tab active" data-filter="all">All</div>
-            <div class="filter-tab" data-filter="pending">Pending</div>
-            <div class="filter-tab" data-filter="approved">Approved</div>
-            <div class="filter-tab" data-filter="rejected">Rejected</div>
-        </div>
-
-        <div class="registrations-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Student ID</th>
-                        <th>Courses</th>
-                        <th>Submitted Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="regTableBody">
-                    <tr data-status="pending">
-                        <td>Ahmad Mirza bin Abdullah</td>
-                        <td>A24DW0112</td>
-                        <td>5 courses</td>
-                        <td>6 May 2026</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td><button class="review-btn" onclick="location.href='advisor_verify_registration.html'">Review</button></td>
-                    </tr>
-                    <tr data-status="approved">
-                        <td>Siti Rahmah binti Abdullah</td>
-                        <td>A24DW0204</td>
-                        <td>6 courses</td>
-                        <td>5 May 2026</td>
-                        <td><span class="status-badge status-approved">Approved</span></td>
-                        <td><button class="view-btn" onclick="location.href='advisor_verify_registration.html'">View</button></td>
-                    </tr>
-                    <tr data-status="pending">
-                        <td>Khairul Haziq bin Mohd</td>
-                        <td>A24DW0339</td>
-                        <td>4 courses</td>
-                        <td>6 May 2026</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td><button class="review-btn" onclick="location.href='advisor_verify_registration.html'">Review</button></td>
-                    </tr>
-                    <tr data-status="rejected">
-                        <td>Nora Nabila binti Zainal</td>
-                        <td>A24DW0451</td>
-                        <td>3 courses</td>
-                        <td>4 May 2026</td>
-                        <td><span class="status-badge status-rejected">Rejected</span></td>
-                        <td><button class="view-btn" onclick="location.href='advisor_verify_registration.html'">View</button></td>
-                    </tr>
-                    <tr data-status="pending">
-                        <td>Faiz Zulkifli bin Ahmad</td>
-                        <td>A24DW0512</td>
-                        <td>5 courses</td>
-                        <td>5 May 2026</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td><button class="review-btn" onclick="location.href='advisor_verify_registration.html'">Review</button></td>
-                    </tr>
-                    <tr data-status="pending">
-                        <td>Ain Izzati binti Rashid</td>
-                        <td>A24DW0612</td>
-                        <td>4 courses</td>
-                        <td>7 May 2026</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td><button class="review-btn" onclick="location.href='advisor_verify_registration.html'">Review</button></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="page-header">
+        <h2>Student Registrations</h2>
+        <p id="pendingCountText">Review and manage student course registrations</p>
     </div>
 
-    <script>
-        const tabs = document.querySelectorAll('.filter-tab');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function () {
-                tabs.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                const filter = this.dataset.filter;
-                document.querySelectorAll('#regTableBody tr').forEach(row => {
-                    row.style.display = (filter === 'all' || row.dataset.status === filter) ? '' : 'none';
-                });
-            });
-        });
-    </script>
-    <script>
-        // Apply saved sidebar state on every page load
-        (function() {
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                document.querySelector('.sidebar').classList.add('collapsed');
-                document.querySelector('.main-content').classList.add('expanded');
-            }
-        })();
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all">All</div>
+        <div class="filter-tab" data-filter="pending">Pending</div>
+        <div class="filter-tab" data-filter="approved">Approved</div>
+        <div class="filter-tab" data-filter="rejected">Rejected</div>
+    </div>
 
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const main = document.querySelector('.main-content');
-            sidebar.classList.toggle('collapsed');
-            main.classList.toggle('expanded');
-            // Save state
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    <div class="registrations-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student ID</th>
+                    <th>Courses</th>
+                    <th>Submitted Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="regTableBody">
+                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="js/common.js"></script>
+<script>
+    let currentFilter = 'all';
+    let allRegistrations = [];
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
         }
-    </script>
+    })();
+
+    async function loadRegistrations() {
+        try {
+            const data = await apiGet('registrations/list.php?status=all');
+            allRegistrations = data;
+            updatePendingCount();
+            renderTable(currentFilter);
+        } catch (err) {
+            console.error(err);
+            document.getElementById('regTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load registrations</td></tr>';
+        }
+    }
+
+    function updatePendingCount() {
+        const pendingCount = allRegistrations.filter(r => r.status === 'pending').length;
+        document.getElementById('pendingCountText').innerHTML = `Review and manage student course registrations (Pending: ${pendingCount})`;
+    }
+
+    function renderTable(filter) {
+        const filtered = filter === 'all' ? allRegistrations : allRegistrations.filter(r => r.status === filter);
+        const tbody = document.getElementById('regTableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center">No ${filter !== 'all' ? filter : ''} registrations found</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = '';
+        filtered.forEach(reg => {
+            const row = `
+                <tr data-status="${reg.status}">
+                    <td>${escapeHtml(reg.student_name)}</td>
+                    <td>${escapeHtml(reg.student_id)}</td>
+                    <td>${reg.course_count} courses</td>
+                    <td>${reg.submission_date}</td>
+                    <td><span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span></td>
+                    <td><button class="${reg.status === 'pending' ? 'review-btn' : 'view-btn'}" onclick="location.href='advisor_verify_registration.html?id=${reg.id}'">${reg.status === 'pending' ? 'Review' : 'View'}</button></td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Attach filter tab events
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            renderTable(currentFilter);
+        });
+    });
+
+    loadRegistrations();
+</script>
 </body>
 </html>
