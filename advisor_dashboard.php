@@ -184,7 +184,6 @@ $all_requests = array_slice($all_requests, 0, 6);
 
         <div class="hero">
             <div><h1>Welcome back, Miss Nurul 👩‍🏫</h1><p>Manage your students' course registrations here.</p></div>
-            <img src="https://cdn-icons-png.flaticon.com/512/3976/3976626.png">
         </div>
 
         <div class="row g-4">
