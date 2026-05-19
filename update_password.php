@@ -8,7 +8,7 @@
 
 // ── DB CONFIG ─────────────────────────────────────────────────────────────────
 $host    = 'localhost';
-$db      = 'dummyfyp';
+$db      = 'fypdb3';
 $user    = 'root';
 $pass    = '';
 $charset = 'utf8mb4';

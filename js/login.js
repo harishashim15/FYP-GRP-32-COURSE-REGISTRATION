@@ -17,15 +17,15 @@
 
         if (!check) return;
 
-        // GET ID + PASSWORD
-        var id       = $('input[name="id"]').val().trim();
+        // GET LOGIN_CRED + PASSWORD
+        var loginCred = $('input[name="id"]').val().trim();
         var password = $('input[name="pass"]').val();
 
         $.ajax({
             url: 'login.php',
             type: 'POST',
             data: {
-                username: id,
+                username: loginCred,
                 password: password
             },
             success: function (response) {
@@ -36,9 +36,9 @@
                 } else if (response === 'advisor') {
                     window.location.href = 'advisor_dashboard.html';
                 } else if (response === 'student') {
-                    window.location.href = 'student_dashboard.html';
+                    window.location.href = 'student_dashboard.php';
                 } else if (response === 'invalid') {
-                    showErrorMessage('Invalid ID or password. Please try again.');
+                    showErrorMessage('Invalid login credentials or password. Please try again.');
                 } else {
                     showErrorMessage('Unexpected response: [' + response + ']');
                 }
@@ -56,11 +56,12 @@
         });
     });
 
-    // SIMPLE VALIDATION (NO EMAIL CHECK ANYMORE)
+    // SIMPLE VALIDATION
     function validate(input) {
         if ($(input).val().trim() == '') {
             return false;
         }
+        return true;  // FIXED: was missing return true
     }
 
     function showValidate(input) {

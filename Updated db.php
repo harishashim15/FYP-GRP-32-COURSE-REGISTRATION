@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $password = "";
-$database = "utm_registration_system";
+$database = "fypdb3";
 
 $conn = mysqli_connect($host, $user, $password, $database);
 

@@ -3,7 +3,7 @@
  * reset_password.php
  * Handles AJAX requests from reset-password.js
  *
- * Database: dummyfyp
+ * Database: fypdb3
  * Table:    users (id, name, email, password, role)
  */
 
@@ -20,7 +20,7 @@ use PHPMailer\PHPMailer\Exception;
 // ── DATABASE CONFIG ───────────────────────────────────────────────────────────
 
 define('DB_HOST',    'localhost');
-define('DB_NAME',    'dummyfyp');
+define('DB_NAME',    'fypdb3');
 define('DB_USER',    'root');
 define('DB_PASS',    '');
 define('DB_CHARSET', 'utf8mb4');

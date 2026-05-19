@@ -7,7 +7,7 @@ echo "Step 1: PHP is working<br>";
 $host = "127.0.0.1";
 $user = "root";
 $pass = "";
-$db   = "dummyfyp";
+$db   = "fypdb3";
 $port = 3306;
 
 $conn = new mysqli($host, $user, $pass, $db, $port);

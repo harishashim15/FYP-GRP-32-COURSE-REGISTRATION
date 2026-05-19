@@ -11,7 +11,7 @@ require_once __DIR__ . '/PHPMailer/src/SMTP.php';
 
 // ── DB CONFIG ─────────────────────────────────────────────────────────────────
 $host    = 'localhost';
-$db      = 'dummyfyp';
+$db      = 'fypdb3';
 $user    = 'root';
 $pass    = '';
 $charset = 'utf8mb4';

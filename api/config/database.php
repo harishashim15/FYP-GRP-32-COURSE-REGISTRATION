@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Database configuration
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'dummyfyp');
+define('DB_NAME', 'fypdb3');
 define('DB_USER', 'root');
 define('DB_PASS', ''); // Set your MySQL password
 
