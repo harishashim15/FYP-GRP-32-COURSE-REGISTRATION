@@ -1,90 +1,73 @@
 <?php
-/**
- * API: Get student details by ID (for advisor)
- * Method: GET
- * Role: advisor
- * Parameters: id (student ID)
- * Response: JSON with student details
- */
-
 require_once __DIR__ . '/../config/database.php';
 
-// Only advisors can access
 $advisor = requireRole('advisor');
-
-// Validate student ID parameter
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Missing or invalid student ID']);
-    exit();
-}
-
-$studentId = (int)$_GET['id'];
-
 $pdo = getDBConnection();
 
-// Verify this student belongs to the current advisor
+$studentId = $_GET['id'] ?? null;
+if (!$studentId || !is_numeric($studentId)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Missing or invalid student ID']);
+    exit;
+}
+
+// Verify that the student belongs to this advisor (via students table)
 $stmt = $pdo->prepare("
-    SELECT 
-        u.id,
-        u.name,
-        u.email,
-        u.Matrix as matrix,
-        u.programme,
-        u.year,
-        u.phone,
-        u.advisor_id
-    FROM users u
-    WHERE u.id = ? AND u.role = 'student' AND u.advisor_id = ?
+    SELECT s.user_id, s.user_name, s.matrix_number, s.programme, s.year, s.utm_email,
+           u.second_email, u.phone, u.role
+    FROM students s
+    JOIN users u ON s.user_id = u.user_id
+    WHERE s.user_id = ? AND s.advisor_id = ?
 ");
 $stmt->execute([$studentId, $advisor['id']]);
 $student = $stmt->fetch();
 
 if (!$student) {
     http_response_code(404);
-    echo json_encode(['error' => 'Student not found or not assigned to you']);
-    exit();
+    echo json_encode(['error' => 'Student not found or not under your supervision']);
+    exit;
 }
 
-// Get current registration status and active registration ID
+// Get latest registration status and registration ID
 $stmt = $pdo->prepare("
-    SELECT id, status 
-    FROM course_registrations 
-    WHERE student_id = ? 
-    ORDER BY id DESC 
-    LIMIT 1
+    SELECT id, status FROM course_registrations
+    WHERE student_id = ?
+    ORDER BY id DESC LIMIT 1
 ");
 $stmt->execute([$studentId]);
-$registration = $stmt->fetch();
+$reg = $stmt->fetch();
 
-$status = $registration ? $registration['status'] : 'pending';
-$regId = $registration ? $registration['id'] : null;
+$registration_status = $reg ? $reg['status'] : 'pending';
+$active_registration_id = $reg ? $reg['id'] : null;
 
-// Get current semester info (from student_semesters)
+// Get current semester info from student_semesters
 $stmt = $pdo->prepare("
-    SELECT session_semester, programme as year_programme, active_code
-    FROM student_semesters 
-    WHERE student_id = ? 
-    ORDER BY no_semester DESC 
-    LIMIT 1
+    SELECT session_semester, programme, active_code
+    FROM student_semesters
+    WHERE student_id = ?
+    ORDER BY no_semester DESC LIMIT 1
 ");
 $stmt->execute([$studentId]);
-$semesterInfo = $stmt->fetch();
+$sem = $stmt->fetch();
 
+$current_semester = $sem ? $sem['session_semester'] : '--';
+$year_programme = $sem ? $sem['programme'] : '--';
+$active_code = $sem ? $sem['active_code'] : 'A - Active';
+
+// Prepare response
 echo json_encode([
-    'id' => $student['id'],
-    'name' => $student['name'],
-    'email' => $student['email'],
-    'matrix' => $student['matrix'],
+    'id' => $student['user_id'],
+    'name' => $student['user_name'],
+    'email' => $student['utm_email'],
+    'matrix' => $student['matrix_number'],
     'programme' => $student['programme'],
     'year' => $student['year'],
-    'phone' => $student['phone'],
-    'advisor_id' => $student['advisor_id'],
+    'advisor_id' => $advisor['id'],
     'advisor_name' => $advisor['name'],
-    'registration_status' => $status,
-    'active_registration_id' => $regId,
-    'current_semester' => $semesterInfo ? $semesterInfo['session_semester'] : '--',
-    'year_programme' => $semesterInfo ? $semesterInfo['year_programme'] : '--',
-    'active_code' => $semesterInfo ? $semesterInfo['active_code'] : 'A - Active'
+    'registration_status' => $registration_status,
+    'active_registration_id' => $active_registration_id,
+    'current_semester' => $current_semester,
+    'year_programme' => $year_programme,
+    'active_code' => $active_code
 ]);
 ?>

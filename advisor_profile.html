@@ -16,7 +16,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
 
-        /* SIDEBAR */
+        /* SIDEBAR (same as before) */
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
@@ -107,7 +107,7 @@
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR (same) -->
 <div class="sidebar">
     <div class="logo">
         <img src="images/utmlogo.png" alt="UTM Logo">
@@ -154,16 +154,20 @@
 
         <div class="row-custom">
             <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="fullName" placeholder="Full Name">
+                <label>Full Name (cannot be changed)</label>
+                <input type="text" id="fullName" disabled>
             </div>
             <div class="form-group">
                 <label>Staff ID</label>
                 <input type="text" id="staffId" disabled>
             </div>
             <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="email" placeholder="Email">
+                <label>UTM Email (cannot be changed)</label>
+                <input type="email" id="email" disabled>
+            </div>
+            <div class="form-group">
+                <label>Second Email</label>
+                <input type="email" id="secondEmail" placeholder="Second Email">
             </div>
             <div class="form-group">
                 <label>Phone Number</label>
@@ -205,6 +209,7 @@
             document.getElementById('fullName').value = profile.full_name || '';
             document.getElementById('staffId').value = profile.staff_id || '';
             document.getElementById('email').value = profile.email || '';
+            document.getElementById('secondEmail').value = profile.second_email || '';
             document.getElementById('phone').value = profile.phone || '';
             document.getElementById('department').value = profile.department || '';
             document.getElementById('role').value = profile.role || 'Academic Advisor';
@@ -219,9 +224,9 @@
     }
 
     document.getElementById('saveBtn').addEventListener('click', async () => {
+        // Only send editable fields: second_email, phone, department
         const formData = {
-            full_name: document.getElementById('fullName').value,
-            email: document.getElementById('email').value,
+            second_email: document.getElementById('secondEmail').value,
             phone: document.getElementById('phone').value,
             department: document.getElementById('department').value
         };
@@ -232,7 +237,6 @@
             setTimeout(() => {
                 alertDiv.style.display = 'none';
             }, 3000);
-            // Reload to show updated name in sidebar
             loadProfile();
         } catch (err) {
             alert('Update failed: ' + err.message);

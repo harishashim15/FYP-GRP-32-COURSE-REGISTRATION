@@ -11,10 +11,10 @@ if (!$input) {
     exit;
 }
 
-// Prepare dynamic update query
 $updates = [];
 $params = [];
 
+// Allowed editable fields
 if (isset($input['second_email'])) {
     $updates[] = "second_email = ?";
     $params[] = trim($input['second_email']);
@@ -23,26 +23,20 @@ if (isset($input['phone'])) {
     $updates[] = "phone = ?";
     $params[] = trim($input['phone']);
 }
-// Optional: allow full_name and utm_email if needed later, but frontend disabled them
-if (isset($input['full_name'])) {
-    $updates[] = "user_name = ?";
-    $params[] = trim($input['full_name']);
-}
-if (isset($input['utm_email'])) {
-    $updates[] = "utm_email = ?";
-    $params[] = trim($input['utm_email']);
+
+// If department is provided, update the advisor table (for advisors only)
+if (isset($input['department']) && $user['role'] === 'advisor') {
+    $stmt = $pdo->prepare("UPDATE advisor SET department = ? WHERE user_id = ?");
+    $stmt->execute([trim($input['department']), $user['id']]);
 }
 
-if (empty($updates)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'No fields to update']);
-    exit;
+// If there are fields to update in users table
+if (!empty($updates)) {
+    $params[] = $user['id'];
+    $sql = "UPDATE users SET " . implode(", ", $updates) . " WHERE user_id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
 }
-
-$params[] = $user['id'];
-$sql = "UPDATE users SET " . implode(", ", $updates) . " WHERE user_id = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
 
 echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
 ?>

@@ -1,71 +1,58 @@
 <?php
-/**
- * API: Get registration details by ID (for advisor verification)
- * Method: GET
- * Role: advisor
- * Parameters: id (registration ID)
- * Response: JSON with registration details, student info, and courses
- */
-
 require_once __DIR__ . '/../config/database.php';
 
-// Only advisors can access
 $advisor = requireRole('advisor');
-
-// Validate registration ID parameter
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Missing or invalid registration ID']);
-    exit();
-}
-
-$regId = (int)$_GET['id'];
-
 $pdo = getDBConnection();
+
+$regId = $_GET['id'] ?? null;
+if (!$regId) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Missing registration ID']);
+    exit;
+}
 
 // Fetch registration and verify it belongs to a student under this advisor
 $stmt = $pdo->prepare("
     SELECT 
         cr.id,
-        cr.student_id,
         cr.submission_date,
         cr.status,
         cr.advisor_remarks,
-        u.name as student_name,
-        u.Matrix as student_matrix,
-        u.programme,
-        u.year,
-        u.email as student_email
+        s.user_id AS student_id,
+        s.user_name AS student_name,
+        s.matrix_number AS matrix,
+        s.programme,
+        s.year,
+        u.second_email,
+        u.phone
     FROM course_registrations cr
-    JOIN users u ON cr.student_id = u.id
-    WHERE cr.id = ? AND u.advisor_id = ?
+    JOIN students s ON cr.student_id = s.user_id
+    JOIN users u ON s.user_id = u.user_id
+    WHERE cr.id = ? AND s.advisor_id = ?
 ");
 $stmt->execute([$regId, $advisor['id']]);
-$registration = $stmt->fetch();
+$reg = $stmt->fetch();
 
-if (!$registration) {
+if (!$reg) {
     http_response_code(404);
     echo json_encode(['error' => 'Registration not found or not under your supervision']);
-    exit();
+    exit;
 }
 
-// Get semester from latest student_semester record (optional)
+// Get semester (from student_semesters, latest)
 $stmt = $pdo->prepare("
-    SELECT no_semester 
-    FROM student_semesters 
-    WHERE student_id = ? 
-    ORDER BY no_semester DESC 
-    LIMIT 1
+    SELECT no_semester FROM student_semesters
+    WHERE student_id = ? ORDER BY no_semester DESC LIMIT 1
 ");
-$stmt->execute([$registration['student_id']]);
-$semester = $stmt->fetch();
-$semesterNum = $semester ? $semester['no_semester'] : '?';
+$stmt->execute([$reg['student_id']]);
+$sem = $stmt->fetch();
+$semesterNum = $sem ? $sem['no_semester'] : '?';
 
 // Get registered courses
 $stmt = $pdo->prepare("
     SELECT 
-        rc.subject_code as code,
-        s.subject_name as name,
+        rc.subject_code AS code,
+        s.subject_name AS name,
         s.credits,
         rc.section
     FROM registration_courses rc
@@ -76,28 +63,29 @@ $stmt->execute([$regId]);
 $courses = $stmt->fetchAll();
 
 // Calculate total credits
-$totalCredits = 0;
-foreach ($courses as $course) {
-    $totalCredits += (int)$course['credits'];
-}
+$totalCredits = array_sum(array_column($courses, 'credits'));
 
-echo json_encode([
-    'id' => $registration['id'],
+// Advisor name for display
+$advisorName = $advisor['name'] ?? 'Academic Advisor';
+
+// Build response
+$response = [
+    'id' => $reg['id'],
     'student' => [
-        'id' => $registration['student_id'],
-        'name' => $registration['student_name'],
-        'matrix' => $registration['student_matrix'],
-        'programme' => $registration['programme'],
-        'year' => $registration['year'],
-        'email' => $registration['student_email'],
-        'initials' => implode('', array_map(function($n) { return $n[0]; }, explode(' ', $registration['student_name'])))
+        'id' => $reg['student_id'],
+        'name' => $reg['student_name'],
+        'matrix' => $reg['matrix'],
+        'programme' => $reg['programme'],
+        'year' => $reg['year']
     ],
     'semester' => $semesterNum,
-    'submission_date' => date('d M Y', strtotime($registration['submission_date'])),
-    'status' => $registration['status'],
-    'advisor_remarks' => $registration['advisor_remarks'],
+    'submission_date' => date('d M Y', strtotime($reg['submission_date'])),
+    'status' => $reg['status'],
+    'advisor_remarks' => $reg['advisor_remarks'],
     'courses' => $courses,
     'total_credits' => $totalCredits,
-    'advisor_name' => $advisor['name']
-]);
+    'advisor_name' => $advisorName
+];
+
+echo json_encode($response);
 ?>

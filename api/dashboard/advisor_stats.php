@@ -1,51 +1,41 @@
 <?php
-/**
- * API: Get advisor dashboard statistics
- * Method: GET
- * Role: advisor
- * Response: JSON with stats
- */
-
 require_once __DIR__ . '/../config/database.php';
 
-// Only advisors can access this endpoint
 $advisor = requireRole('advisor');
-
 $pdo = getDBConnection();
 
-// Get advisor's name
-$advisorName = $advisor['name'];
-
-// 1. Total students under this advisor
-$stmt = $pdo->prepare("SELECT COUNT(*) as total FROM users WHERE advisor_id = ? AND role = 'student'");
+// Get advisor name from users table (fypdb3)
+$stmt = $pdo->prepare("SELECT user_name FROM users WHERE user_id = ?");
 $stmt->execute([$advisor['id']]);
-$totalStudents = $stmt->fetch()['total'];
+$advisorName = $stmt->fetchColumn() ?: 'Advisor';
 
-// 2. Pending approvals (registrations with status 'pending' for this advisor's students)
+// Total students under this advisor (from students table)
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM students WHERE advisor_id = ?");
+$stmt->execute([$advisor['id']]);
+$totalStudents = (int)$stmt->fetchColumn();
+
+// Pending approvals: registrations with status 'pending' for students under this advisor
 $stmt = $pdo->prepare("
-    SELECT COUNT(*) as pending 
-    FROM course_registrations cr
-    JOIN users u ON cr.student_id = u.id
-    WHERE u.advisor_id = ? AND cr.status = 'pending'
+    SELECT COUNT(*) FROM course_registrations cr
+    JOIN students s ON cr.student_id = s.user_id
+    WHERE s.advisor_id = ? AND cr.status = 'pending'
 ");
 $stmt->execute([$advisor['id']]);
-$pendingApprovals = $stmt->fetch()['pending'];
+$pendingApprovals = (int)$stmt->fetchColumn();
 
-// 3. Approved this week (registrations approved in last 7 days)
+// Approved this week (last 7 days)
 $stmt = $pdo->prepare("
-    SELECT COUNT(*) as approved_week 
-    FROM course_registrations cr
-    JOIN users u ON cr.student_id = u.id
-    WHERE u.advisor_id = ? AND cr.status = 'approved' 
-    AND cr.reviewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    SELECT COUNT(*) FROM course_registrations cr
+    JOIN students s ON cr.student_id = s.user_id
+    WHERE s.advisor_id = ? AND cr.status = 'approved' AND cr.reviewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
 ");
 $stmt->execute([$advisor['id']]);
-$approvedThisWeek = $stmt->fetch()['approved_week'];
+$approvedThisWeek = (int)$stmt->fetchColumn();
 
 echo json_encode([
     'advisorName' => $advisorName,
-    'totalStudents' => (int)$totalStudents,
-    'pendingApprovals' => (int)$pendingApprovals,
-    'approvedThisWeek' => (int)$approvedThisWeek
+    'totalStudents' => $totalStudents,
+    'pendingApprovals' => $pendingApprovals,
+    'approvedThisWeek' => $approvedThisWeek
 ]);
 ?>
