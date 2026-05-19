@@ -1,14 +1,12 @@
 <?php
-// db_connect.php
 $host = "127.0.0.1";
 $user = "root";
 $pass = "";
-$db   = "fypdb3";
-$port = 3306;
+$db   = "fypdb3";  // or "dummyfyp" - whichever you're using
 
-$conn = new mysqli($host, $user, $pass, $db, $port);
+$conn = mysqli_connect($host, $user, $pass, $db);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
 }
 ?>

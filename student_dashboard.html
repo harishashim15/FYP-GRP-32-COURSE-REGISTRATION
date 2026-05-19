@@ -1,507 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UTM Student Dashboard - Course Registration System</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        body {
-            background: #f8f6f4;
-            overflow-x: hidden;
-        }
-        
-        .sidebar {
-            width: 280px;
-            height: 100vh;
-            background: linear-gradient(to bottom, #670019, #8b0022);
-            position: fixed;
-            padding: 30px 20px;
-            color: white;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-        
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        
-        .logo img {
-            width: 130px;
-        }
-        
-        .system-title {
-            color: #ffc107;
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 12px;
-        }
-        
-        .menu a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 14px;
-            margin-bottom: 12px;
-            transition: 0.3s;
-            font-size: 16px;
-        }
-        
-        .menu a:hover,
-        .menu .active {
-            background: linear-gradient(to right, #f4a000, #e08700);
-        }
-        
-        .menu i {
-            font-size: 20px;
-        }
-        
-        .logout {
-            position: absolute;
-            bottom: 30px;
-            width: calc(100% - 40px);
-            left: 20px;
-        }
-        
-        .logout a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 14px;
-            transition: 0.3s;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .logout a:hover {
-            background: linear-gradient(to right, #f4a000, #e08700);
-        }
-        
-        .main-content {
-            margin-left: 280px;
-            padding: 30px;
-            transition: margin-left 0.3s ease;
-        }
-        
-        .main-content.expanded {
-            margin-left: 0;
-        }
-        
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            background: white;
-            padding: 15px 25px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-        
-        .toggle-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #333;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-        }
-        
-        .profile-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .profile-box img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        /* Hero section - NO IMAGE */
-        .hero {
-            background: #f7f2ee;
-            border-radius: 25px;
-            padding: 35px 40px;
-            margin-bottom: 35px;
-            border: 1px solid #eee;
-        }
-        
-        .hero h1 {
-            font-size: 34px;
-            font-weight: 700;
-            color: #670019;
-        }
-        
-        .hero p {
-            color: #666;
-            margin-top: 8px;
-            font-size: 15px;
-        }
-        
-        .dashboard-card {
-            border: none;
-            border-radius: 25px;
-            padding: 25px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
-            transition: 0.3s;
-            height: 100%;
-            background: white;
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
-            margin-bottom: 15px;
-        }
-        
-        .card-icon.yellow {
-            background: #fff2cc;
-            color: #d48a00;
-        }
-        
-        .card-icon.red {
-            background: #ffe0e0;
-            color: #b00020;
-        }
-        
-        .card-icon.green {
-            background: #e4f7df;
-            color: #2e7d32;
-        }
-        
-        .card-icon.purple {
-            background: #eee3ff;
-            color: #7b1fa2;
-        }
-        
-        .dashboard-card h2 {
-            font-size: 36px;
-            font-weight: 700;
-            color: #670019;
-            margin-bottom: 5px;
-        }
-        
-        .dashboard-card h5 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-        
-        .dashboard-card p {
-            color: #666;
-            margin-top: 5px;
-            font-size: 13px;
-        }
-        
-        .quick-actions {
-            background: white;
-            border-radius: 25px;
-            padding: 30px;
-            margin-top: 35px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .quick-actions h3 {
-            color: #670019;
-            font-weight: 700;
-            margin-bottom: 25px;
-            font-size: 20px;
-        }
-        
-        .action-btn {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border: 1px solid #eee;
-            border-radius: 18px;
-            margin-bottom: 15px;
-            text-decoration: none;
-            color: black;
-            transition: 0.3s;
-        }
-        
-        .action-btn:hover {
-            background: #fff7ef;
-            transform: translateX(5px);
-        }
-        
-        .action-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .action-icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #670019;
-            color: white;
-            font-size: 24px;
-        }
-        
-        .action-left h5 {
-            margin-bottom: 2px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-        
-        .action-left small {
-            font-size: 11px;
-            color: #888;
-        }
-        
-        .bi-chevron-right {
-            color: #670019;
-            font-size: 18px;
-        }
-        
-        .period-card {
-            background: white;
-            border-radius: 25px;
-            padding: 20px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .period-card h4 {
-            color: #670019;
-            font-weight: 600;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        
-        .period-status {
-            display: inline-block;
-            padding: 5px 12px;
-            background: #d4edda;
-            color: #155724;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 15px;
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-280px);
-            }
-            .main-content {
-                margin-left: 0;
-            }
-            .hero {
-                text-align: center;
-            }
-        }
-    </style>
-</head>
-<body>
-
-<div class="sidebar" id="sidebar">
-    <div class="logo">
-        <img src="images/utmlogo.png" alt="UTM Logo">
-        <div class="system-title">COURSE REGISTRATION SYSTEM</div>
-    </div>
-    <div class="menu">
-        <a href="student_dashboard.html" class="active">
-            <i class="bi bi-house-fill"></i>
-            Dashboard
-        </a>
-        <a href="student_profile.html">
-            <i class="bi bi-person-fill"></i>
-            Profile
-        </a>
-        <a href="student_courses.html">
-            <i class="bi bi-book-fill"></i>
-            Courses
-        </a>
-        <a href="student_registration.html">
-            <i class="bi bi-file-earmark-text-fill"></i>
-            My Registration
-        </a>
-        <a href="student_change_password.html">
-            <i class="bi bi-lock-fill"></i>
-            Change Password
-        </a>
-    </div>
-    <div class="logout">
-        <a href="index.html">
-            <i class="bi bi-box-arrow-right"></i>
-            Logout
-        </a>
-    </div>
-</div>
-
-<div class="main-content" id="mainContent">
-    <div class="topbar">
-        <button class="toggle-btn" onclick="toggleSidebar()">
-            <i class="bi bi-list"></i>
-        </button>
-        <div class="profile-box">
-            <i class="bi bi-bell fs-5"></i>
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-            <div>
-                <!-- NOTE: HTML files show "Student" because they cannot fetch from database -->
-                <h6 class="mb-0">Student</h6>
-                <small class="text-muted">Student</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hero Section - IMAGE REMOVED -->
-    <div class="hero">
-        <div>
-            <h1>Welcome back, Student!</h1>
-            <p>Manage your course registration and academic progress here.</p>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="dashboard-card">
-                <div class="card-icon yellow">
-                    <i class="bi bi-book"></i>
-                </div>
-                <h2>3</h2>
-                <h5>Registered Courses</h5>
-                <p>Total courses registered</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dashboard-card">
-                <div class="card-icon red">
-                    <i class="bi bi-clock-history"></i>
-                </div>
-                <h2>1</h2>
-                <h5>Pending Approval</h5>
-                <p>Waiting for advisor review</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dashboard-card">
-                <div class="card-icon green">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-                <h2>2</h2>
-                <h5>Approved Courses</h5>
-                <p>Successfully approved</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dashboard-card">
-                <div class="card-icon purple">
-                    <i class="bi bi-calendar-event"></i>
-                </div>
-                <h2>2025/2026</h2>
-                <h5>Current Session</h5>
-                <p>Semester 2</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mt-2">
-        <div class="col-md-12">
-            <div class="period-card">
-                <h4><i class="bi bi-calendar-event"></i> Registration Period</h4>
-                <span class="period-status">Currently Open</span>
-                <div class="mt-3">
-                    <strong>1 May - 15 May 2026</strong>
-                    <div class="mt-2">
-                        <span class="badge bg-light text-dark me-1">Semester 2</span>
-                        <span class="badge bg-light text-dark me-1">2025/2026</span>
-                        <span class="badge bg-success">Active</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="quick-actions">
-        <h3><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h3>
-        <a href="student_courses.html" class="action-btn">
-            <div class="action-left">
-                <div class="action-icon">
-                    <i class="bi bi-book"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0">Browse Courses</h5>
-                    <small>View and register for available courses</small>
-                </div>
-            </div>
-            <i class="bi bi-chevron-right"></i>
-        </a>
-        <a href="student_registration.html" class="action-btn">
-            <div class="action-left">
-                <div class="action-icon">
-                    <i class="bi bi-file-earmark-text"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0">My Registration</h5>
-                    <small>Check your registration status</small>
-                </div>
-            </div>
-            <i class="bi bi-chevron-right"></i>
-        </a>
-        <a href="student_profile.html" class="action-btn">
-            <div class="action-left">
-                <div class="action-icon">
-                    <i class="bi bi-person"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0">My Profile</h5>
-                    <small>Update your personal information</small>
-                </div>
-            </div>
-            <i class="bi bi-chevron-right"></i>
-        </a>
-    </div>
-</div>
-
+<script src="js/common.js"></script>
 <script>
-    (function() {
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            document.querySelector('.sidebar').classList.add('collapsed');
-            document.querySelector('.main-content').classList.add('expanded');
-        }
-    })();
-
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const main = document.querySelector('.main-content');
@@ -509,6 +7,53 @@
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
+
+    async function loadStudentDashboard() {
+        try {
+            console.log('Loading student dashboard...');
+            const stats = await apiGet('dashboard/student_stats.php');
+            console.log('API Response:', stats);
+            
+            // Update all the elements
+            const studentName = stats.student_name || 'Student';
+            const firstName = studentName.split(' ')[0];
+            
+            document.getElementById('registeredCourses').innerText = stats.registered_courses || 0;
+            document.getElementById('pendingApprovals').innerText = stats.pending_approvals || 0;
+            document.getElementById('approvedCourses').innerText = stats.approved_courses || 0;
+            document.getElementById('currentSession').innerText = stats.current_session || '2025/2026';
+            document.getElementById('currentSemester').innerHTML = `Semester ${stats.current_semester || 2}`;
+            document.getElementById('studentName').innerText = studentName;
+            document.getElementById('heroGreeting').innerHTML = `Welcome back, ${firstName}!`;
+            
+            // Also update the page title or any other elements that show student name
+            console.log('Student name set to:', studentName);
+            
+            // Load registration period
+            const period = await apiGet('registrations/period.php');
+            console.log('Period Response:', period);
+            
+            const statusSpan = document.getElementById('periodStatus');
+            statusSpan.innerHTML = period.is_open ? '🟢 Currently open' : '🔴 Closed';
+            statusSpan.style.background = period.is_open ? '#d4edda' : '#f8d7da';
+            statusSpan.style.color = period.is_open ? '#155724' : '#721c24';
+            document.getElementById('periodDates').innerText = `${period.start_date} – ${period.end_date}`;
+            document.getElementById('periodBadges').innerHTML = `
+                <span class="badge bg-light text-dark me-1">${period.semester}</span>
+                <span class="badge bg-light text-dark me-1">${period.session}</span>
+                <span class="badge ${period.is_open ? 'bg-success' : 'bg-secondary'}">${period.is_open ? 'Active' : 'Inactive'}</span>
+            `;
+        } catch (err) {
+            console.error('Error loading dashboard:', err);
+            document.getElementById('heroGreeting').innerHTML = 'Welcome back, Student! (Error loading data)';
+        }
+    }
+    
+    loadStudentDashboard();
 </script>
-</body>
-</html>

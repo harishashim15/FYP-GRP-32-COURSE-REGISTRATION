@@ -36,7 +36,7 @@
                 } else if (response === 'advisor') {
                     window.location.href = 'advisor_dashboard.html';
                 } else if (response === 'student') {
-                    window.location.href = 'student_dashboard.php';
+                    window.location.href = 'student_dashboard.html';
                 } else if (response === 'invalid') {
                     showErrorMessage('Invalid login credentials or password. Please try again.');
                 } else {

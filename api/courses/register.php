@@ -1,16 +1,12 @@
 <?php
 /**
  * API: Register a student for a course
- * Method: POST
- * Role: student
- * Request body: { "course_code": "SECJ2154" }
- * Response: JSON success or error
  */
 
 require_once __DIR__ . '/../config/database.php';
 
-// Only students can access
 $student = requireRole('student');
+$pdo = getDBConnection();
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -22,9 +18,7 @@ if (!$input || !isset($input['course_code'])) {
 
 $courseCode = trim($input['course_code']);
 
-$pdo = getDBConnection();
-
-// Verify the course exists in subjects table
+// Verify course exists
 $stmt = $pdo->prepare("SELECT subject_code, subject_name FROM subjects WHERE subject_code = ?");
 $stmt->execute([$courseCode]);
 $course = $stmt->fetch();
@@ -35,7 +29,7 @@ if (!$course) {
     exit();
 }
 
-// Check if the student has already registered for this course in any pending/approved registration
+// Check if already registered
 $stmt = $pdo->prepare("
     SELECT cr.status 
     FROM registration_courses rc
@@ -48,11 +42,11 @@ $existing = $stmt->fetch();
 
 if ($existing) {
     http_response_code(409);
-    echo json_encode(['error' => 'You have already registered for this course (status: ' . $existing['status'] . ')']);
+    echo json_encode(['error' => 'You have already registered for this course']);
     exit();
 }
 
-// Find if there is a pending registration for this student (to add course to it)
+// Find pending registration or create new one
 $stmt = $pdo->prepare("
     SELECT id FROM course_registrations 
     WHERE student_id = ? AND status = 'pending'
@@ -62,10 +56,8 @@ $stmt->execute([$student['id']]);
 $pendingReg = $stmt->fetch();
 
 if ($pendingReg) {
-    // Add course to existing pending registration
     $registrationId = $pendingReg['id'];
 } else {
-    // Create new registration record
     $stmt = $pdo->prepare("
         INSERT INTO course_registrations (student_id, submission_date, status) 
         VALUES (?, CURDATE(), 'pending')
@@ -74,7 +66,7 @@ if ($pendingReg) {
     $registrationId = $pdo->lastInsertId();
 }
 
-// Insert the registration_courses link
+// Add course to registration
 $stmt = $pdo->prepare("
     INSERT INTO registration_courses (registration_id, subject_code, section) 
     VALUES (?, ?, 'A')

@@ -1,15 +1,6 @@
 <?php
-/**
- * API: Update user profile (name, email, phone)
- * Method: POST
- * Role: any authenticated user (advisor or student)
- * Request body: { "full_name": "...", "email": "...", "phone": "..." }
- * Response: JSON success or error
- */
-
 require_once __DIR__ . '/../config/database.php';
 
-// Require authentication (any role)
 $user = requireAuth();
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -20,45 +11,25 @@ if (!$input) {
     exit();
 }
 
-// Validate required fields
-$fullName = isset($input['full_name']) ? trim($input['full_name']) : null;
-$email = isset($input['email']) ? trim($input['email']) : null;
-$phone = isset($input['phone']) ? trim($input['phone']) : null;
+$fullName = $input['full_name'] ?? null;
+$utmEmail = $input['utm_email'] ?? null;
+$secondEmail = $input['second_email'] ?? null;
+$phone = $input['phone'] ?? null;
 
-if (!$fullName || !$email) {
+if (!$fullName || !$utmEmail) {
     http_response_code(400);
-    echo json_encode(['error' => 'Full name and email are required']);
-    exit();
-}
-
-// Validate email format
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid email format']);
+    echo json_encode(['error' => 'Full name and UTM email are required']);
     exit();
 }
 
 $pdo = getDBConnection();
 
-// Check if email is already used by another user (excluding current user)
-$stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
-$stmt->execute([$email, $user['id']]);
-if ($stmt->fetch()) {
-    http_response_code(409);
-    echo json_encode(['error' => 'Email already in use by another account']);
-    exit();
-}
-
-// Update user profile
 $stmt = $pdo->prepare("
     UPDATE users 
-    SET name = ?, email = ?, phone = ?
-    WHERE id = ?
+    SET user_name = ?, utm_email = ?, second_email = ?, phone = ?
+    WHERE user_id = ?
 ");
-$stmt->execute([$fullName, $email, $phone, $user['id']]);
+$stmt->execute([$fullName, $utmEmail, $secondEmail, $phone, $user['id']]);
 
-echo json_encode([
-    'success' => true,
-    'message' => 'Profile updated successfully'
-]);
+echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
 ?>
