@@ -10,9 +10,9 @@ include("db.php");
 
 // Fetch student name from database
 $user_id = $_SESSION['user_id'];
-$query = "SELECT name FROM users WHERE id = '$user_id'";
-$result = mysqli_query($conn, $query);
-$user = mysqli_fetch_assoc($result);
+$user_query = "SELECT name FROM users WHERE id = '$user_id'";
+$user_result = mysqli_query($conn, $user_query);
+$user = mysqli_fetch_assoc($user_result);
 $student_name = $user ? $user['name'] : "Student";
 
 // Fetch all courses
@@ -43,7 +43,6 @@ $courses_result = mysqli_query($conn, $courses_query);
             overflow-x: hidden;
         }
         
-        /* Sidebar Styles */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -121,7 +120,6 @@ $courses_result = mysqli_query($conn, $courses_query);
             background: linear-gradient(to right, #f4a000, #e08700);
         }
         
-        /* Main Content */
         .main-content {
             margin-left: 280px;
             padding: 30px;
@@ -132,7 +130,6 @@ $courses_result = mysqli_query($conn, $courses_query);
             margin-left: 0;
         }
         
-        /* Topbar */
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -158,6 +155,12 @@ $courses_result = mysqli_query($conn, $courses_query);
             display: flex;
             align-items: center;
             gap: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .profile-box:hover {
+            opacity: 0.8;
         }
         
         .profile-box img {
@@ -167,7 +170,6 @@ $courses_result = mysqli_query($conn, $courses_query);
             object-fit: cover;
         }
         
-        /* Page Header - IMAGE REMOVED */
         .page-header {
             background: #f7f2ee;
             border-radius: 25px;
@@ -188,7 +190,6 @@ $courses_result = mysqli_query($conn, $courses_query);
             font-size: 15px;
         }
         
-        /* Search Bar */
         .search-bar {
             display: flex;
             gap: 12px;
@@ -228,7 +229,6 @@ $courses_result = mysqli_query($conn, $courses_query);
             background: linear-gradient(to right, #8b0022, #a80028);
         }
         
-        /* Course Card */
         .courses-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -325,7 +325,6 @@ $courses_result = mysqli_query($conn, $courses_query);
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
     <div class="logo">
         <img src="images/utmlogo.png" alt="UTM Logo">
@@ -361,14 +360,12 @@ $courses_result = mysqli_query($conn, $courses_query);
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="main-content" id="mainContent">
-    <!-- TOPBAR -->
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-list"></i>
         </button>
-        <div class="profile-box">
+        <div class="profile-box" onclick="window.location.href='student_profile.php'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
@@ -378,7 +375,6 @@ $courses_result = mysqli_query($conn, $courses_query);
         </div>
     </div>
 
-    <!-- PAGE HEADER - IMAGE REMOVED -->
     <div class="page-header">
         <div>
             <h2>Available Courses</h2>
@@ -386,13 +382,11 @@ $courses_result = mysqli_query($conn, $courses_query);
         </div>
     </div>
 
-    <!-- SEARCH BAR -->
     <div class="search-bar">
         <input type="text" id="searchInput" placeholder="Search by course name or code..." onkeyup="filterCourses()">
         <button onclick="filterCourses()"><i class="bi bi-search"></i> Search</button>
     </div>
 
-    <!-- COURSES GRID -->
     <div class="courses-grid" id="coursesGrid">
         <?php while ($course = mysqli_fetch_assoc($courses_result)): ?>
         <div class="course-card" data-name="<?php echo strtolower($course['course_name']); ?>" data-code="<?php echo strtolower($course['course_code']); ?>">

@@ -46,7 +46,6 @@ $result = mysqli_query($conn, $query);
             overflow-x: hidden;
         }
         
-        /* Sidebar Styles */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -124,7 +123,6 @@ $result = mysqli_query($conn, $query);
             background: linear-gradient(to right, #f4a000, #e08700);
         }
         
-        /* Main Content */
         .main-content {
             margin-left: 280px;
             padding: 30px;
@@ -135,7 +133,6 @@ $result = mysqli_query($conn, $query);
             margin-left: 0;
         }
         
-        /* Topbar */
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -161,6 +158,12 @@ $result = mysqli_query($conn, $query);
             display: flex;
             align-items: center;
             gap: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .profile-box:hover {
+            opacity: 0.8;
         }
         
         .profile-box img {
@@ -170,7 +173,6 @@ $result = mysqli_query($conn, $query);
             object-fit: cover;
         }
         
-        /* Page Header */
         .page-header {
             background: #f7f2ee;
             border-radius: 25px;
@@ -191,7 +193,6 @@ $result = mysqli_query($conn, $query);
             font-size: 15px;
         }
         
-        /* Summary Strip */
         .summary-strip {
             display: flex;
             gap: 15px;
@@ -223,7 +224,6 @@ $result = mysqli_query($conn, $query);
             display: inline-block;
         }
         
-        /* Registration Table */
         .registration-table {
             background: white;
             border-radius: 25px;
@@ -277,7 +277,6 @@ $result = mysqli_query($conn, $query);
             background: #fdf9f7;
         }
         
-        /* Status Badges */
         .status-badge {
             padding: 5px 14px;
             border-radius: 20px;
@@ -301,7 +300,6 @@ $result = mysqli_query($conn, $query);
             color: #721c24;
         }
         
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -349,7 +347,6 @@ $result = mysqli_query($conn, $query);
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
     <div class="logo">
         <img src="images/utmlogo.png" alt="UTM Logo">
@@ -385,14 +382,12 @@ $result = mysqli_query($conn, $query);
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="main-content" id="mainContent">
-    <!-- TOPBAR -->
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-list"></i>
         </button>
-        <div class="profile-box">
+        <div class="profile-box" onclick="window.location.href='student_profile.php'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
@@ -402,7 +397,6 @@ $result = mysqli_query($conn, $query);
         </div>
     </div>
 
-    <!-- PAGE HEADER -->
     <div class="page-header">
         <div>
             <h2>My Registration</h2>
@@ -410,7 +404,6 @@ $result = mysqli_query($conn, $query);
         </div>
     </div>
 
-    <!-- SUMMARY STRIP -->
     <div class="summary-strip">
         <div class="strip-item">
             <span class="strip-dot" style="background: #670019;"></span>
@@ -430,7 +423,6 @@ $result = mysqli_query($conn, $query);
         </div>
     </div>
 
-    <!-- REGISTRATION TABLE -->
     <div class="registration-table">
         <h3><i class="bi bi-journal-text me-2"></i>Course Registration Status</h3>
         <div style="overflow-x: auto;">
@@ -494,7 +486,6 @@ $result = mysqli_query($conn, $query);
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
 
-    // Calculate summary counts
     function updateSummaryCounts() {
         const rows = document.querySelectorAll('#registrationTableBody tr');
         let total = 0, pending = 0, approved = 0, rejected = 0;

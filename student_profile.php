@@ -10,11 +10,42 @@ include("db.php");
 
 $user_id = $_SESSION['user_id'];
 
+// Handle form submission
+$message = '';
+$message_type = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $primary_email = mysqli_real_escape_string($conn, $_POST['primary_email']);
+    $secondary_email = mysqli_real_escape_string($conn, $_POST['secondary_email']);
+    $primary_phone = mysqli_real_escape_string($conn, $_POST['primary_phone']);
+    $secondary_phone = mysqli_real_escape_string($conn, $_POST['secondary_phone']);
+    
+    $update_query = "UPDATE users SET 
+                     email = '$primary_email',
+                     secondary_email = '$secondary_email',
+                     phone = '$primary_phone',
+                     secondary_phone = '$secondary_phone'
+                     WHERE id = '$user_id'";
+    
+    if (mysqli_query($conn, $update_query)) {
+        $message = "Profile updated successfully!";
+        $message_type = "success";
+    } else {
+        $message = "Error updating profile: " . mysqli_error($conn);
+        $message_type = "error";
+    }
+}
+
 // Fetch user data
 $query = "SELECT * FROM users WHERE id = '$user_id'";
 $result = mysqli_query($conn, $query);
 $user = mysqli_fetch_assoc($result);
 $student_name = $user ? $user['name'] : "Student";
+
+// Get additional profile fields if they exist
+$secondary_email = isset($user['secondary_email']) ? $user['secondary_email'] : '';
+$phone = isset($user['phone']) ? $user['phone'] : '';
+$secondary_phone = isset($user['secondary_phone']) ? $user['secondary_phone'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,7 +71,6 @@ $student_name = $user ? $user['name'] : "Student";
             overflow-x: hidden;
         }
         
-        /* Sidebar Styles */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -118,7 +148,6 @@ $student_name = $user ? $user['name'] : "Student";
             background: linear-gradient(to right, #f4a000, #e08700);
         }
         
-        /* Main Content */
         .main-content {
             margin-left: 280px;
             padding: 30px;
@@ -129,7 +158,6 @@ $student_name = $user ? $user['name'] : "Student";
             margin-left: 0;
         }
         
-        /* Topbar */
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -155,6 +183,12 @@ $student_name = $user ? $user['name'] : "Student";
             display: flex;
             align-items: center;
             gap: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .profile-box:hover {
+            opacity: 0.8;
         }
         
         .profile-box img {
@@ -164,7 +198,6 @@ $student_name = $user ? $user['name'] : "Student";
             object-fit: cover;
         }
         
-        /* Page Header */
         .page-header {
             margin-bottom: 30px;
         }
@@ -181,7 +214,6 @@ $student_name = $user ? $user['name'] : "Student";
             font-size: 15px;
         }
         
-        /* Profile Card */
         .profile-card {
             background: white;
             border-radius: 25px;
@@ -214,7 +246,8 @@ $student_name = $user ? $user['name'] : "Student";
             font-size: 14px;
         }
         
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 13px 15px;
             border: 1.5px solid #e0d6d6;
@@ -224,15 +257,18 @@ $student_name = $user ? $user['name'] : "Student";
             transition: 0.3s;
         }
         
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #670019;
             box-shadow: 0 0 0 4px rgba(103, 0, 25, 0.08);
         }
         
-        .form-group input:disabled {
+        .form-group input:disabled,
+        .form-group input[readonly] {
             background: #f5f5f5;
             color: #999;
+            cursor: not-allowed;
         }
         
         .row-custom {
@@ -277,6 +313,34 @@ $student_name = $user ? $user['name'] : "Student";
             text-decoration: underline;
         }
         
+        .alert-custom {
+            border-radius: 14px;
+            padding: 14px 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .info-note {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+            display: block;
+        }
+        
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-280px);
@@ -292,7 +356,6 @@ $student_name = $user ? $user['name'] : "Student";
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
     <div class="logo">
         <img src="images/utmlogo.png" alt="UTM Logo">
@@ -328,14 +391,12 @@ $student_name = $user ? $user['name'] : "Student";
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="main-content" id="mainContent">
-    <!-- TOPBAR -->
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-list"></i>
         </button>
-        <div class="profile-box">
+        <div class="profile-box" onclick="window.location.href='student_profile.php'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
@@ -345,13 +406,11 @@ $student_name = $user ? $user['name'] : "Student";
         </div>
     </div>
 
-    <!-- PAGE HEADER -->
     <div class="page-header">
         <h2>My Profile</h2>
-        <p>View and update your personal information</p>
+        <p>View and update your contact information</p>
     </div>
 
-    <!-- PROFILE CARD -->
     <div class="profile-card">
         <div class="profile-pic">
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Photo">
@@ -360,34 +419,61 @@ $student_name = $user ? $user['name'] : "Student";
             </div>
         </div>
         
-        <form action="update_profile.php" method="POST">
+        <?php if ($message): ?>
+        <div class="alert-custom alert-<?php echo $message_type; ?>">
+            <i class="bi bi-<?php echo $message_type == 'success' ? 'check-circle-fill' : 'exclamation-circle-fill'; ?> fs-5 me-2"></i>
+            <span><?php echo $message; ?></span>
+        </div>
+        <?php endif; ?>
+        
+        <form method="POST" action="">
             <div class="row-custom">
+                <!-- Restricted Fields (Read-only) -->
                 <div class="form-group">
                     <label><i class="bi bi-person-fill me-1"></i> Full Name</label>
-                    <input type="text" name="name" value="<?php echo htmlspecialchars($user['name']); ?>">
+                    <input type="text" value="<?php echo htmlspecialchars($user['name']); ?>" readonly disabled>
+                    <small class="info-note">Contact administrator to change name</small>
                 </div>
+                
                 <div class="form-group">
                     <label><i class="bi bi-card-text"></i> Student ID</label>
-                    <input type="text" value="<?php echo htmlspecialchars($user['id']); ?>" disabled>
+                    <input type="text" value="<?php echo htmlspecialchars($user['id']); ?>" readonly disabled>
                 </div>
+                
+                <!-- Editable Fields -->
                 <div class="form-group">
-                    <label><i class="bi bi-envelope-fill"></i> Email Address</label>
-                    <input type="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>">
+                    <label><i class="bi bi-envelope-fill"></i> UTM Email (Primary)</label>
+                    <input type="email" name="primary_email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
                 </div>
+                
                 <div class="form-group">
-                    <label><i class="bi bi-telephone-fill"></i> Phone Number</label>
-                    <input type="text" name="phone" value="+60 12-345 6789">
+                    <label><i class="bi bi-envelope-paper-fill"></i> Personal Email (Secondary)</label>
+                    <input type="email" name="secondary_email" value="<?php echo htmlspecialchars($secondary_email); ?>" placeholder="your.email@example.com">
+                    <small class="info-note">Optional: Add a personal email address</small>
                 </div>
+                
+                <div class="form-group">
+                    <label><i class="bi bi-telephone-fill"></i> Primary Phone</label>
+                    <input type="tel" name="primary_phone" value="<?php echo htmlspecialchars($phone); ?>" placeholder="+60 XX-XXX XXXX">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="bi bi-phone-fill"></i> Secondary Phone</label>
+                    <input type="tel" name="secondary_phone" value="<?php echo htmlspecialchars($secondary_phone); ?>" placeholder="Alternate contact number">
+                    <small class="info-note">Optional: Add a backup phone number</small>
+                </div>
+                
+                <!-- More Restricted Fields -->
                 <div class="form-group">
                     <label><i class="bi bi-bookmark-fill"></i> Programme</label>
-                    <input type="text" value="Diploma in Computer Science" disabled>
+                    <input type="text" value="Diploma in Computer Science" readonly disabled>
                 </div>
+                
                 <div class="form-group">
                     <label><i class="bi bi-flag-fill"></i> Role</label>
-                    <input type="text" value="<?php echo ucfirst($user['role']); ?>" disabled>
+                    <input type="text" value="<?php echo ucfirst($user['role']); ?>" readonly disabled>
                 </div>
             </div>
-            <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
             <button type="submit" class="save-btn"><i class="bi bi-save"></i> Save Changes</button>
         </form>
     </div>
@@ -408,6 +494,17 @@ $student_name = $user ? $user['name'] : "Student";
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
+    
+    // Auto-hide alert after 4 seconds
+    setTimeout(function() {
+        var alert = document.querySelector('.alert-custom');
+        if (alert) {
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.style.display = 'none';
+            }, 500);
+        }
+    }, 4000);
 </script>
 </body>
 </html>

@@ -24,10 +24,10 @@ if (isset($_POST['update'])) {
     $confirm_password = $_POST['confirm_password'];
     
     // Check current password
-    $query = "SELECT * FROM users WHERE id = '$user_id' AND password = '$current_password'";
-    $result = mysqli_query($conn, $query);
+    $check_query = "SELECT * FROM users WHERE id = '$user_id' AND password = '$current_password'";
+    $check_result = mysqli_query($conn, $check_query);
     
-    if (mysqli_num_rows($result) > 0) {
+    if (mysqli_num_rows($check_result) > 0) {
         if ($new_password === $confirm_password) {
             if (strlen($new_password) >= 6) {
                 $update = "UPDATE users SET password = '$new_password' WHERE id = '$user_id'";
@@ -43,11 +43,11 @@ if (isset($_POST['update'])) {
                 $message_type = "error";
             }
         } else {
-            $message = "New passwords do not match.";
+            $message = "New passwords do not match. Please make sure both passwords are identical.";
             $message_type = "error";
         }
     } else {
-        $message = "Current password is incorrect.";
+        $message = "Current password is incorrect. Please enter your correct current password.";
         $message_type = "error";
     }
 }
@@ -76,7 +76,6 @@ if (isset($_POST['update'])) {
             overflow-x: hidden;
         }
         
-        /* Sidebar Styles */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -154,7 +153,6 @@ if (isset($_POST['update'])) {
             background: linear-gradient(to right, #f4a000, #e08700);
         }
         
-        /* Main Content */
         .main-content {
             margin-left: 280px;
             padding: 30px;
@@ -165,7 +163,6 @@ if (isset($_POST['update'])) {
             margin-left: 0;
         }
         
-        /* Topbar */
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -191,6 +188,12 @@ if (isset($_POST['update'])) {
             display: flex;
             align-items: center;
             gap: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .profile-box:hover {
+            opacity: 0.8;
         }
         
         .profile-box img {
@@ -200,7 +203,6 @@ if (isset($_POST['update'])) {
             object-fit: cover;
         }
         
-        /* Page Header */
         .page-header {
             background: #f7f2ee;
             border-radius: 25px;
@@ -221,7 +223,6 @@ if (isset($_POST['update'])) {
             font-size: 15px;
         }
         
-        /* Form Card */
         .form-card {
             background: white;
             border-radius: 25px;
@@ -239,7 +240,6 @@ if (isset($_POST['update'])) {
             border-bottom: 2px solid #f0e8e8;
         }
         
-        /* Form Groups */
         .form-label {
             font-size: 14px;
             font-weight: 600;
@@ -257,9 +257,8 @@ if (isset($_POST['update'])) {
             border-radius: 14px;
             padding: 13px 50px 13px 20px;
             font-size: 14px;
-            font-family: 'Poppins', sans-serif;
-            transition: 0.3s;
             width: 100%;
+            transition: 0.3s;
         }
         
         .input-wrapper .form-control:focus {
@@ -279,14 +278,12 @@ if (isset($_POST['update'])) {
             background: none;
             border: none;
             padding: 0;
-            line-height: 1;
         }
         
         .toggle-eye:hover {
             color: #670019;
         }
         
-        /* Password Strength */
         .strength-bar-wrapper {
             margin-top: -10px;
             margin-bottom: 22px;
@@ -313,7 +310,6 @@ if (isset($_POST['update'])) {
             transition: width 0.4s, background 0.4s;
         }
         
-        /* Requirements */
         .requirements {
             background: #fdf8f8;
             border: 1px solid #f0e5e5;
@@ -343,7 +339,6 @@ if (isset($_POST['update'])) {
             color: #2e7d32;
         }
         
-        /* Buttons */
         .btn-save {
             background: linear-gradient(to right, #670019, #8b0022);
             color: white;
@@ -352,7 +347,6 @@ if (isset($_POST['update'])) {
             border-radius: 14px;
             font-size: 15px;
             font-weight: 600;
-            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: 0.3s;
             display: inline-flex;
@@ -374,7 +368,6 @@ if (isset($_POST['update'])) {
             border-radius: 14px;
             font-size: 15px;
             font-weight: 600;
-            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: 0.3s;
             text-decoration: none;
@@ -389,15 +382,14 @@ if (isset($_POST['update'])) {
             color: #670019;
         }
         
-        /* Alert Messages */
         .alert-custom {
             border-radius: 14px;
             padding: 14px 20px;
             font-size: 14px;
             margin-bottom: 20px;
+            display: flex;
             align-items: center;
             gap: 10px;
-            display: flex;
         }
         
         .alert-success-custom {
@@ -412,7 +404,6 @@ if (isset($_POST['update'])) {
             color: #721c24;
         }
         
-        /* Tip Card */
         .tip-card {
             background: white;
             border-radius: 25px;
@@ -500,7 +491,6 @@ if (isset($_POST['update'])) {
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
     <div class="logo">
         <img src="images/utmlogo.png" alt="UTM Logo">
@@ -536,24 +526,21 @@ if (isset($_POST['update'])) {
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="main-content" id="mainContent">
-    <!-- TOPBAR -->
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-list"></i>
         </button>
-        <div class="profile-box">
+        <div class="profile-box" onclick="window.location.href='student_profile.php'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
                 <h6 class="mb-0"><?php echo htmlspecialchars($student_name); ?></h6>
-                <small class="text-muted">Student</small>
+                <small class="text-muted">Change Password</small>
             </div>
         </div>
     </div>
 
-    <!-- PAGE HEADER -->
     <div class="page-header">
         <div>
             <h1>Change Password</h1>
@@ -561,27 +548,18 @@ if (isset($_POST['update'])) {
         </div>
     </div>
 
-    <!-- CONTENT ROW -->
     <div class="d-flex gap-4 flex-wrap">
-        <!-- FORM CARD -->
         <div class="form-card flex-grow-1">
             <h3><i class="bi bi-shield-lock-fill me-2"></i>Update Your Password</h3>
             
-            <!-- Alert Messages -->
-            <?php if ($message && $message_type == 'success'): ?>
-            <div class="alert-custom alert-success-custom" id="successAlert">
-                <i class="bi bi-check-circle-fill fs-5 me-2"></i>
-                <span><?php echo $message; ?></span>
-            </div>
-            <?php elseif ($message && $message_type == 'error'): ?>
-            <div class="alert-custom alert-error-custom" id="errorAlert">
-                <i class="bi bi-exclamation-circle-fill fs-5 me-2"></i>
+            <?php if ($message): ?>
+            <div class="alert-custom alert-<?php echo $message_type; ?>-custom">
+                <i class="bi bi-<?php echo $message_type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'; ?> fs-5 me-2"></i>
                 <span><?php echo $message; ?></span>
             </div>
             <?php endif; ?>
             
             <form method="POST" action="">
-                <!-- Current Password -->
                 <div>
                     <label class="form-label">Current Password</label>
                     <div class="input-wrapper">
@@ -592,7 +570,6 @@ if (isset($_POST['update'])) {
                     </div>
                 </div>
                 
-                <!-- New Password -->
                 <div>
                     <label class="form-label">New Password</label>
                     <div class="input-wrapper">
@@ -602,7 +579,6 @@ if (isset($_POST['update'])) {
                         </button>
                     </div>
                     
-                    <!-- Strength Bar -->
                     <div class="strength-bar-wrapper">
                         <div class="strength-label" id="strengthLabel">Password strength: </div>
                         <div class="strength-bar">
@@ -610,7 +586,6 @@ if (isset($_POST['update'])) {
                         </div>
                     </div>
                     
-                    <!-- Password Requirements -->
                     <div class="requirements">
                         <p><i class="bi bi-info-circle me-1"></i> Password Requirements</p>
                         <div class="req-item" id="req-length">
@@ -631,7 +606,6 @@ if (isset($_POST['update'])) {
                         </div>
                     </div>
                     
-                    <!-- Confirm Password -->
                     <div>
                         <label class="form-label">Confirm New Password</label>
                         <div class="input-wrapper">
@@ -643,7 +617,6 @@ if (isset($_POST['update'])) {
                         <div class="match-message" id="matchMsg"></div>
                     </div>
                     
-                    <!-- Action Buttons -->
                     <div class="d-flex gap-3 flex-wrap mt-2">
                         <button type="submit" name="update" class="btn-save">
                             <i class="bi bi-shield-check"></i>
@@ -658,7 +631,6 @@ if (isset($_POST['update'])) {
             </form>
         </div>
         
-        <!-- SECURITY TIPS CARD -->
         <div class="tip-card">
             <h4><i class="bi bi-lightbulb-fill me-2"></i>Security Tips</h4>
             <div class="tip-item">
@@ -794,13 +766,15 @@ if (isset($_POST['update'])) {
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
     
-    // Auto-hide alerts after 4 seconds
-    setTimeout(() => {
-        const successAlert = document.getElementById('successAlert');
-        const errorAlert = document.getElementById('errorAlert');
-        if (successAlert) setTimeout(() => { successAlert.style.display = 'none'; }, 4000);
-        if (errorAlert) setTimeout(() => { errorAlert.style.display = 'none'; }, 4000);
-    }, 100);
+    setTimeout(function() {
+        var alert = document.querySelector('.alert-custom');
+        if (alert) {
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.style.display = 'none';
+            }, 500);
+        }
+    }, 4000);
 </script>
 </body>
 </html>

@@ -10,7 +10,7 @@ include("db.php");
 
 // Fetch student name from database
 $user_id = $_SESSION['user_id'];
-$query = "SELECT name FROM users WHERE id = '$user_id'";
+$query = "SELECT name, email, role FROM users WHERE id = '$user_id'";
 $result = mysqli_query($conn, $query);
 $user = mysqli_fetch_assoc($result);
 $student_name = $user ? $user['name'] : "Student";
@@ -23,11 +23,8 @@ $first_name = explode(' ', $student_name)[0];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UTM Student Dashboard - Course Registration System</title>
     
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -43,7 +40,6 @@ $first_name = explode(' ', $student_name)[0];
             overflow-x: hidden;
         }
         
-        /* ========== SIDEBAR ========== */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -121,7 +117,6 @@ $first_name = explode(' ', $student_name)[0];
             background: linear-gradient(to right, #f4a000, #e08700);
         }
         
-        /* ========== MAIN CONTENT ========== */
         .main-content {
             margin-left: 280px;
             padding: 30px;
@@ -132,7 +127,6 @@ $first_name = explode(' ', $student_name)[0];
             margin-left: 0;
         }
         
-        /* ========== TOPBAR ========== */
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -158,6 +152,12 @@ $first_name = explode(' ', $student_name)[0];
             display: flex;
             align-items: center;
             gap: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .profile-box:hover {
+            opacity: 0.8;
         }
         
         .profile-box img {
@@ -167,7 +167,6 @@ $first_name = explode(' ', $student_name)[0];
             object-fit: cover;
         }
         
-        /* ========== HERO SECTION (IMAGE REMOVED) ========== */
         .hero {
             background: #f7f2ee;
             border-radius: 25px;
@@ -188,7 +187,6 @@ $first_name = explode(' ', $student_name)[0];
             font-size: 15px;
         }
         
-        /* ========== DASHBOARD CARDS ========== */
         .dashboard-card {
             border: none;
             border-radius: 25px;
@@ -253,7 +251,6 @@ $first_name = explode(' ', $student_name)[0];
             font-size: 13px;
         }
         
-        /* ========== QUICK ACTIONS ========== */
         .quick-actions {
             background: white;
             border-radius: 25px;
@@ -321,7 +318,6 @@ $first_name = explode(' ', $student_name)[0];
             font-size: 18px;
         }
         
-        /* ========== REGISTRATION PERIOD CARD ========== */
         .period-card {
             background: white;
             border-radius: 25px;
@@ -346,13 +342,9 @@ $first_name = explode(' ', $student_name)[0];
             margin-bottom: 15px;
         }
         
-        /* ========== RESPONSIVE ========== */
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-280px);
-            }
-            .sidebar.mobile-open {
-                transform: translateX(0);
             }
             .main-content {
                 margin-left: 0;
@@ -365,7 +357,6 @@ $first_name = explode(' ', $student_name)[0];
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
     <div class="logo">
         <img src="images/utmlogo.png" alt="UTM Logo">
@@ -401,14 +392,12 @@ $first_name = explode(' ', $student_name)[0];
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="main-content" id="mainContent">
-    <!-- TOPBAR -->
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="bi bi-list"></i>
         </button>
-        <div class="profile-box">
+        <div class="profile-box" onclick="window.location.href='student_profile.php'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
@@ -418,7 +407,6 @@ $first_name = explode(' ', $student_name)[0];
         </div>
     </div>
 
-    <!-- HERO SECTION - IMAGE REMOVED -->
     <div class="hero">
         <div>
             <h1>Welcome back, <?php echo htmlspecialchars($first_name); ?>!</h1>
@@ -426,7 +414,6 @@ $first_name = explode(' ', $student_name)[0];
         </div>
     </div>
 
-    <!-- STATS CARDS ROW -->
     <div class="row g-4">
         <div class="col-md-3">
             <div class="dashboard-card">
@@ -470,7 +457,6 @@ $first_name = explode(' ', $student_name)[0];
         </div>
     </div>
 
-    <!-- REGISTRATION PERIOD ROW -->
     <div class="row g-4 mt-2">
         <div class="col-md-12">
             <div class="period-card">
@@ -488,7 +474,6 @@ $first_name = explode(' ', $student_name)[0];
         </div>
     </div>
 
-    <!-- QUICK ACTIONS -->
     <div class="quick-actions">
         <h3><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h3>
         <a href="student_courses.php" class="action-btn">
@@ -531,7 +516,6 @@ $first_name = explode(' ', $student_name)[0];
 </div>
 
 <script>
-    // Apply saved sidebar state on page load
     (function() {
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.querySelector('.sidebar').classList.add('collapsed');
@@ -544,15 +528,7 @@ $first_name = explode(' ', $student_name)[0];
         const main = document.querySelector('.main-content');
         sidebar.classList.toggle('collapsed');
         main.classList.toggle('expanded');
-        
-        // Save state
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-    }
-
-    // Mobile sidebar handling
-    if (window.innerWidth <= 992) {
-        document.querySelector('.sidebar').classList.add('collapsed');
-        document.querySelector('.main-content').classList.add('expanded');
     }
 </script>
 </body>
