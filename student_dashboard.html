@@ -1,59 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - UTM Course Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f8f6f4; }
+        .sidebar { width: 280px; height: 100vh; background: linear-gradient(to bottom, #670019, #8b0022); position: fixed; padding: 30px 20px; color: white; }
+        .sidebar a { display: block; color: white; text-decoration: none; padding: 12px 20px; border-radius: 14px; margin-bottom: 12px; }
+        .sidebar a:hover, .sidebar a.active { background: #f4a000; }
+        .main-content { margin-left: 280px; padding: 30px; }
+        .topbar { background: white; padding: 15px 25px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .hero { background: #f7f2ee; border-radius: 25px; padding: 40px; margin-bottom: 35px; }
+        .hero h1 { color: #670019; }
+        .dashboard-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 100%; }
+        .card-icon { width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 15px; }
+        .yellow { background: #fff2cc; color: #d48a00; }
+        .red { background: #ffe0e0; color: #b00020; }
+        .green { background: #e4f7df; color: #2e7d32; }
+        .purple { background: #eee3ff; color: #7b1fa2; }
+        .period-card { background: white; border-radius: 25px; padding: 25px; margin-top: 20px; }
+        .quick-actions { background: white; border-radius: 25px; padding: 30px; margin-top: 35px; }
+        .action-btn { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #eee; border-radius: 18px; margin-bottom: 12px; text-decoration: none; color: black; }
+        .action-btn:hover { background: #fff7ef; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="logo text-center mb-5">
+        <img src="images/utmlogo.png" width="130" alt="UTM">
+        <div class="system-title text-warning mt-2">COURSE REGISTRATION SYSTEM</div>
+    </div>
+    <a href="student_dashboard.html" class="active"><i class="bi bi-house-fill me-2"></i> Dashboard</a>
+    <a href="student_profile.html"><i class="bi bi-person-fill me-2"></i> Profile</a>
+    <a href="student_courses.html"><i class="bi bi-book-fill me-2"></i> Courses</a>
+    <a href="student_registration.html"><i class="bi bi-file-earmark-text-fill me-2"></i> My Registration</a>
+    <a href="reset_password_form.html"><i class="bi bi-lock-fill me-2"></i> Change Password</a>
+    <div class="mt-5 pt-5"><a href="logout.php"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></div>
+</div>
+<div class="main-content">
+    <div class="topbar">
+        <div><h6 class="mb-0" id="studentName">Loading...</h6><small>Student</small></div>
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="40" style="border-radius:50%">
+    </div>
+    <div class="hero">
+        <h1 id="heroGreeting">Welcome back, Student!</h1>
+        <p>Manage your course registration and academic progress here.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon yellow"><i class="bi bi-book"></i></div><h2 id="registeredCourses">0</h2><p>Registered Courses</p></div></div>
+        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon red"><i class="bi bi-clock-history"></i></div><h2 id="pendingApprovals">0</h2><p>Pending Approval</p></div></div>
+        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon green"><i class="bi bi-check-circle"></i></div><h2 id="approvedCourses">0</h2><p>Approved Courses</p></div></div>
+        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon purple"><i class="bi bi-calendar-event"></i></div><h2 id="currentSession">--</h2><p id="currentSemester">Semester --</p></div></div>
+    </div>
+    <div class="period-card">
+        <h4><i class="bi bi-calendar-event me-2"></i>Registration Period</h4>
+        <span class="badge" id="periodStatus">Loading...</span>
+        <div class="mt-3"><strong id="periodDates">--</strong><div id="periodBadges" class="mt-2"></div></div>
+    </div>
+    <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <a href="student_courses.html" class="action-btn"><div><strong>Browse Courses</strong><br><small>Register for courses</small></div><i class="bi bi-chevron-right"></i></a>
+        <a href="student_registration.html" class="action-btn"><div><strong>My Registration</strong><br><small>Check status</small></div><i class="bi bi-chevron-right"></i></a>
+        <a href="student_profile.html" class="action-btn"><div><strong>My Profile</strong><br><small>Update info</small></div><i class="bi bi-chevron-right"></i></a>
+    </div>
+</div>
 <script src="js/common.js"></script>
 <script>
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const main = document.querySelector('.main-content');
-        sidebar.classList.toggle('collapsed');
-        main.classList.toggle('expanded');
-        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-    }
-    (function() {
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            document.querySelector('.sidebar').classList.add('collapsed');
-            document.querySelector('.main-content').classList.add('expanded');
-        }
-    })();
-
-    async function loadStudentDashboard() {
+    async function loadDashboard() {
         try {
-            console.log('Loading student dashboard...');
+            // Fetch student stats
             const stats = await apiGet('dashboard/student_stats.php');
-            console.log('API Response:', stats);
-            
-            // Update all the elements
-            const studentName = stats.student_name || 'Student';
-            const firstName = studentName.split(' ')[0];
-            
+            console.log('Stats:', stats);
+            document.getElementById('studentName').innerText = stats.student_name || 'Student';
+            const firstName = (stats.student_name || 'Student').split(' ')[0];
+            document.getElementById('heroGreeting').innerText = `Welcome back, ${firstName}!`;
             document.getElementById('registeredCourses').innerText = stats.registered_courses || 0;
             document.getElementById('pendingApprovals').innerText = stats.pending_approvals || 0;
             document.getElementById('approvedCourses').innerText = stats.approved_courses || 0;
             document.getElementById('currentSession').innerText = stats.current_session || '2025/2026';
             document.getElementById('currentSemester').innerHTML = `Semester ${stats.current_semester || 2}`;
-            document.getElementById('studentName').innerText = studentName;
-            document.getElementById('heroGreeting').innerHTML = `Welcome back, ${firstName}!`;
-            
-            // Also update the page title or any other elements that show student name
-            console.log('Student name set to:', studentName);
-            
-            // Load registration period
+
+            // Fetch registration period
             const period = await apiGet('registrations/period.php');
-            console.log('Period Response:', period);
-            
+            console.log('Period:', period);
             const statusSpan = document.getElementById('periodStatus');
-            statusSpan.innerHTML = period.is_open ? '🟢 Currently open' : '🔴 Closed';
-            statusSpan.style.background = period.is_open ? '#d4edda' : '#f8d7da';
-            statusSpan.style.color = period.is_open ? '#155724' : '#721c24';
+            statusSpan.innerText = period.is_open ? '🟢 Open' : '🔴 Closed';
+            statusSpan.className = `badge ${period.is_open ? 'bg-success' : 'bg-secondary'}`;
             document.getElementById('periodDates').innerText = `${period.start_date} – ${period.end_date}`;
             document.getElementById('periodBadges').innerHTML = `
                 <span class="badge bg-light text-dark me-1">${period.semester}</span>
                 <span class="badge bg-light text-dark me-1">${period.session}</span>
-                <span class="badge ${period.is_open ? 'bg-success' : 'bg-secondary'}">${period.is_open ? 'Active' : 'Inactive'}</span>
             `;
         } catch (err) {
-            console.error('Error loading dashboard:', err);
-            document.getElementById('heroGreeting').innerHTML = 'Welcome back, Student! (Error loading data)';
+            console.error('Dashboard error:', err);
+            document.getElementById('heroGreeting').innerText = 'Error loading dashboard. Please login again.';
         }
     }
-    
-    loadStudentDashboard();
+    loadDashboard();
 </script>
+</body>
+</html>

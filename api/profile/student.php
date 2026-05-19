@@ -6,7 +6,7 @@ $pdo = getDBConnection();
 
 $stmt = $pdo->prepare("
     SELECT 
-        user_name as full_name,
+        user_name AS full_name,
         matrix_number,
         utm_email,
         second_email,
@@ -21,8 +21,16 @@ $profile = $stmt->fetch();
 if (!$profile) {
     http_response_code(404);
     echo json_encode(['error' => 'Profile not found']);
-    exit();
+    exit;
 }
+
+// Ensure all fields exist
+$profile['full_name'] = $profile['full_name'] ?? '';
+$profile['matrix_number'] = $profile['matrix_number'] ?? '';
+$profile['utm_email'] = $profile['utm_email'] ?? '';
+$profile['second_email'] = $profile['second_email'] ?? '';
+$profile['phone'] = $profile['phone'] ?? '';
+$profile['role'] = $profile['role'] ?? 'student';
 
 echo json_encode($profile);
 ?>

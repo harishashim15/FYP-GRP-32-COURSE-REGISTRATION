@@ -139,16 +139,16 @@
 
         <div class="row-custom">
             <div class="form-group">
-                <label><i class="bi bi-person-fill me-1"></i> Full Name</label>
-                <input type="text" id="fullName" placeholder="Full Name">
+                <label><i class="bi bi-person-fill me-1"></i> Full Name (cannot be changed)</label>
+                <input type="text" id="fullName" disabled placeholder="Full Name">
             </div>
             <div class="form-group">
                 <label><i class="bi bi-card-text"></i> Matrix Number</label>
                 <input type="text" id="matrixNumber" disabled>
             </div>
             <div class="form-group">
-                <label><i class="bi bi-envelope-fill"></i> UTM Email</label>
-                <input type="email" id="utmEmail" placeholder="Email">
+                <label><i class="bi bi-envelope-fill"></i> UTM Email (cannot be changed)</label>
+                <input type="email" id="utmEmail" disabled placeholder="UTM Email">
             </div>
             <div class="form-group">
                 <label><i class="bi bi-envelope-fill"></i> Second Email</label>
@@ -203,9 +203,8 @@
     }
 
     document.getElementById('saveBtn').addEventListener('click', async () => {
+        // Only send editable fields: second_email and phone
         const formData = {
-            full_name: document.getElementById('fullName').value,
-            utm_email: document.getElementById('utmEmail').value,
             second_email: document.getElementById('secondEmail').value,
             phone: document.getElementById('phone').value
         };
@@ -214,7 +213,7 @@
             const alertDiv = document.getElementById('successAlert');
             alertDiv.style.display = 'block';
             setTimeout(() => { alertDiv.style.display = 'none'; }, 3000);
-            loadProfile();
+            loadProfile(); // Reload to reflect any changes (though only phone/second email)
         } catch (err) {
             alert('Update failed: ' + err.message);
         }

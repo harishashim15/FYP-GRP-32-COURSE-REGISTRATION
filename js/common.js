@@ -1,27 +1,10 @@
-/**
- * common.js - Shared API utilities for UTM Course Registration System
- */
-
-// Get the correct base path dynamically
-function getApiBase() {
-    let path = window.location.pathname;
-    console.log('Current path:', path);
-    let folderPath = path.substring(0, path.lastIndexOf('/') + 1);
-    console.log('Folder path:', folderPath);
-    let apiPath = folderPath + 'api';
-    console.log('API base path:', apiPath);
-    return apiPath;
-}
-
-const API_BASE = getApiBase();
+// Hardcoded API base path for your exact folder
+const API_BASE = '/FYP/FYP%20COURSE%20REGISTRATION/api';
 
 async function apiGet(endpoint) {
     const url = `${API_BASE}/${endpoint}`;
-    console.log('API GET Request URL:', url);
-    
-    const response = await fetch(url, {
-        credentials: 'include'
-    });
+    console.log('API GET:', url);
+    const response = await fetch(url, { credentials: 'include' });
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || `HTTP ${response.status}`);
@@ -31,8 +14,7 @@ async function apiGet(endpoint) {
 
 async function apiPost(endpoint, data) {
     const url = `${API_BASE}/${endpoint}`;
-    console.log('API POST Request URL:', url);
-    
+    console.log('API POST:', url);
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

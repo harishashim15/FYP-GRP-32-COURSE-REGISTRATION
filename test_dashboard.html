@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Dashboard</title>
+    <script src="js/common.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #f0f0f0; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Student Dashboard Test</h1>
+    <div id="status">Checking login status...</div>
+    <div id="stats"></div>
+    <div id="period"></div>
+
+    <script>
+        (async function() {
+            try {
+                // Check if user is logged in
+                const user = await getCurrentUser();
+                document.getElementById('status').innerHTML = `<span class="success">✅ Logged in as: ${user.name} (${user.role})</span>`;
+                
+                // Fetch student stats
+                const stats = await apiGet('dashboard/student_stats.php');
+                document.getElementById('stats').innerHTML = `
+                    <h2>Student Stats</h2>
+                    <pre>${JSON.stringify(stats, null, 2)}</pre>
+                `;
+                
+                // Fetch registration period
+                const period = await apiGet('registrations/period.php');
+                document.getElementById('period').innerHTML = `
+                    <h2>Registration Period</h2>
+                    <pre>${JSON.stringify(period, null, 2)}</pre>
+                `;
+            } catch (err) {
+                document.getElementById('status').innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
+            }
+        })();
+    </script>
+</body>
+</html>
