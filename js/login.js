@@ -61,7 +61,7 @@
         if ($(input).val().trim() == '') {
             return false;
         }
-        return true;  // FIXED: was missing return true
+        return true;
     }
 
     function showValidate(input) {
@@ -86,5 +86,20 @@
     function hideErrorMessage() {
         $('#login-error-msg').hide();
     }
+
+    // Toggle password visibility
+    window.togglePasswordVisibility = function() {
+        var passwordInput = document.getElementById('login-password');
+        var toggleIcon = document.querySelector('.toggle-eye i');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    };
 
 })(jQuery);

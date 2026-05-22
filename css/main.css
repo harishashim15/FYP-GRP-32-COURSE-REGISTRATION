@@ -463,5 +463,19 @@ background: radial-gradient(circle, rgba(93, 0, 29, 1) 63%, rgba(230, 147, 5, 1)
   }
 }
 
+/* Show/hide password toggle button */
+.toggle-password {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #999;
+    z-index: 10;
+}
+.toggle-password:hover {
+    color: #670019;
+}
+
 
 }
