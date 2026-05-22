@@ -15,11 +15,12 @@ $user_result = mysqli_query($conn, $user_query);
 $user = mysqli_fetch_assoc($user_result);
 $student_name = $user ? $user['name'] : "Student";
 
-// Fetch user's registered courses with status
-$query = "SELECT r.course_id, r.status, c.course_name, c.course_code 
+// Fetch submitted registrations
+$query = "SELECT r.*, c.course_name 
           FROM registrations r 
           JOIN courses c ON r.course_id = c.course_code 
-          WHERE r.user_id = '$user_id'";
+          WHERE r.user_id = '$user_id' 
+          ORDER BY r.submitted_date DESC";
 $result = mysqli_query($conn, $query);
 ?>
 <!DOCTYPE html>
@@ -27,7 +28,7 @@ $result = mysqli_query($conn, $query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Registration - UTM Student</title>
+    <title>Registration History - UTM Student</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -224,14 +225,14 @@ $result = mysqli_query($conn, $query);
             display: inline-block;
         }
         
-        .registration-table {
+        .history-table {
             background: white;
             border-radius: 25px;
             padding: 30px;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
         }
         
-        .registration-table h3 {
+        .history-table h3 {
             color: #670019;
             font-weight: 700;
             font-size: 20px;
@@ -316,16 +317,6 @@ $result = mysqli_query($conn, $query);
             margin-bottom: 15px;
         }
         
-        .empty-state a {
-            color: #670019;
-            font-weight: 500;
-            text-decoration: none;
-        }
-        
-        .empty-state a:hover {
-            text-decoration: underline;
-        }
-        
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-280px);
@@ -365,9 +356,13 @@ $result = mysqli_query($conn, $query);
             <i class="bi bi-book-fill"></i>
             Courses
         </a>
-        <a href="student_registration.php" class="active">
-            <i class="bi bi-file-earmark-text-fill"></i>
-            My Registration
+        <a href="student_register.php">
+            <i class="bi bi-journal-text"></i>
+            Register
+        </a>
+        <a href="student_registration_history.php" class="active">
+            <i class="bi bi-clock-history"></i>
+            Registration History
         </a>
         <a href="student_change_password.php">
             <i class="bi bi-lock-fill"></i>
@@ -399,52 +394,66 @@ $result = mysqli_query($conn, $query);
 
     <div class="page-header">
         <div>
-            <h2>My Registration</h2>
-            <p>Track your course registration requests and their status</p>
+            <h2>Registration History</h2>
+            <p>Track the status of your submitted course registrations</p>
         </div>
     </div>
+
+    <?php
+    // Calculate statistics
+    $stats_query = "SELECT status, COUNT(*) as count FROM registrations WHERE user_id = '$user_id' GROUP BY status";
+    $stats_result = mysqli_query($conn, $stats_query);
+    $stats = ['pending' => 0, 'approved' => 0, 'rejected' => 0];
+    while ($row = mysqli_fetch_assoc($stats_result)) {
+        $stats[$row['status']] = $row['count'];
+    }
+    ?>
 
     <div class="summary-strip">
         <div class="strip-item">
             <span class="strip-dot" style="background: #670019;"></span>
-            Total &nbsp;<strong id="totalCount">0</strong>&nbsp; courses
+            Total &nbsp;<strong><?php echo array_sum($stats); ?></strong>&nbsp; registrations
         </div>
         <div class="strip-item">
             <span class="strip-dot" style="background: #856404;"></span>
-            Pending &nbsp;<strong id="pendingCount">0</strong>
+            Pending &nbsp;<strong><?php echo $stats['pending']; ?></strong>
         </div>
         <div class="strip-item">
             <span class="strip-dot" style="background: #155724;"></span>
-            Approved &nbsp;<strong id="approvedCount">0</strong>
+            Approved &nbsp;<strong><?php echo $stats['approved']; ?></strong>
         </div>
         <div class="strip-item">
             <span class="strip-dot" style="background: #721c24;"></span>
-            Rejected &nbsp;<strong id="rejectedCount">0</strong>
+            Rejected &nbsp;<strong><?php echo $stats['rejected']; ?></strong>
         </div>
     </div>
 
-    <div class="registration-table">
-        <h3><i class="bi bi-journal-text me-2"></i>Course Registration Status</h3>
+    <div class="history-table">
+        <h3><i class="bi bi-journal-text me-2"></i>Submitted Registrations</h3>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
                     <tr>
                         <th>Course Code</th>
                         <th>Course Name</th>
-                        <th>Registration Date</th>
+                        <th>Section</th>
+                        <th>Session</th>
+                        <th>Submitted Date</th>
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody id="registrationTableBody">
+                <tbody>
                     <?php 
                     $has_results = false;
                     while ($row = mysqli_fetch_assoc($result)): 
                         $has_results = true;
                     ?>
-                    <tr data-status="<?php echo $row['status']; ?>">
-                        <td><strong><?php echo htmlspecialchars($row['course_code']); ?></strong></td>
+                    <tr>
+                        <td><strong><?php echo htmlspecialchars($row['course_id']); ?></strong></td>
                         <td><?php echo htmlspecialchars($row['course_name']); ?></td>
-                        <td><?php echo date('d M Y'); ?></td>
+                        <td><?php echo htmlspecialchars($row['section'] ?: 'TBD'); ?></td>
+                        <td><?php echo htmlspecialchars($row['session'] ?: '2025/2026 - Semester 2'); ?></td>
+                        <td><?php echo date('d M Y, h:i A', strtotime($row['submitted_date'])); ?></td>
                         <td>
                             <span class="status-badge status-<?php echo $row['status']; ?>">
                                 <?php echo ucfirst($row['status']); ?>
@@ -454,12 +463,12 @@ $result = mysqli_query($conn, $query);
                     <?php endwhile; ?>
                     <?php if (!$has_results): ?>
                     <tr>
-                        <td colspan="4">
+                        <td colspan="6">
                             <div class="empty-state">
                                 <i class="bi bi-inbox"></i>
-                                <h4>No courses registered yet</h4>
-                                <p>You haven't registered for any courses this semester.</p>
-                                <a href="student_courses.php"><i class="bi bi-arrow-right-circle me-1"></i> Browse Courses</a>
+                                <h4>No registration history found</h4>
+                                <p>You haven't submitted any course registrations yet.</p>
+                                <a href="student_courses.php" class="btn btn-primary mt-2" style="background: #670019; border: none;">Browse Courses</a>
                             </div>
                         </td>
                     </tr>
@@ -485,29 +494,6 @@ $result = mysqli_query($conn, $query);
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-
-    function updateSummaryCounts() {
-        const rows = document.querySelectorAll('#registrationTableBody tr');
-        let total = 0, pending = 0, approved = 0, rejected = 0;
-        
-        rows.forEach(row => {
-            const statusSpan = row.querySelector('.status-badge');
-            if (statusSpan) {
-                total++;
-                const statusText = statusSpan.innerText.toLowerCase().trim();
-                if (statusText === 'pending') pending++;
-                else if (statusText === 'approved') approved++;
-                else if (statusText === 'rejected') rejected++;
-            }
-        });
-        
-        document.getElementById('totalCount').innerText = total;
-        document.getElementById('pendingCount').innerText = pending;
-        document.getElementById('approvedCount').innerText = approved;
-        document.getElementById('rejectedCount').innerText = rejected;
-    }
-    
-    updateSummaryCounts();
 </script>
 </body>
 </html>

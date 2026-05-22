@@ -15,6 +15,40 @@ $user_result = mysqli_query($conn, $user_query);
 $user = mysqli_fetch_assoc($user_result);
 $student_name = $user ? $user['name'] : "Student";
 
+// Handle Add to Cart
+if (isset($_GET['add_to_cart'])) {
+    $course_code = mysqli_real_escape_string($conn, $_GET['add_to_cart']);
+    
+    // Check if already in cart
+    $check_cart = "SELECT * FROM registration_cart WHERE user_id = '$user_id' AND course_code = '$course_code'";
+    $cart_result = mysqli_query($conn, $check_cart);
+    
+    if (mysqli_num_rows($cart_result) == 0) {
+        $insert_cart = "INSERT INTO registration_cart (user_id, course_code, added_date) 
+                        VALUES ('$user_id', '$course_code', NOW())";
+        mysqli_query($conn, $insert_cart);
+    }
+    header("Location: student_courses.php");
+    exit();
+}
+
+// Handle Remove from Cart
+if (isset($_GET['remove_from_cart'])) {
+    $course_code = mysqli_real_escape_string($conn, $_GET['remove_from_cart']);
+    $delete_cart = "DELETE FROM registration_cart WHERE user_id = '$user_id' AND course_code = '$course_code'";
+    mysqli_query($conn, $delete_cart);
+    header("Location: student_courses.php");
+    exit();
+}
+
+// Get courses in cart
+$cart_query = "SELECT course_code FROM registration_cart WHERE user_id = '$user_id'";
+$cart_result = mysqli_query($conn, $cart_query);
+$cart_courses = [];
+while ($row = mysqli_fetch_assoc($cart_result)) {
+    $cart_courses[] = $row['course_code'];
+}
+
 // Fetch all courses
 $courses_query = "SELECT * FROM courses";
 $courses_result = mysqli_query($conn, $courses_query);
@@ -190,6 +224,60 @@ $courses_result = mysqli_query($conn, $courses_query);
             font-size: 15px;
         }
         
+        .cart-summary {
+            background: #fff7ef;
+            border: 1px solid #f4a000;
+            border-radius: 25px;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .cart-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cart-info i {
+            font-size: 24px;
+            color: #670019;
+        }
+        
+        .cart-info span {
+            font-weight: 600;
+            color: #670019;
+        }
+        
+        .cart-info .count {
+            background: #670019;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .view-cart-btn {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        
+        .view-cart-btn:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+            color: white;
+        }
+        
         .search-bar {
             display: flex;
             gap: 12px;
@@ -307,6 +395,24 @@ $courses_result = mysqli_query($conn, $courses_query);
             color: white;
         }
         
+        .register-btn.added {
+            background: #2e7d32;
+            cursor: default;
+        }
+        
+        .register-btn.added:hover {
+            transform: none;
+            background: #2e7d32;
+        }
+        
+        .register-btn.remove {
+            background: #dc3545;
+        }
+        
+        .register-btn.remove:hover {
+            background: #c82333;
+        }
+        
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-280px);
@@ -343,9 +449,13 @@ $courses_result = mysqli_query($conn, $courses_query);
             <i class="bi bi-book-fill"></i>
             Courses
         </a>
-        <a href="student_registration.php">
-            <i class="bi bi-file-earmark-text-fill"></i>
-            My Registration
+        <a href="student_register.php">
+            <i class="bi bi-journal-text"></i>
+            Register
+        </a>
+        <a href="student_registration_history.php">
+            <i class="bi bi-clock-history"></i>
+            Registration History
         </a>
         <a href="student_change_password.php">
             <i class="bi bi-lock-fill"></i>
@@ -378,9 +488,22 @@ $courses_result = mysqli_query($conn, $courses_query);
     <div class="page-header">
         <div>
             <h2>Available Courses</h2>
-            <p>Browse and register for courses for the current semester</p>
+            <p>Browse and add courses to your registration cart</p>
         </div>
     </div>
+
+    <!-- Cart Summary -->
+    <?php if (count($cart_courses) > 0): ?>
+    <div class="cart-summary">
+        <div class="cart-info">
+            <i class="bi bi-bag-check"></i>
+            <span>You have <strong class="count"><?php echo count($cart_courses); ?></strong> course(s) in your registration cart</span>
+        </div>
+        <a href="student_register.php" class="view-cart-btn">
+            <i class="bi bi-arrow-right"></i> Proceed to Register
+        </a>
+    </div>
+    <?php endif; ?>
 
     <div class="search-bar">
         <input type="text" id="searchInput" placeholder="Search by course name or code..." onkeyup="filterCourses()">
@@ -388,7 +511,9 @@ $courses_result = mysqli_query($conn, $courses_query);
     </div>
 
     <div class="courses-grid" id="coursesGrid">
-        <?php while ($course = mysqli_fetch_assoc($courses_result)): ?>
+        <?php while ($course = mysqli_fetch_assoc($courses_result)): 
+            $is_in_cart = in_array($course['course_code'], $cart_courses);
+        ?>
         <div class="course-card" data-name="<?php echo strtolower($course['course_name']); ?>" data-code="<?php echo strtolower($course['course_code']); ?>">
             <span class="course-code"><?php echo htmlspecialchars($course['course_code']); ?></span>
             <h4><?php echo htmlspecialchars($course['course_name']); ?></h4>
@@ -402,9 +527,15 @@ $courses_result = mysqli_query($conn, $courses_query);
                     <span>45 Students</span>
                 </div>
             </div>
-            <a href="register_course.php?id=<?php echo $course['course_code']; ?>" class="register-btn" onclick="return confirm('Register for <?php echo addslashes($course['course_name']); ?>?')">
-                <i class="bi bi-plus-circle me-1"></i> Register for Course
-            </a>
+            <?php if ($is_in_cart): ?>
+                <a href="student_courses.php?remove_from_cart=<?php echo urlencode($course['course_code']); ?>" class="register-btn remove">
+                    <i class="bi bi-dash-circle me-1"></i> Remove from Cart
+                </a>
+            <?php else: ?>
+                <a href="student_courses.php?add_to_cart=<?php echo urlencode($course['course_code']); ?>" class="register-btn">
+                    <i class="bi bi-plus-circle me-1"></i> Add to Cart
+                </a>
+            <?php endif; ?>
         </div>
         <?php endwhile; ?>
     </div>
