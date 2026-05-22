@@ -1,309 +1,180 @@
 <?php
 session_start();
+require_once '../db_connect.php';
 
-// 1. Include database connection
-include '../db_connect.php';
-
-// 2. Security check: Only admin allowed
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.html");
     exit();
 }
 
-// 3. Fetch dynamic counts
-// Note: You need tables 'students', 'advisors', 'subjects' in your DB
+// Fetch counts from fypdb3
 $students_count = 0;
 $advisors_count = 0;
 $subjects_count = 0;
 
 if ($conn) {
-    // Count students from 'users' table if role = 'student'
-    $stmt1 = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'student'");
-    $stmt1->execute();
-    $result1 = $stmt1->get_result();
-    $students_count = $result1->fetch_assoc()['total'];
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE role = 'student'");
+    $stmt->execute();
+    $students_count = $stmt->get_result()->fetch_row()[0];
 
-    // Count advisors from 'users' table if role = 'advisor'
-    $stmt2 = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'advisor'");
-    $stmt2->execute();
-    $result2 = $stmt2->get_result();
-    $advisors_count = $result2->fetch_assoc()['total'];
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE role = 'advisor'");
+    $stmt->execute();
+    $advisors_count = $stmt->get_result()->fetch_row()[0];
 
-    // Count subjects – You need a 'subjects' table. This will return 0 if table doesn't exist.
-    $subjects_check = $conn->query("SHOW TABLES LIKE 'subjects'");
-    if ($subjects_check->num_rows > 0) {
-        $stmt3 = $conn->prepare("SELECT COUNT(*) as total FROM subjects");
-        $stmt3->execute();
-        $result3 = $stmt3->get_result();
-        $subjects_count = $result3->fetch_assoc()['total'];
-    }
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM subjects");
+    $stmt->execute();
+    $subjects_count = $stmt->get_result()->fetch_row()[0];
 }
 
-// 4. Get admin name
-$user_id = $_SESSION['user_id'];
-$name_query = "SELECT name FROM users WHERE id = ?";
-$stmt_name = $conn->prepare($name_query);
-$stmt_name->bind_param("i", $user_id);
-$stmt_name->execute();
-$name_result = $stmt_name->get_result();
-$admin_name = $name_result->fetch_assoc()['name'] ?? 'Admin';
+// Admin name
+$admin_name = $_SESSION['user_name'] ?? 'Admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal</title>
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Admin Dashboard - UTM Course Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ---------- RESET ---------- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            display: flex;
-            background-color: #f4f6f9;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* ---------- SIDEBAR ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
-            width: 250px;
-            background-color: #7A0D2A; /* Dark maroon */
-            color: white;
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-            position: fixed;
-            height: 100%;
-            left: 0;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            width: 280px; height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed; padding: 30px 20px; color: white;
+            transition: transform 0.3s ease;
         }
-
-        .sidebar h1 {
-            font-size: 24px;
-            font-weight: 600;
-            padding: 0 25px 30px 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        .sidebar.collapsed { transform: translateX(-280px); }
+        .logo { text-align: center; margin-bottom: 50px; }
+        .logo img { width: 130px; }
+        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .menu a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
         }
-
-        .sidebar nav ul {
-            list-style: none;
-            padding: 20px 15px;
+        .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
+        .menu i { font-size: 20px; }
+        .logout {
+            position: absolute; bottom: 30px;
+            width: calc(100% - 40px); left: 20px;
         }
-
-        .sidebar nav ul li {
-            margin-bottom: 12px;
+        .logout a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; background: rgba(255,255,255,0.1);
         }
-
-        .sidebar nav ul li a {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            transition: 0.3s ease;
-            font-size: 16px;
+        .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content.expanded { margin-left: 0; }
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; background: white; padding: 15px 25px;
+            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
-        .sidebar nav ul li a i {
-            margin-right: 15px;
-            width: 20px;
-            text-align: center;
+        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
+        .hero {
+            background: #f7f2ee; border-radius: 25px; padding: 40px;
+            margin-bottom: 35px; border: 1px solid #eee;
         }
-
-        .sidebar nav ul li a:hover {
-            background-color: rgba(255,255,255,0.1);
+        .hero h1 { font-size: 40px; font-weight: 700; color: #670019; }
+        .hero p { color: #666; margin-top: 10px; font-size: 16px; }
+        .dashboard-card {
+            border: none; border-radius: 25px; padding: 25px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05); transition: 0.3s;
+            height: 100%; background: white;
         }
-
-        .sidebar nav ul li a.active {
-            background-color: #DE9E1F; /* Orange gold */
-            color: #fff;
-            font-weight: 500;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .dashboard-card:hover { transform: translateY(-5px); }
+        .card-icon {
+            width: 60px; height: 60px; border-radius: 20px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; margin-bottom: 15px;
         }
-
-        .sidebar nav ul li a.logout {
-            margin-top: 60px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 20px;
-            border-radius: 0;
-        }
-
-        /* ---------- MAIN CONTENT ---------- */
-        .main-content {
-            margin-left: 250px;
-            width: calc(100% - 250px);
-            padding: 30px;
-            background-color: #f4f6f9;
-        }
-
-        /* ---------- TOP CARDS ---------- */
-        .welcome-card {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 40px;
-        }
-
-        .welcome-card h2 {
-            font-size: 32px;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-
-        .welcome-card h2 span {
-            display: inline-block;
-        }
-
-        .welcome-card p {
-            color: #6b7280;
-            font-size: 16px;
-        }
-
-        /* ---------- STATS CARDS ---------- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px 20px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-
-        .stat-card i {
-            font-size: 40px;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .stat-icon-student { color: #F59E0B; }
-        .stat-icon-advisor { color: #E53E3E; }
-        .stat-icon-subject { color: #047857; }
-
-        .stat-card h3 {
-            font-size: 42px;
-            color: #7A0D2A;
-            margin: 10px 0 5px 0;
-            font-weight: 700;
-        }
-
-        .stat-card p {
-            color: #4b5563;
-            font-weight: 500;
-            font-size: 16px;
-            margin: 0;
-        }
-
-        /* ---------- RESPONSIVE ---------- */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-            .main-content {
-                margin-left: 200px;
-                padding: 20px;
-            }
-        }
-        @media (max-width: 576px) {
-            body {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding: 15px;
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+        .yellow { background: #fff2cc; color: #d48a00; }
+        .red    { background: #ffe0e0; color: #b00020; }
+        .green  { background: #e4f7df; color: #2e7d32; }
+        .dashboard-card h2 { font-size: 36px; font-weight: 700; color: #670019; margin-bottom: 5px; }
+        .dashboard-card h5 { font-size: 16px; font-weight: 600; margin-top: 5px; }
+        .dashboard-card p { color: #666; margin-top: 5px; font-size: 13px; }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; }
+            .hero { text-align: center; }
         }
     </style>
 </head>
 <body>
-
-    <!-- LEFT SIDEBAR -->
-    <aside class="sidebar">
-        <h1>Admin Portal</h1>
-        <nav>
-            <ul>
-                <li><a href="admin_dashboard.php" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-
-                <!-- Changed: 'Add Student' → 'Manage Students' -->
-                <li><a href="manage_students.php"><i class="fas fa-user-graduate"></i> Manage Students</a></li>
-
-                <!-- Changed: 'Add Advisor' → 'Manage Advisors' -->
-                <li><a href="manage_advisors.php"><i class="fas fa-users"></i> Manage Advisors</a></li>
-
-                <!-- Changed: 'Add Subject' → 'Manage Subjects' -->
-                <li><a href="manage_subjects.php"><i class="fas fa-book"></i> Manage Subjects</a></li>
-
-                <li><a href="../forgot_password.php"><i class="fas fa-key"></i> Forgot Password</a></li>
-                <li><a href="logout.php" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-        </nav>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-
-        <!-- WELCOME CARD -->
-        <div class="welcome-card">
-            <h2>Welcome Admin 👋</h2>
-            <p>Manage students, advisors and subjects here.</p>
-        </div>
-
-        <!-- STATS CARDS -->
-        <div class="stats-grid">
-
-            <div class="stat-card">
-                <i class="fas fa-users stat-icon-student"></i>
-                <h3><?php echo number_format($students_count); ?></h3>
-                <p>Students Registered</p>
-            </div>
-
-            <div class="stat-card">
-                <i class="fas fa-user-tie stat-icon-advisor"></i>
-                <h3><?php echo number_format($advisors_count); ?></h3>
-                <p>Academic Advisors</p>
-            </div>
-
-            <div class="stat-card">
-                <i class="fas fa-book-open stat-icon-subject"></i>
-                <h3><?php echo number_format($subjects_count); ?></h3>
-                <p>Subjects Registered</p>
-            </div>
-
-        </div>
-
+<div class="sidebar">
+    <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+    <div class="menu">
+        <a href="admin_dashboard.php" class="active"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
+        <a href="profile.php"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="../forgot_password.php"><i class="bi bi-key-fill"></i> Forgot Password</a>
     </div>
-
+    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+</div>
+<div class="main-content">
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box" onclick="location.href='profile.php'">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div><h6 class="mb-0"><?php echo htmlspecialchars($admin_name); ?></h6><small class="text-muted">Admin</small></div>
+        </div>
+    </div>
+    <div class="hero">
+        <h1>Welcome Admin, <?php echo htmlspecialchars(explode(' ', $admin_name)[0]); ?> 👋</h1>
+        <p>Manage students, advisors, and course subjects.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-icon yellow"><i class="bi bi-people-fill"></i></div>
+                <h2><?php echo $students_count; ?></h2>
+                <h5>Total Students</h5>
+                <p>Registered students</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-icon red"><i class="bi bi-person-badge-fill"></i></div>
+                <h2><?php echo $advisors_count; ?></h2>
+                <h5>Total Advisors</h5>
+                <p>Academic advisors</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <div class="card-icon green"><i class="bi bi-book-fill"></i></div>
+                <h2><?php echo $subjects_count; ?></h2>
+                <h5>Subjects</h5>
+                <p>Available courses</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
+</script>
 </body>
 </html>
