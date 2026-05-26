@@ -1,90 +1,152 @@
 <?php
 session_start();
-include '../db_connect.php';
+require_once '../db_connect.php';
 
-// 1. Security: Only Admin allowed
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.html");
     exit();
 }
 
-// 2. Handle form submission
+// Fetch admin name
+$admin_name = 'Admin';
+$stmt = $conn->prepare("SELECT user_name FROM users WHERE user_id = ?");
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($row = $result->fetch_assoc()) {
+    $admin_name = $row['user_name'];
+}
+$stmt->close();
+
+// Fetch advisors for dropdown
+$advisors = [];
+$advisor_query = "SELECT user_id, user_name FROM users WHERE role = 'advisor' ORDER BY user_name";
+$advisor_result = $conn->query($advisor_query);
+if ($advisor_result) {
+    while ($row = $advisor_result->fetch_assoc()) {
+        $advisors[] = $row;
+    }
+}
+
 $message = '';
 $msg_type = '';
-$matrix_error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $matrix = trim($_POST['matrix']);
-    $name   = trim($_POST['name']);
-    $email  = trim($_POST['email']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $matrix = trim($_POST['matrix'] ?? '');
+    $name   = trim($_POST['name'] ?? '');
+    $utm_email = trim($_POST['utm_email'] ?? '');
+    $second_email = trim($_POST['second_email'] ?? '');
+    $phone  = trim($_POST['phone'] ?? '');
+    $programme = trim($_POST['programme'] ?? '');
+    $year = trim($_POST['year'] ?? '');
+    $semester = trim($_POST['semester'] ?? '');
+    $advisor_id = isset($_POST['advisor_id']) ? (int)$_POST['advisor_id'] : 0;
+    $password = $_POST['password'] ?? '';
+    $confirm = $_POST['confirm_password'] ?? '';
+
+    $errors = [];
 
     // Validation
-    $error = false;
+    if (empty($matrix)) $errors[] = "Matrix number is required.";
+    if (empty($name)) $errors[] = "Full name is required.";
+    if (empty($utm_email)) $errors[] = "UTM email is required.";
+    if (empty($phone)) $errors[] = "Phone number is required.";
+    if (empty($password)) $errors[] = "Password is required.";
+    if (empty($programme)) $errors[] = "Programme is required.";
+    if (empty($year)) $errors[] = "Year is required.";
+    if (empty($semester)) $errors[] = "Semester is required.";
+    if ($advisor_id <= 0) $errors[] = "Advisor must be selected.";
 
-    // Matrix number validation (must be integer)
-    if (!is_numeric($matrix) || $matrix <= 0) {
-        $matrix_error = "Matrix number must be a positive number.";
-        $error = true;
-    }
-
-    // Check if matrix already exists
-    if (!$error) {
-        $check_stmt = $conn->prepare("SELECT id FROM users WHERE Matrix = ?");
-        $check_stmt->bind_param("i", $matrix);
-        $check_stmt->execute();
-        $result = $check_stmt->get_result();
-        if ($result->num_rows > 0) {
-            $matrix_error = "Matrix number already registered. Please use a different number.";
-            $error = true;
+    if (empty($errors)) {
+        if (!filter_var($utm_email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid UTM email format.";
         }
-        $check_stmt->close();
-    }
-
-    // Check if email already exists
-    if (!$error) {
-        $check_email = $conn->prepare("SELECT id FROM users WHERE email = ?");
-        $check_email->bind_param("s", $email);
-        $check_email->execute();
-        $result_email = $check_email->get_result();
-        if ($result_email->num_rows > 0) {
-            $message = "Email already registered. Please use a different email.";
-            $msg_type = 'danger';
-            $error = true;
+        if (!empty($second_email) && !filter_var($second_email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid second email format.";
         }
-        $check_email->close();
-    }
-
-    // Password validation
-    if (!$error) {
         if (strlen($password) < 6) {
-            $message = "Password must be at least 6 characters long.";
-            $msg_type = 'danger';
-            $error = true;
-        } elseif ($password !== $confirm_password) {
-            $message = "Passwords do not match.";
-            $msg_type = 'danger';
-            $error = true;
+            $errors[] = "Password must be at least 6 characters.";
+        }
+        if ($password !== $confirm) {
+            $errors[] = "Passwords do not match.";
         }
     }
 
-    // Insert into database
-    if (!$error) {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        
-        $insert_stmt = $conn->prepare("INSERT INTO users (Matrix, name, email, password, role) VALUES (?, ?, ?, ?, 'student')");
-        $insert_stmt->bind_param("isss", $matrix, $name, $email, $hashed_password);
-        
-        if ($insert_stmt->execute()) {
-            // Success: Redirect to manage_students.php with success message
-            header("Location: manage_students.php?msg=Student added successfully.");
-            exit();
-        } else {
-            $message = "Error adding student: " . $conn->error;
+    if (!empty($errors)) {
+        $message = implode("<br>", $errors);
+        $msg_type = 'danger';
+    } else {
+        // Check duplicate matrix
+        $stmt = $conn->prepare("SELECT user_id FROM users WHERE matrix_number = ?");
+        $stmt->bind_param("s", $matrix);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            $message = "Matrix number already exists.";
             $msg_type = 'danger';
         }
-        $insert_stmt->close();
+        $stmt->close();
+
+        // Check duplicate email
+        if (empty($message)) {
+            $stmt = $conn->prepare("SELECT user_id FROM users WHERE utm_email = ?");
+            $stmt->bind_param("s", $utm_email);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows > 0) {
+                $message = "UTM email already registered.";
+                $msg_type = 'danger';
+            }
+            $stmt->close();
+        }
+
+        // If no duplicates, proceed
+        if (empty($message)) {
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $login_cred = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
+
+            // Insert into users
+            $stmt = $conn->prepare("INSERT INTO users (matrix_number, user_name, utm_email, second_email, phone, password, role, login_cred) VALUES (?, ?, ?, ?, ?, ?, 'student', ?)");
+            $stmt->bind_param("sssssss", $matrix, $name, $utm_email, $second_email, $phone, $hashed, $login_cred);
+            if ($stmt->execute()) {
+                $user_id = $stmt->insert_id;
+
+                // Check if a students record already exists (trigger might have created it)
+                $check = $conn->prepare("SELECT user_id FROM students WHERE user_id = ?");
+                $check->bind_param("i", $user_id);
+                $check->execute();
+                $exists = $check->get_result()->num_rows > 0;
+                $check->close();
+
+                if ($exists) {
+                    // Update the existing record
+                    $update = $conn->prepare("UPDATE students SET programme = ?, year = ?, semester = ?, advisor_id = ? WHERE user_id = ?");
+                    $update->bind_param("sssii", $programme, $year, $semester, $advisor_id, $user_id);
+                    if ($update->execute()) {
+                        header("Location: manage_students.php?msg=Student added successfully.");
+                        exit();
+                    } else {
+                        $message = "Error updating students: " . $conn->error;
+                        $msg_type = 'danger';
+                    }
+                    $update->close();
+                } else {
+                    // Insert new record
+                    $insert = $conn->prepare("INSERT INTO students (user_id, matrix_number, user_name, utm_email, second_email, phone, programme, year, semester, advisor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $insert->bind_param("issssssssi", $user_id, $matrix, $name, $utm_email, $second_email, $phone, $programme, $year, $semester, $advisor_id);
+                    if ($insert->execute()) {
+                        header("Location: manage_students.php?msg=Student added successfully.");
+                        exit();
+                    } else {
+                        $message = "Error inserting into students: " . $conn->error;
+                        $msg_type = 'danger';
+                    }
+                    $insert->close();
+                }
+            } else {
+                $message = "Database error: " . $conn->error;
+                $msg_type = 'danger';
+            }
+            $stmt->close();
+        }
     }
 }
 ?>
@@ -94,115 +156,187 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Student - Admin Portal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { display: flex; background-color: #f4f6f9; min-height: 100vh; }
-        
-        .sidebar { width: 250px; background-color: #7A0D2A; color: white; display: flex; flex-direction: column; padding: 20px 0; position: fixed; height: 100%; left: 0; top: 0; z-index: 1000; }
-        .sidebar h1 { font-size: 24px; font-weight: 600; padding: 0 25px 30px 25px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar nav ul { list-style: none; padding: 20px 15px; }
-        .sidebar nav ul li { margin-bottom: 12px; }
-        .sidebar nav ul li a { display: flex; align-items: center; text-decoration: none; color: white; padding: 12px 20px; border-radius: 8px; transition: 0.3s ease; font-size: 16px; }
-        .sidebar nav ul li a i { margin-right: 15px; width: 20px; text-align: center; }
-        .sidebar nav ul li a:hover { background-color: rgba(255,255,255,0.1); }
-        .sidebar nav ul li a.active { background-color: #DE9E1F; color: #fff; font-weight: 500; }
-        .sidebar nav ul li a.logout { margin-top: 60px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; border-radius: 0; }
-
-        .main-content { margin-left: 250px; width: calc(100% - 250px); padding: 30px; background-color: #f4f6f9; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f8f6f4; display: flex; overflow-x: hidden; }
+        .sidebar {
+            width: 280px; height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed; padding: 30px 20px; color: white;
+            transition: transform 0.3s ease;
+        }
+        .sidebar.collapsed { transform: translateX(-280px); }
+        .logo { text-align: center; margin-bottom: 50px; }
+        .logo img { width: 130px; }
+        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .menu a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
+        }
+        .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
+        .menu i { font-size: 20px; }
+        .logout {
+            position: absolute; bottom: 30px;
+            width: calc(100% - 40px); left: 20px;
+        }
+        .logout a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; background: rgba(255,255,255,0.1);
+        }
+        .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; width: calc(100% - 280px); }
+        .main-content.expanded { margin-left: 0; }
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; background: white; padding: 15px 25px;
+            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .toggle-btn { background: none; border: none; font-size: 22px; cursor: pointer; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .page-header h2 { color: #1f2937; }
-        .btn-cancel { background-color: #6b7280; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .btn-cancel:hover { background-color: #4b5563; color: white; }
-
-        .form-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); max-width: 600px; }
+        .page-header h2 { color: #670019; font-weight: 700; }
+        .btn-cancel { background: #6c757d; color: white; padding: 8px 20px; border-radius: 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-cancel:hover { background: #5a6268; color: white; }
+        .form-card { background: white; border-radius: 25px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 800px; }
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 6px; color: #4b5563; font-weight: 500; }
-        .form-group input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 15px; transition: 0.2s; }
-        .form-group input:focus { outline: none; border-color: #7A0D2A; box-shadow: 0 0 0 3px rgba(122, 13, 42, 0.1); }
-        .form-group .error-text { color: #dc2626; font-size: 14px; margin-top: 4px; display: block; }
-        .btn-submit { background-color: #7A0D2A; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: 0.2s; font-weight: 500; }
-        .btn-submit:hover { background-color: #5c0920; }
-
-        .alert { padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
-        .alert-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; display: block; }
-        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; display: block; }
-
-        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; } }
-        @media (max-width: 576px) { body { flex-direction: column; } .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; width: 100%; } }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #670019; box-shadow: 0 0 0 3px rgba(103,0,25,0.08); }
+        .row-custom { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .btn-submit { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
+        .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; width: 100%; }
+            .row-custom { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <h1>Admin Portal</h1>
-        <nav>
-            <ul>
-                <li><a href="admin_dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="manage_students.php" class="active"><i class="fas fa-user-graduate"></i> Manage Students</a></li>
-                <li><a href="manage_advisors.php"><i class="fas fa-users"></i> Manage Advisors</a></li>
-                <li><a href="manage_subjects.php"><i class="fas fa-book"></i> Manage Subjects</a></li>
-                <li><a href="../forgot_password.php"><i class="fas fa-key"></i> Forgot Password</a></li>
-                <li><a href="logout.php" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-        </nav>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-
-        <!-- PAGE HEADER -->
-        <div class="page-header">
-            <h2>Add New Student</h2>
-            <a href="manage_students.php" class="btn-cancel"><i class="fas fa-arrow-left"></i> Back to Students</a>
-        </div>
-
-        <!-- ALERT MESSAGE -->
-        <?php if ($message): ?>
-            <div class="alert alert-<?php echo $msg_type; ?>"><?php echo $message; ?></div>
-        <?php endif; ?>
-
-        <!-- ADD STUDENT FORM -->
-        <div class="form-card">
-            <form method="POST" action="">
-                
-                <div class="form-group">
-                    <label for="matrix">Matrix Number</label>
-                    <input type="number" id="matrix" name="matrix" value="<?php echo htmlspecialchars($matrix ?? ''); ?>" required>
-                    <?php if ($matrix_error): ?>
-                        <span class="error-text"><?php echo $matrix_error; ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($name ?? ''); ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email ?? ''); ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirm_password">Confirm Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password" required>
-                </div>
-
-                <button type="submit" class="btn-submit"><i class="fas fa-user-plus"></i> Add Student</button>
-
-            </form>
-        </div>
-
+<div class="sidebar">
+    <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+    <div class="menu">
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
+        <a href="profile.php"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="../forgot_password.php"><i class="bi bi-key-fill"></i> Forgot Password</a>
     </div>
-
+    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+</div>
+<div class="main-content">
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box" onclick="location.href='profile.php'">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div><h6 class="mb-0"><?php echo htmlspecialchars($admin_name); ?></h6><small class="text-muted">Admin</small></div>
+        </div>
+    </div>
+    <div class="page-header">
+        <h2>Add New Student</h2>
+        <a href="manage_students.php" class="btn-cancel"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+    <?php if ($message): ?>
+        <div class="alert alert-danger"><?php echo nl2br(htmlspecialchars($message)); ?></div>
+    <?php endif; ?>
+    <div class="form-card">
+        <form method="POST">
+            <div class="row-custom">
+                <div class="form-group">
+                    <label>Matrix Number</label>
+                    <input type="text" name="matrix" required>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>UTM Email</label>
+                    <input type="email" name="utm_email" required>
+                </div>
+                <div class="form-group">
+                    <label>Second Email</label>
+                    <input type="email" name="second_email">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Programme</label>
+                    <select name="programme" required>
+                        <option value="">Select Programme</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Electrical Engineering">Electrical Engineering</option>
+                        <option value="Sport Science">Sport Science</option>
+                        <option value="Pengajian Islam">Pengajian Islam</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <select name="year" required>
+                        <option value="">Select Year</option>
+                        <option value="1">Year 1</option>
+                        <option value="2">Year 2</option>
+                        <option value="3">Year 3</option>
+                        <option value="4">Year 4</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Semester</label>
+                    <select name="semester" required>
+                        <option value="">Select Semester</option>
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Advisor</label>
+                    <select name="advisor_id" required>
+                        <option value="">-- Select Advisor --</option>
+                        <?php foreach ($advisors as $advisor): ?>
+                            <option value="<?php echo $advisor['user_id']; ?>"><?php echo htmlspecialchars($advisor['user_name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirm_password" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit"><i class="bi bi-save"></i> Add Student</button>
+        </form>
+    </div>
+</div>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
+</script>
 </body>
 </html>

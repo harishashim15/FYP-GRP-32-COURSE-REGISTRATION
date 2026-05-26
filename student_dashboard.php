@@ -383,6 +383,8 @@ $first_name = explode(' ', $student_name)[0];
             <i class="bi bi-lock-fill"></i>
             Change Password
         </a>
+        <a href="student_register.html"><i class="bi bi-journal-text"></i> Register</a>
+<a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
     </div>
     <div class="logout">
         <a href="logout.php">

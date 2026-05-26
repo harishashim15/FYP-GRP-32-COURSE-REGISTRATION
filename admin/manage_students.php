@@ -1,33 +1,37 @@
 <?php
 session_start();
-include '../db_connect.php';
+require_once '../db_connect.php';
 
-// 1. Security: Only Admin allowed
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.html");
     exit();
 }
 
-// 2. Delete student if delete_id is set
+// Fetch admin name
+$admin_name = 'Admin';
+$stmt = $conn->prepare("SELECT user_name FROM users WHERE user_id = ?");
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($row = $result->fetch_assoc()) {
+    $admin_name = $row['user_name'];
+}
+$stmt->close();
+
+// Delete student
 if (isset($_GET['delete_id'])) {
     $delete_id = intval($_GET['delete_id']);
-    
-    // Delete from users table
-    $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role = 'student'");
+    $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ? AND role = 'student'");
     $stmt->bind_param("i", $delete_id);
-    if ($stmt->execute()) {
-        $message = "Student deleted successfully.";
-        $msg_type = 'success';
-    } else {
-        $message = "Error deleting student.";
-        $msg_type = 'danger';
-    }
+    $stmt->execute();
     $stmt->close();
+    header("Location: manage_students.php?msg=Student deleted successfully.");
+    exit();
 }
 
-// 3. Fetch all students
+// Fetch all students
 $students = [];
-$query = "SELECT id, name, email FROM users WHERE role = 'student' ORDER BY id DESC";
+$query = "SELECT user_id, matrix_number, user_name, utm_email FROM users WHERE role = 'student' ORDER BY user_id DESC";
 $result = $conn->query($query);
 if ($result) {
     while ($row = $result->fetch_assoc()) {
@@ -41,132 +45,141 @@ if ($result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Students - Admin Portal</title>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Reuse same styles as dashboard -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Reset & Base */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { display: flex; background-color: #f4f6f9; min-height: 100vh; }
-        
-        /* Sidebar (Same as dashboard) */
-        .sidebar { width: 250px; background-color: #7A0D2A; color: white; display: flex; flex-direction: column; padding: 20px 0; position: fixed; height: 100%; left: 0; top: 0; z-index: 1000; }
-        .sidebar h1 { font-size: 24px; font-weight: 600; padding: 0 25px 30px 25px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar nav ul { list-style: none; padding: 20px 15px; }
-        .sidebar nav ul li { margin-bottom: 12px; }
-        .sidebar nav ul li a { display: flex; align-items: center; text-decoration: none; color: white; padding: 12px 20px; border-radius: 8px; transition: 0.3s ease; font-size: 16px; }
-        .sidebar nav ul li a i { margin-right: 15px; width: 20px; text-align: center; }
-        .sidebar nav ul li a:hover { background-color: rgba(255,255,255,0.1); }
-        .sidebar nav ul li a.active { background-color: #DE9E1F; color: #fff; font-weight: 500; }
-        .sidebar nav ul li a.logout { margin-top: 60px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; border-radius: 0; }
-
-        /* Main Content */
-        .main-content { margin-left: 250px; width: calc(100% - 250px); padding: 30px; background-color: #f4f6f9; }
-        
-        /* Page Header */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f8f6f4; overflow-x: hidden; }
+        .sidebar {
+            width: 280px; height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed; padding: 30px 20px; color: white;
+            transition: transform 0.3s ease;
+        }
+        .sidebar.collapsed { transform: translateX(-280px); }
+        .logo { text-align: center; margin-bottom: 50px; }
+        .logo img { width: 130px; }
+        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .menu a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
+        }
+        .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
+        .menu i { font-size: 20px; }
+        .logout {
+            position: absolute; bottom: 30px;
+            width: calc(100% - 40px); left: 20px;
+        }
+        .logout a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; background: rgba(255,255,255,0.1);
+        }
+        .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content.expanded { margin-left: 0; }
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; background: white; padding: 15px 25px;
+            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .toggle-btn { background: none; border: none; font-size: 22px; cursor: pointer; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .page-header h2 { color: #1f2937; }
-        .btn-add { background-color: #7A0D2A; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; border: none; font-weight: 500; }
-        .btn-add:hover { background-color: #5c0920; color: white; }
-
-        /* Table */
-        .table-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; }
-        th { text-align: left; background-color: #f8f9fa; padding: 12px 15px; color: #4b5563; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
-        td { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; color: #1f2937; }
-        tr:hover { background-color: #f9fafb; }
-
-        /* Action Buttons */
-        .action-btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block; margin-right: 5px; }
-        .btn-edit { background-color: #DE9E1F; color: white; }
-        .btn-edit:hover { background-color: #c48a1a; color: white; }
-        .btn-delete { background-color: #dc2626; color: white; }
-        .btn-delete:hover { background-color: #b91c1c; color: white; }
-
-        /* Alert */
-        .alert { padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; }
-        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .alert-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
-        /* Responsive */
-        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; padding: 20px; } }
-        @media (max-width: 576px) { body { flex-direction: column; } .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; width: 100%; } }
+        .page-header h2 { color: #670019; font-weight: 700; }
+        .btn-add {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white; padding: 10px 20px; border-radius: 25px;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+            transition: 0.3s;
+        }
+        .btn-add:hover { background: linear-gradient(to right, #8b0022, #a80028); color: white; }
+        .table-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; background: #f8f6f4; padding: 12px 15px; color: #670019; font-weight: 600; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #333; }
+        tr:hover { background: #fdf9f7; }
+        .action-btn { padding: 5px 12px; border-radius: 20px; text-decoration: none; font-size: 13px; display: inline-block; margin-right: 5px; }
+        .btn-edit { background: #f4a000; color: white; }
+        .btn-edit:hover { background: #e08700; color: white; }
+        .btn-delete { background: #dc2626; color: white; }
+        .btn-delete:hover { background: #b91c1c; color: white; }
+        .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; background: #d4edda; color: #155724; }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; }
+        }
     </style>
 </head>
 <body>
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <h1>Admin Portal</h1>
-        <nav>
-            <ul>
-                <li><a href="admin_dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="manage_students.php" class="active"><i class="fas fa-user-graduate"></i> Manage Students</a></li>
-                <li><a href="manage_advisors.php"><i class="fas fa-users"></i> Manage Advisors</a></li>
-                <li><a href="manage_subjects.php"><i class="fas fa-book"></i> Manage Subjects</a></li>
-                <li><a href="../forgot_password.php"><i class="fas fa-key"></i> Forgot Password</a></li>
-                <li><a href="logout.php" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-        </nav>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-
-        <!-- PAGE HEADER -->
-        <div class="page-header">
-            <h2>Manage Students</h2>
-            <a href="add_student.php" class="btn-add"><i class="fas fa-plus-circle"></i> Add New Student</a>
-        </div>
-
-        <!-- ALERT MESSAGE -->
-        <?php if (isset($message)): ?>
-            <div class="alert alert-<?php echo $msg_type; ?>"><?php echo $message; ?></div>
-        <?php endif; ?>
-
-        <!-- STUDENT TABLE -->
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th style="text-align: center;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (count($students) > 0): ?>
-                        <?php foreach ($students as $student): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($student['id']); ?></td>
-                                <td><?php echo htmlspecialchars($student['name']); ?></td>
-                                <td><?php echo htmlspecialchars($student['email']); ?></td>
-                                <td style="text-align: center;">
-                                    <a href="edit_student.php?id=<?php echo $student['id']; ?>" class="action-btn btn-edit">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                    <a href="manage_students.php?delete_id=<?php echo $student['id']; ?>" 
-                                       class="action-btn btn-delete" 
-                                       onclick="return confirm('Are you sure you want to delete this student? This cannot be undone.');">
-                                        <i class="fas fa-trash-alt"></i> Delete
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="4" style="text-align: center; padding: 30px; color: #6b7280;">
-                                No students found. <a href="add_student.php" style="color: #7A0D2A; font-weight: 500;">Add a student</a>
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-
+<div class="sidebar">
+    <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+    <div class="menu">
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
+        <a href="profile.php"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="../forgot_password.php"><i class="bi bi-key-fill"></i> Forgot Password</a>
     </div>
-
+    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+</div>
+<div class="main-content">
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box" onclick="location.href='profile.php'">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div><h6 class="mb-0"><?php echo htmlspecialchars($admin_name); ?></h6><small class="text-muted">Admin</small></div>
+        </div>
+    </div>
+    <div class="page-header">
+        <h2>Manage Students</h2>
+        <a href="add_student.php" class="btn-add"><i class="bi bi-plus-circle"></i> Add Student</a>
+    </div>
+    <?php if (isset($_GET['msg'])): ?>
+        <div class="alert"><?php echo htmlspecialchars($_GET['msg']); ?></div>
+    <?php endif; ?>
+    <div class="table-card">
+        <table>
+            <thead><tr><th>ID</th><th>Matrix</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead>
+            <tbody>
+                <?php foreach ($students as $s): ?>
+                    <tr>
+                        <td><?php echo $s['user_id']; ?></td>
+                        <td><?php echo htmlspecialchars($s['matrix_number']); ?></td>
+                        <td><?php echo htmlspecialchars($s['user_name']); ?></td>
+                        <td><?php echo htmlspecialchars($s['utm_email']); ?></td>
+                        <td>
+                            <a href="edit_student.php?id=<?php echo $s['user_id']; ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
+                            <a href="manage_students.php?delete_id=<?php echo $s['user_id']; ?>" class="action-btn btn-delete" onclick="return confirm('Delete this student?')"><i class="bi bi-trash"></i> Delete</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                <?php if (empty($students)): ?>
+                    <tr><td colspan="5" class="text-center">No students found</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
+</script>
 </body>
 </html>

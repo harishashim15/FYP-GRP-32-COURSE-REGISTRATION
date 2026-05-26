@@ -7,27 +7,28 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Fetch counts from fypdb3
+// Fetch admin name from database
+$admin_name = 'Admin';
+$stmt = $conn->prepare("SELECT user_name FROM users WHERE user_id = ?");
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($row = $result->fetch_assoc()) {
+    $admin_name = $row['user_name'];
+}
+$stmt->close();
+
+// Fetch counts
 $students_count = 0;
 $advisors_count = 0;
 $subjects_count = 0;
 
-if ($conn) {
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE role = 'student'");
-    $stmt->execute();
-    $students_count = $stmt->get_result()->fetch_row()[0];
-
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE role = 'advisor'");
-    $stmt->execute();
-    $advisors_count = $stmt->get_result()->fetch_row()[0];
-
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM subjects");
-    $stmt->execute();
-    $subjects_count = $stmt->get_result()->fetch_row()[0];
-}
-
-// Admin name
-$admin_name = $_SESSION['user_name'] ?? 'Admin';
+$result = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'student'");
+$students_count = $result->fetch_row()[0];
+$result = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'advisor'");
+$advisors_count = $result->fetch_row()[0];
+$result = $conn->query("SELECT COUNT(*) FROM subjects");
+$subjects_count = $result->fetch_row()[0];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,7 +76,7 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
             margin-bottom: 30px; background: white; padding: 15px 25px;
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
+        .toggle-btn { background: none; border: none; font-size: 22px; cursor: pointer; }
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .hero {
@@ -117,7 +118,7 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="profile.php"><i class="bi bi-person-fill"></i> Profile</a>
-        <a href="../forgot_password.php"><i class="bi bi-key-fill"></i> Forgot Password</a>
+        <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
     </div>
     <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
@@ -131,7 +132,7 @@ $admin_name = $_SESSION['user_name'] ?? 'Admin';
         </div>
     </div>
     <div class="hero">
-        <h1>Welcome Admin, <?php echo htmlspecialchars(explode(' ', $admin_name)[0]); ?> 👋</h1>
+        <h1>Welcome <?php echo htmlspecialchars(explode(' ', $admin_name)[0]); ?> 👋</h1>
         <p>Manage students, advisors, and course subjects.</p>
     </div>
     <div class="row g-4">
