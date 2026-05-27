@@ -41,8 +41,7 @@
         .logout a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 16px;
-            background: rgba(255,255,255,0.1);
+            border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
 
@@ -107,7 +106,7 @@
 </head>
 <body>
 
-<!-- SIDEBAR (same) -->
+<!-- SIDEBAR -->
 <div class="sidebar">
     <div class="logo">
         <img src="images/utmlogo.png" alt="UTM Logo">
@@ -212,7 +211,20 @@
             document.getElementById('secondEmail').value = profile.second_email || '';
             document.getElementById('phone').value = profile.phone || '';
             document.getElementById('department').value = profile.department || '';
-            document.getElementById('role').value = profile.role || 'Academic Advisor';
+            
+            // Map role from database to user-friendly display
+            let roleDisplay = 'Academic Advisor';
+            if (profile.role === 'advisor') {
+                roleDisplay = 'Academic Advisor';
+            } else if (profile.role === 'student') {
+                roleDisplay = 'Student';
+            } else if (profile.role === 'admin') {
+                roleDisplay = 'Admin';
+            } else {
+                roleDisplay = profile.role || 'Academic Advisor';
+            }
+            document.getElementById('role').value = roleDisplay;
+            
             document.getElementById('advisorName').innerText = profile.full_name || 'Miss Nurul Asyikin';
             if (profile.profile_pic) {
                 document.getElementById('profilePic').src = profile.profile_pic;

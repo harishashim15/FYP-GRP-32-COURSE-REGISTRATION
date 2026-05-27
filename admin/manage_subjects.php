@@ -97,6 +97,23 @@ if ($result) {
             transition: 0.3s;
         }
         .btn-add:hover { background: linear-gradient(to right, #8b0022, #a80028); color: white; }
+        .search-bar {
+            margin-bottom: 25px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        .search-bar input:focus {
+            border-color: #670019;
+            box-shadow: 0 0 0 4px rgba(103,0,25,0.08);
+        }
         .table-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; background: #f8f6f4; padding: 12px 15px; color: #670019; font-weight: 600; }
@@ -108,6 +125,12 @@ if ($result) {
         .btn-delete { background: #dc2626; color: white; }
         .btn-delete:hover { background: #b91c1c; color: white; }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; background: #d4edda; color: #155724; }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 15px;
+        }
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
@@ -117,11 +140,11 @@ if ($result) {
 <body>
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
-  <div class="menu">
+    <div class="menu">
         <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
-        <a href="manage_subjects.php"class="active"><i class="bi bi-book-fill"></i> Manage Subjects</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_subjects.php" class="active"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
     </div>
@@ -143,26 +166,42 @@ if ($result) {
     <?php if (isset($_GET['msg'])): ?>
         <div class="alert"><?php echo htmlspecialchars($_GET['msg']); ?></div>
     <?php endif; ?>
+    
+    <!-- Live Search Bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by subject code or name (live search)...">
+    </div>
+    
     <div class="table-card">
-        <table>
-            <thead><tr><th>Subject Code</th><th>Subject Name</th><th>Credits</th><th>Actions</th></tr></thead>
-            <tbody>
-                <?php foreach ($subjects as $s): ?>
+        <div style="overflow-x: auto;">
+            <table id="subjectsTable">
+                <thead>
                     <tr>
-                        <td><?php echo htmlspecialchars($s['subject_code']); ?></td>
-                        <td><?php echo htmlspecialchars($s['subject_name']); ?></td>
-                        <td><?php echo $s['credits']; ?></td>
-                        <td>
-                            <a href="edit_subject.php?code=<?php echo urlencode($s['subject_code']); ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
-                            <a href="manage_subjects.php?delete_id=<?php echo urlencode($s['subject_code']); ?>" class="action-btn btn-delete" onclick="return confirm('Delete this subject?')"><i class="bi bi-trash"></i> Delete</a>
-                        </td>
+                        <th>Subject Code</th>
+                        <th>Subject Name</th>
+                        <th>Credits</th>
+                        <th>Actions</th>
                     </tr>
-                <?php endforeach; ?>
-                <?php if (empty($subjects)): ?>
-                    <tr><td colspan="4" class="text-center">No subjects found</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="tableBody">
+                    <?php foreach ($subjects as $s): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($s['subject_code']); ?></td>
+                            <td><?php echo htmlspecialchars($s['subject_name']); ?></td>
+                            <td><?php echo $s['credits']; ?></td>
+                            <td>
+                                <a href="edit_subject.php?code=<?php echo urlencode($s['subject_code']); ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
+                                <a href="manage_subjects.php?delete_id=<?php echo urlencode($s['subject_code']); ?>" class="action-btn btn-delete" onclick="return confirm('Delete this subject?')"><i class="bi bi-trash"></i> Delete</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if (empty($subjects)): ?>
+                        <tr><td colspan="4" class="text-center">No subjects found</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+            <div id="noResultsMsg" class="no-results" style="display: none;">No subjects match your search.</div>
+        </div>
     </div>
 </div>
 <script>
@@ -179,6 +218,41 @@ if ($result) {
             document.querySelector('.main-content').classList.add('expanded');
         }
     })();
+    
+    // Live filtering
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('subjectsTable');
+    const noResultsMsg = document.getElementById('noResultsMsg');
+    const rows = table.getElementsByTagName('tr');
+    
+    function filterTable() {
+        const filter = searchInput.value.toLowerCase().trim();
+        let hasVisible = false;
+        
+        // Skip header row (index 0)
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            if (cells.length === 0) continue;
+            
+            const codeCell = cells[0]; // Subject Code column
+            const nameCell = cells[1]; // Subject Name column
+            const code = codeCell ? codeCell.textContent.toLowerCase() : '';
+            const name = nameCell ? nameCell.textContent.toLowerCase() : '';
+            
+            if (code.includes(filter) || name.includes(filter)) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        }
+        
+        noResultsMsg.style.display = hasVisible ? 'none' : 'block';
+    }
+    
+    // Attach event listener for live search
+    searchInput.addEventListener('input', filterTable);
 </script>
 </body>
 </html>

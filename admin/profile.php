@@ -219,10 +219,10 @@ $stmt->close();
                     <label>Phone Number</label>
                     <input type="text" name="phone" value="<?php echo htmlspecialchars($admin_data['phone'] ?? ''); ?>">
                 </div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <input type="text" value="<?php echo htmlspecialchars($admin_data['role'] ?? 'admin'); ?>" disabled>
-                </div>
+               <div class="form-group">
+    <label>Role</label>
+    <input type="text" value="<?php echo ucfirst(htmlspecialchars($admin_data['role'] ?? 'admin')); ?>" disabled>
+</div>
             </div>
             <button type="submit" class="save-btn"><i class="bi bi-save"></i> Save Changes</button>
         </form>
