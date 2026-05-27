@@ -2,6 +2,13 @@
 session_start();
 require_once '../db_connect.php';
 
+// PHPMailer for email
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+require_once '../PHPMailer/src/Exception.php';
+require_once '../PHPMailer/src/PHPMailer.php';
+require_once '../PHPMailer/src/SMTP.php';
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.html");
     exit();
@@ -28,47 +35,88 @@ if ($advisor_result) {
     }
 }
 
+// Function to send account creation email
+function sendAccountCreatedEmail($email, $name, $login_cred, $default_password) {
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'ariefiqmal2006@gmail.com';
+        $mail->Password   = 'xill egye ginu ebig';  // App password
+        $mail->SMTPSecure = 'tls';
+        $mail->Port       = 587;
+
+        $mail->setFrom('ariefiqmal2006@gmail.com', 'UTM SYSTEM ADMIN');
+        $mail->addAddress($email, $name);
+        $mail->isHTML(true);
+        $mail->Subject = 'Your Student Account Has Been Created';
+        $mail->Body    = "
+            <h3>Welcome to UTM Course Registration System</h3>
+            <p>Dear <strong>{$name}</strong>,</p>
+            <p>A student account has been created for you by the administrator.</p>
+            <p><strong>Your login credentials:</strong><br>
+            Login ID: <strong>{$login_cred}</strong><br>
+            Temporary Password: <strong>{$default_password}</strong></p>
+            <p>Please login using the link below and change your password after first login.</p>
+            <p><a href='http://localhost/FYP/FYP%20COURSE%20REGISTRATION/index.html'>Click here to login</a></p>
+            <p>Regards,<br>UTM SYSTEM ADMIN</p>
+        ";
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Email failed: " . $mail->ErrorInfo);
+        return false;
+    }
+}
+
 $message = '';
 $msg_type = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $matrix = trim($_POST['matrix'] ?? '');
-    $name   = trim($_POST['name'] ?? '');
-    $utm_email = trim($_POST['utm_email'] ?? '');
-    $second_email = trim($_POST['second_email'] ?? '');
-    $phone  = trim($_POST['phone'] ?? '');
-    $programme = trim($_POST['programme'] ?? '');
-    $year = trim($_POST['year'] ?? '');
-    $semester = trim($_POST['semester'] ?? '');
+    $matrix = trim($_POST['matrix']);
+    $name   = trim($_POST['name']);
+    $utm_email = trim($_POST['utm_email']);
+    $second_email = trim($_POST['second_email']);
+    $phone  = trim($_POST['phone']);
+    $programme = trim($_POST['programme']);
+    $year = trim($_POST['year']);
+    $semester = trim($_POST['semester']);
     $advisor_id = isset($_POST['advisor_id']) ? (int)$_POST['advisor_id'] : 0;
-    $password = $_POST['password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
 
     $errors = [];
 
-    // Validation
+    // Validation (no password fields)
     if (empty($matrix)) $errors[] = "Matrix number is required.";
     if (empty($name)) $errors[] = "Full name is required.";
     if (empty($utm_email)) $errors[] = "UTM email is required.";
     if (empty($phone)) $errors[] = "Phone number is required.";
-    if (empty($password)) $errors[] = "Password is required.";
     if (empty($programme)) $errors[] = "Programme is required.";
     if (empty($year)) $errors[] = "Year is required.";
     if (empty($semester)) $errors[] = "Semester is required.";
     if ($advisor_id <= 0) $errors[] = "Advisor must be selected.";
+    if (!filter_var($utm_email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid UTM email format.";
+    if (!empty($second_email) && !filter_var($second_email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid second email format.";
 
     if (empty($errors)) {
-        if (!filter_var($utm_email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Invalid UTM email format.";
+        // Check duplicate matrix
+        $stmt = $conn->prepare("SELECT user_id FROM users WHERE matrix_number = ?");
+        $stmt->bind_param("s", $matrix);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            $errors[] = "Matrix number already exists.";
         }
-        if (!empty($second_email) && !filter_var($second_email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Invalid second email format.";
-        }
-        if (strlen($password) < 6) {
-            $errors[] = "Password must be at least 6 characters.";
-        }
-        if ($password !== $confirm) {
-            $errors[] = "Passwords do not match.";
+        $stmt->close();
+
+        // Check duplicate email
+        if (empty($errors)) {
+            $stmt = $conn->prepare("SELECT user_id FROM users WHERE utm_email = ?");
+            $stmt->bind_param("s", $utm_email);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows > 0) {
+                $errors[] = "UTM email already exists.";
+            }
+            $stmt->close();
         }
     }
 
@@ -76,77 +124,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = implode("<br>", $errors);
         $msg_type = 'danger';
     } else {
-        // Check duplicate matrix
-        $stmt = $conn->prepare("SELECT user_id FROM users WHERE matrix_number = ?");
-        $stmt->bind_param("s", $matrix);
-        $stmt->execute();
-        if ($stmt->get_result()->num_rows > 0) {
-            $message = "Matrix number already exists.";
+        // Default password
+        $default_password = 'pass1234';
+        $hashed = password_hash($default_password, PASSWORD_DEFAULT);
+        $login_cred = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
+
+        // Insert into users
+        $stmt = $conn->prepare("INSERT INTO users (matrix_number, user_name, utm_email, second_email, phone, password, role, login_cred) VALUES (?, ?, ?, ?, ?, ?, 'student', ?)");
+        $stmt->bind_param("sssssss", $matrix, $name, $utm_email, $second_email, $phone, $hashed, $login_cred);
+        if ($stmt->execute()) {
+            $user_id = $stmt->insert_id;
+
+            // Update students table (trigger already inserted, we update with correct values)
+            $stmt2 = $conn->prepare("UPDATE students SET programme = ?, year = ?, semester = ?, advisor_id = ? WHERE user_id = ?");
+            $stmt2->bind_param("sssii", $programme, $year, $semester, $advisor_id, $user_id);
+            $stmt2->execute();
+            $stmt2->close();
+
+            // Send email notification – send to second email if provided, otherwise UTM email
+            $recipient_email = !empty($second_email) ? $second_email : $utm_email;
+            $email_sent = sendAccountCreatedEmail($recipient_email, $name, $login_cred, $default_password);
+            if (!$email_sent) {
+                $message = "Student added successfully, but email notification could not be sent.";
+                $msg_type = 'warning';
+            } else {
+                $message = "Student added successfully. Email notification sent to {$recipient_email}.";
+                $msg_type = 'success';
+            }
+            header("Location: manage_students.php?msg=" . urlencode($message));
+            exit();
+        } else {
+            $message = "Database error: " . $conn->error;
             $msg_type = 'danger';
         }
         $stmt->close();
-
-        // Check duplicate email
-        if (empty($message)) {
-            $stmt = $conn->prepare("SELECT user_id FROM users WHERE utm_email = ?");
-            $stmt->bind_param("s", $utm_email);
-            $stmt->execute();
-            if ($stmt->get_result()->num_rows > 0) {
-                $message = "UTM email already registered.";
-                $msg_type = 'danger';
-            }
-            $stmt->close();
-        }
-
-        // If no duplicates, proceed
-        if (empty($message)) {
-            $hashed = password_hash($password, PASSWORD_DEFAULT);
-            $login_cred = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
-
-            // Insert into users
-            $stmt = $conn->prepare("INSERT INTO users (matrix_number, user_name, utm_email, second_email, phone, password, role, login_cred) VALUES (?, ?, ?, ?, ?, ?, 'student', ?)");
-            $stmt->bind_param("sssssss", $matrix, $name, $utm_email, $second_email, $phone, $hashed, $login_cred);
-            if ($stmt->execute()) {
-                $user_id = $stmt->insert_id;
-
-                // Check if a students record already exists (trigger might have created it)
-                $check = $conn->prepare("SELECT user_id FROM students WHERE user_id = ?");
-                $check->bind_param("i", $user_id);
-                $check->execute();
-                $exists = $check->get_result()->num_rows > 0;
-                $check->close();
-
-                if ($exists) {
-                    // Update the existing record
-                    $update = $conn->prepare("UPDATE students SET programme = ?, year = ?, semester = ?, advisor_id = ? WHERE user_id = ?");
-                    $update->bind_param("sssii", $programme, $year, $semester, $advisor_id, $user_id);
-                    if ($update->execute()) {
-                        header("Location: manage_students.php?msg=Student added successfully.");
-                        exit();
-                    } else {
-                        $message = "Error updating students: " . $conn->error;
-                        $msg_type = 'danger';
-                    }
-                    $update->close();
-                } else {
-                    // Insert new record
-                    $insert = $conn->prepare("INSERT INTO students (user_id, matrix_number, user_name, utm_email, second_email, phone, programme, year, semester, advisor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                    $insert->bind_param("issssssssi", $user_id, $matrix, $name, $utm_email, $second_email, $phone, $programme, $year, $semester, $advisor_id);
-                    if ($insert->execute()) {
-                        header("Location: manage_students.php?msg=Student added successfully.");
-                        exit();
-                    } else {
-                        $message = "Error inserting into students: " . $conn->error;
-                        $msg_type = 'danger';
-                    }
-                    $insert->close();
-                }
-            } else {
-                $message = "Database error: " . $conn->error;
-                $msg_type = 'danger';
-            }
-            $stmt->close();
-        }
     }
 }
 ?>
@@ -212,7 +223,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .btn-submit { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: 0.3s; }
         .btn-submit:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; }
-        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; }
+        .alert-warning { background: #fff3cd; color: #856404; }
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; width: 100%; }
@@ -223,15 +235,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
-    <div class="menu">
+   <div class="menu">
         <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
-        <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
+        <a href="manage_advisors.php" class="active"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="profile.php"><i class="bi bi-person-fill"></i> Profile</a>
-        <a href="../forgot_password.php"><i class="bi bi-key-fill"></i> Forgot Password</a>
+        <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
     </div>
-    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 <div class="main-content">
     <div class="topbar">
@@ -247,62 +259,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <a href="manage_students.php" class="btn-cancel"><i class="bi bi-arrow-left"></i> Back</a>
     </div>
     <?php if ($message): ?>
-        <div class="alert alert-danger"><?php echo nl2br(htmlspecialchars($message)); ?></div>
+        <div class="alert alert-<?php echo $msg_type; ?>"><?php echo nl2br(htmlspecialchars($message)); ?></div>
     <?php endif; ?>
     <div class="form-card">
         <form method="POST">
             <div class="row-custom">
-                <div class="form-group">
-                    <label>Matrix Number</label>
-                    <input type="text" name="matrix" required>
-                </div>
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label>UTM Email</label>
-                    <input type="email" name="utm_email" required>
-                </div>
-                <div class="form-group">
-                    <label>Second Email</label>
-                    <input type="email" name="second_email">
-                </div>
-                <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" name="phone" required>
-                </div>
-                <div class="form-group">
-                    <label>Programme</label>
+                <div class="form-group"><label>Matrix Number</label><input type="text" name="matrix" required></div>
+                <div class="form-group"><label>Full Name</label><input type="text" name="name" required></div>
+                <div class="form-group"><label>UTM Email</label><input type="email" name="utm_email" required></div>
+                <div class="form-group"><label>Second Email (for notifications)</label><input type="email" name="second_email"></div>
+                <div class="form-group"><label>Phone Number</label><input type="text" name="phone" required></div>
+                <div class="form-group"><label>Programme</label>
                     <select name="programme" required>
-                        <option value="">Select Programme</option>
                         <option value="Computer Science">Computer Science</option>
                         <option value="Electrical Engineering">Electrical Engineering</option>
                         <option value="Sport Science">Sport Science</option>
                         <option value="Pengajian Islam">Pengajian Islam</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Year</label>
+                <div class="form-group"><label>Year</label>
                     <select name="year" required>
-                        <option value="">Select Year</option>
-                        <option value="1">Year 1</option>
-                        <option value="2">Year 2</option>
-                        <option value="3">Year 3</option>
-                        <option value="4">Year 4</option>
+                        <option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option><option value="4">Year 4</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Semester</label>
+                <div class="form-group"><label>Semester</label>
                     <select name="semester" required>
-                        <option value="">Select Semester</option>
-                        <option value="1">Semester 1</option>
-                        <option value="2">Semester 2</option>
-                        <option value="3">Semester 3</option>
+                        <option value="1">Semester 1</option><option value="2">Semester 2</option><option value="3">Semester 3</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Advisor</label>
+                <div class="form-group"><label>Advisor</label>
                     <select name="advisor_id" required>
                         <option value="">-- Select Advisor --</option>
                         <?php foreach ($advisors as $advisor): ?>
@@ -310,17 +295,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" name="confirm_password" required>
-                </div>
             </div>
             <button type="submit" class="btn-submit"><i class="bi bi-save"></i> Add Student</button>
         </form>
+        <div class="mt-3 text-muted small">
+            <i class="bi bi-info-circle"></i> The student will receive an email at their <strong>second email address</strong> (or UTM email if second email not provided) with login credentials and a temporary password (<strong>pass1234</strong>).
+        </div>
     </div>
 </div>
 <script>

@@ -9,36 +9,29 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f8f6f4; }
-        .sidebar { width: 280px; height: 100vh; background: linear-gradient(to bottom, #670019, #8b0022); position: fixed; padding: 30px 20px; color: white; }
+        .sidebar { width: 280px; height: 100vh; background: linear-gradient(to bottom, #670019, #8b0022); position: fixed; padding: 30px 20px; color: white; display: flex; flex-direction: column; }
         .sidebar a { display: block; color: white; text-decoration: none; padding: 12px 20px; border-radius: 14px; margin-bottom: 12px; }
         .sidebar a:hover, .sidebar a.active { background: #f4a000; }
+        .logout-link { margin-top: auto; padding-top: 20px; }
         .main-content { margin-left: 280px; padding: 30px; }
         .topbar { background: white; padding: 15px 25px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 30px; }
         .page-header { background: #f7f2ee; border-radius: 25px; padding: 35px 40px; margin-bottom: 30px; }
         .page-header h1 { font-size: 34px; font-weight: 700; color: #670019; }
-        .page-header p { color: #666; margin-top: 8px; }
         .info-card { background: #fff7ef; border-left: 4px solid #f4a000; border-radius: 15px; padding: 20px; margin-bottom: 25px; }
         .registration-table { background: white; border-radius: 25px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .registration-table h3 { color: #670019; font-weight: 700; font-size: 20px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0e8e8; }
+        .registration-table h3 { color: #670019; font-weight: 700; font-size: 20px; border-bottom: 2px solid #f0e8e8; padding-bottom: 15px; margin-bottom: 25px; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #f8f6f4; padding: 12px 15px; color: #670019; font-weight: 600; font-size: 13px; }
-        td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #333; }
-        tr:hover td { background: #fdf9f7; }
-        .section-select { padding: 8px 12px; border: 1.5px solid #e0d6d6; border-radius: 10px; font-size: 13px; background: white; cursor: pointer; }
-        .section-select:focus { outline: none; border-color: #670019; }
-        .remove-btn { background: none; border: none; color: #dc3545; font-size: 20px; cursor: pointer; transition: 0.3s; }
-        .remove-btn:hover { color: #c82333; transform: scale(1.1); }
+        th { background: #f8f6f4; padding: 12px 15px; color: #670019; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        .section-select { padding: 8px 12px; border: 1.5px solid #e0d6d6; border-radius: 10px; background: white; cursor: pointer; }
+        .remove-btn { background: none; border: none; color: #dc3545; font-size: 20px; cursor: pointer; }
         .total-row td { font-weight: 600; color: #670019; background: #f8f6f4; }
-        .submit-btn { background: linear-gradient(to right, #2e7d32, #1b5e20); color: white; border: none; padding: 15px 40px; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 20px; display: inline-flex; align-items: center; gap: 10px; }
-        .submit-btn:hover { background: linear-gradient(to right, #1b5e20, #0d3b0f); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3); }
+        .submit-btn { background: linear-gradient(to right, #2e7d32, #1b5e20); color: white; border: none; padding: 15px 40px; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 20px; }
         .empty-cart { text-align: center; padding: 60px 20px; }
-        .empty-cart i { font-size: 64px; color: #ddd; margin-bottom: 20px; }
-        .empty-cart h4 { color: #666; margin-bottom: 15px; }
-        .empty-cart a { color: #670019; font-weight: 500; text-decoration: none; }
-        .alert-custom { border-radius: 14px; padding: 14px 20px; font-size: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-        .alert-error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } .page-header { text-align: center; } th, td { padding: 10px; } }
+        .alert-custom { border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
     </style>
 </head>
 <body>
@@ -50,10 +43,10 @@
     <a href="student_dashboard.html"><i class="bi bi-house-fill me-2"></i> Dashboard</a>
     <a href="student_profile.html"><i class="bi bi-person-fill me-2"></i> Profile</a>
     <a href="student_courses.html"><i class="bi bi-book-fill me-2"></i> Courses</a>
-    <a href="student_registration.html" class="active"><i class="bi bi-journal-text me-2"></i> Register</a>
+    <a href="student_register.html" class="active"><i class="bi bi-journal-text me-2"></i> Register</a>
     <a href="student_registration_history.html"><i class="bi bi-clock-history me-2"></i> Registration History</a>
     <a href="student_change_password.html"><i class="bi bi-lock-fill me-2"></i> Change Password</a>
-    <div class="mt-5 pt-5"><a href="index.html"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></div>
+    <div class="logout-link"><a href="index.html"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></div>
 </div>
 <div class="main-content">
     <div class="topbar">
@@ -61,7 +54,8 @@
         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="40" style="border-radius:50%">
     </div>
     <div class="page-header">
-        <div><h1>Register</h1><p>Review your added courses and select sections before submitting</p></div>
+        <h1>Register</h1>
+        <p>Review your added courses and select sections before submitting</p>
     </div>
     <div id="alertContainer"></div>
     <div class="info-card">
@@ -77,90 +71,102 @@
 </div>
 <script src="js/common.js"></script>
 <script>
+    let isRegistrationOpen = false;
+
+    async function checkRegistrationPeriod() {
+        try {
+            const period = await apiGet('registrations/period.php');
+            isRegistrationOpen = period.is_open;
+            if (!isRegistrationOpen) {
+                showPeriodClosedModal();
+                const submitContainer = document.getElementById('submitBtnContainer');
+                if (submitContainer) submitContainer.style.display = 'none';
+                const removeBtns = document.querySelectorAll('.remove-btn');
+                removeBtns.forEach(btn => btn.disabled = true);
+                const selects = document.querySelectorAll('.section-select');
+                selects.forEach(select => select.disabled = true);
+            }
+            return isRegistrationOpen;
+        } catch(err) {
+            console.error(err);
+            return false;
+        }
+    }
+
+    function showPeriodClosedModal() {
+        let modal = document.getElementById('periodClosedModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'periodClosedModal';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = '2000';
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 25px; padding: 30px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                    <i class="bi bi-calendar-x" style="font-size: 48px; color: #dc3545;"></i>
+                    <h3 style="margin-top: 15px; color: #670019;">Registration Period Closed</h3>
+                    <p style="margin-top: 10px; color: #666;">The registration period is currently closed. Please contact your academic advisor for assistance.</p>
+                    <button onclick="this.closest('#periodClosedModal').remove()" style="background: #670019; color: white; border: none; padding: 10px 25px; border-radius: 25px; margin-top: 20px; cursor: pointer;">OK</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    }
+
     async function loadCart() {
         try {
             const cart = await apiGet('cart/get.php');
             const container = document.getElementById('cartContainer');
             if (!cart.items || cart.items.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-cart">
-                        <i class="bi bi-cart"></i>
-                        <h4>No courses added yet</h4>
-                        <p>Go to the Courses page to add courses to your registration cart.</p>
-                        <a href="student_courses.html"><i class="bi bi-arrow-right-circle me-1"></i> Browse Courses</a>
-                    </div>
-                `;
+                container.innerHTML = `<div class="empty-cart"><i class="bi bi-cart"></i><h4>No courses added yet</h4><p>Go to the Courses page to add courses to your registration cart.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>`;
                 document.getElementById('submitBtnContainer').style.display = 'none';
                 return;
             }
-            let html = `
-                <div style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Course Code</th>
-                                <th>Course Name</th>
-                                <th>Credit Hours</th>
-                                <th>Section *</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+            let html = `<table><thead><tr><th>No.</th><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Section *</th><th>Action</th></tr></thead><tbody>`;
             cart.items.forEach((item, idx) => {
-                html += `
-                    <tr>
-                        <td>${idx+1}</td>
-                        <td><strong>${escapeHtml(item.code)}</strong></td>
-                        <td>${escapeHtml(item.name)}</td>
-                        <td>${item.credits}</td>
-                        <td>
-                            <select class="section-select" data-code="${escapeHtml(item.code)}">
-                                <option value="">Select Section</option>
-                                <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
-                                <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
-                                <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
-                                <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
-                            </select>
-                        </td>
-                        <td><button class="remove-btn" data-code="${escapeHtml(item.code)}"><i class="bi bi-trash3"></i></button></td>
-                    </tr>
-                `;
+                html += `<tr>
+                    <td>${idx+1}</td>
+                    <td><strong>${escapeHtml(item.code)}</strong></td>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td>${item.credits}</td>
+                    <td><select class="section-select" data-code="${escapeHtml(item.code)}">
+                        <option value="">Select Section</option>
+                        <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
+                        <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
+                        <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
+                        <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
+                    </select></td>
+                    <td><button class="remove-btn" data-code="${escapeHtml(item.code)}"><i class="bi bi-trash3"></i></button></td>
+                </tr>`;
             });
-            html += `
-                            <tr class="total-row">
-                                <td colspan="3"><strong>Total Credit Hours:</strong></td>
-                                <td colspan="3"><strong>${cart.total_credits}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></table>`;
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
             attachEvents();
-        } catch (err) {
+        } catch(err) {
             console.error(err);
             document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger">Failed to load cart. Please refresh.</div>';
         }
     }
 
     function attachEvents() {
-        // Section change
         document.querySelectorAll('.section-select').forEach(select => {
             select.addEventListener('change', async (e) => {
                 const courseCode = select.dataset.code;
                 const section = select.value;
                 try {
-                    await apiPost('cart/update_section.php', { course_code: courseCode, section: section });
+                    await apiPost('cart/update_section.php', { course_code: courseCode, section });
                     showAlert('Section updated', 'success');
-                } catch (err) {
-                    showAlert('Failed to update section', 'error');
-                }
+                } catch(err) { showAlert('Failed to update section', 'error'); }
             });
         });
-        // Remove button
         document.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const courseCode = btn.dataset.code;
@@ -168,18 +174,18 @@
                     try {
                         await apiPost('cart/remove.php', { course_code: courseCode });
                         showAlert('Course removed', 'success');
-                        loadCart(); // reload cart
-                    } catch (err) {
-                        showAlert('Failed to remove', 'error');
-                    }
+                        loadCart();
+                    } catch(err) { showAlert('Failed to remove', 'error'); }
                 }
             });
         });
-        // Submit button
         const submitBtn = document.getElementById('submitBtn');
         if (submitBtn) {
             submitBtn.onclick = async () => {
-                // Validate all sections are selected
+                if (!isRegistrationOpen) {
+                    showPeriodClosedModal();
+                    return;
+                }
                 const selects = document.querySelectorAll('.section-select');
                 let missing = [];
                 selects.forEach(select => {
@@ -197,12 +203,8 @@
                     try {
                         await apiPost('cart/submit.php', {});
                         showAlert('Registration submitted successfully! Redirecting...', 'success');
-                        setTimeout(() => {
-                            window.location.href = 'student_registration_history.html';
-                        }, 2000);
-                    } catch (err) {
-                        showAlert('Submission failed: ' + err.message, 'error');
-                    }
+                        setTimeout(() => { window.location.href = 'student_registration_history.html'; }, 2000);
+                    } catch(err) { showAlert('Submission failed: ' + err.message, 'error'); }
                 }
             };
         }
@@ -222,7 +224,6 @@
         return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    // Load student name from session (optional)
     async function loadStudentName() {
         try {
             const user = await getCurrentUser();
@@ -230,8 +231,12 @@
         } catch(e) {}
     }
 
-    loadStudentName();
-    loadCart();
+    async function init() {
+        await loadStudentName();
+        await checkRegistrationPeriod();
+        await loadCart();
+    }
+    init();
 </script>
 </body>
 </html>
