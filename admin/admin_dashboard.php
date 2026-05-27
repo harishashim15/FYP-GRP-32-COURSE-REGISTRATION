@@ -39,6 +39,7 @@ $subjects_count = $result->fetch_row()[0];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../images/logoWebsite.png"/>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
@@ -54,7 +55,7 @@ $subjects_count = $result->fetch_row()[0];
         .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
+            text-decoration: none; color: white; padding: 9px 20px;
             border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }

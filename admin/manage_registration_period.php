@@ -21,8 +21,14 @@ $stmt->close();
 $message = '';
 $msg_type = '';
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Fetch current period (if any)
+$current_period = null;
+$result = $conn->query("SELECT * FROM semester_registration_periods LIMIT 1");
+if ($result && $result->num_rows > 0) {
+    $current_period = $result->fetch_assoc();
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $start_date = $_POST['start_date'];
     $end_date = $_POST['end_date'];
     $session_semester = $_POST['session_semester'];
@@ -34,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $message = "Start date cannot be after end date.";
         $msg_type = 'danger';
     } else {
-        // Clear existing periods and insert new one (is_open is always 1; real-time check will use dates)
+        // Clear existing periods and insert new one
         $conn->query("TRUNCATE TABLE semester_registration_periods");
         $stmt = $conn->prepare("INSERT INTO semester_registration_periods (session_semester, start_date, end_date, is_open) VALUES (?, ?, ?, 1)");
         $stmt->bind_param("sss", $session_semester, $start_date, $end_date);
@@ -49,14 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch current period
-$current_period = null;
-$result = $conn->query("SELECT * FROM semester_registration_periods LIMIT 1");
-if ($result && $result->num_rows > 0) {
-    $current_period = $result->fetch_assoc();
-}
-
-// Determine real-time status for display
+// Real-time status for display
 $is_open = false;
 if ($current_period) {
     $today = new DateTime();
@@ -120,12 +119,74 @@ if ($current_period) {
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333; }
         .form-group input { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 12px; }
-        .btn-submit { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; position: center; display: block; margin: 0 auto; transition: 0.3s; }
+        .btn-submit { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer;position: center; display: block; margin: 0 auto; transition: 0.3s; }
         .btn-submit:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; }
         .alert-success { background: #d4edda; color: #155724; }
         .alert-danger { background: #f8d7da; color: #721c24; }
         .current-info { background: #f7f2ee; border-radius: 20px; padding: 20px; margin-bottom: 25px; }
+        /* Custom Modal Styles */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .custom-modal-content {
+            background: white;
+            border-radius: 25px;
+            max-width: 400px;
+            width: 90%;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .custom-modal-content i {
+            font-size: 48px;
+            color: #670019;
+            margin-bottom: 15px;
+        }
+        .custom-modal-content h3 {
+            color: #670019;
+            margin-bottom: 10px;
+        }
+        .custom-modal-content p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        .custom-modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .custom-modal-buttons button {
+            padding: 10px 25px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-confirm {
+            background: #670019;
+            color: white;
+        }
+        .btn-confirm:hover {
+            background: #8b0022;
+        }
+        .btn-cancel-modal {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-cancel-modal:hover {
+            background: #5a6268;
+        }
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; width: 100%; }
@@ -135,13 +196,14 @@ if ($current_period) {
 <body>
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
-   <div class="menu">
+    <div class="menu">
         <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php" class="active"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
-        <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
-        <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
+        <a href="manage_registration_period.php" class="active"><i class="bi bi-calendar-event"></i> Registration Period</a>
+        <a href="profile.php"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="../forgot_password.php"><i class="bi bi-key-fill"></i> Forgot Password</a>
     </div>
     <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
@@ -169,7 +231,7 @@ if ($current_period) {
     </div>
     <?php endif; ?>
     <div class="form-card">
-        <form method="POST">
+        <form method="POST" id="registrationPeriodForm">
             <div class="form-group">
                 <label>Session Semester (e.g., 2025/2026-2)</label>
                 <input type="text" name="session_semester" value="<?php echo $current_period ? htmlspecialchars($current_period['session_semester']) : '2025/2026-2'; ?>" required>
@@ -182,13 +244,25 @@ if ($current_period) {
                 <label>End Date</label>
                 <input type="date" name="end_date" value="<?php echo $current_period ? $current_period['end_date'] : ''; ?>" required>
             </div>
-            <button type="submit" class="btn-submit">Save Registration Period</button>
+            <button type="button" class="btn-submit" id="showConfirmBtn">Save Registration Period</button>
         </form>
-        <div class="mt-3 text-muted small">
-            <i class="bi bi-info-circle"></i> The registration period will be automatically open or closed based on the current server date and time.
+      
+    </div>
+</div>
+
+<!-- Custom Modal -->
+<div id="confirmModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <i class="bi bi-calendar-check"></i>
+        <h3>Confirm Registration Period</h3>
+        <p>Are you sure you want to update the registration period?<br>This will overwrite the current period and affect student access.</p>
+        <div class="custom-modal-buttons">
+            <button class="btn-cancel-modal" id="cancelModalBtn">Cancel</button>
+            <button class="btn-confirm" id="confirmModalBtn">Confirm</button>
         </div>
     </div>
 </div>
+
 <script>
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -203,6 +277,33 @@ if ($current_period) {
             document.querySelector('.main-content').classList.add('expanded');
         }
     })();
+
+    // Custom modal logic
+    const modal = document.getElementById('confirmModal');
+    const showBtn = document.getElementById('showConfirmBtn');
+    const confirmBtn = document.getElementById('confirmModalBtn');
+    const cancelBtn = document.getElementById('cancelModalBtn');
+    const form = document.getElementById('registrationPeriodForm');
+
+    showBtn.addEventListener('click', function() {
+        modal.style.display = 'flex';
+    });
+
+    confirmBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+        form.submit();
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    // Close modal if user clicks outside the content
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 </script>
 </body>
 </html>

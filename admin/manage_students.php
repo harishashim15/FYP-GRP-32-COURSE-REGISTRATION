@@ -49,10 +49,11 @@ if ($result) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Same styles as before, plus search bar */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
-            width: 280px; height: 100vh;
+            width: 280px; height: 90vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
@@ -97,6 +98,23 @@ if ($result) {
             transition: 0.3s;
         }
         .btn-add:hover { background: linear-gradient(to right, #8b0022, #a80028); color: white; }
+        .search-bar {
+            margin-bottom: 25px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        .search-bar input:focus {
+            border-color: #670019;
+            box-shadow: 0 0 0 4px rgba(103,0,25,0.08);
+        }
         .table-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; background: #f8f6f4; padding: 12px 15px; color: #670019; font-weight: 600; }
@@ -108,6 +126,12 @@ if ($result) {
         .btn-delete { background: #dc2626; color: white; }
         .btn-delete:hover { background: #b91c1c; color: white; }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; background: #d4edda; color: #155724; }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 15px;
+        }
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
@@ -119,8 +143,8 @@ if ($result) {
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
         <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
-        <a href="manage_students.php"class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
@@ -143,27 +167,44 @@ if ($result) {
     <?php if (isset($_GET['msg'])): ?>
         <div class="alert"><?php echo htmlspecialchars($_GET['msg']); ?></div>
     <?php endif; ?>
+    
+    <!-- Live Search Bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by student name or matrix number">
+    </div>
+    
     <div class="table-card">
-        <table>
-            <thead><tr><th>ID</th><th>Matrix</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead>
-            <tbody>
-                <?php foreach ($students as $s): ?>
+        <div style="overflow-x: auto;">
+            <table id="studentsTable">
+                <thead>
                     <tr>
-                        <td><?php echo $s['user_id']; ?></td>
-                        <td><?php echo htmlspecialchars($s['matrix_number']); ?></td>
-                        <td><?php echo htmlspecialchars($s['user_name']); ?></td>
-                        <td><?php echo htmlspecialchars($s['utm_email']); ?></td>
-                        <td>
-                            <a href="edit_student.php?id=<?php echo $s['user_id']; ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
-                            <a href="manage_students.php?delete_id=<?php echo $s['user_id']; ?>" class="action-btn btn-delete" onclick="return confirm('Delete this student?')"><i class="bi bi-trash"></i> Delete</a>
-                        </td>
+                        <th>ID</th>
+                        <th>Matrix</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
                     </tr>
-                <?php endforeach; ?>
-                <?php if (empty($students)): ?>
-                    <tr><td colspan="5" class="text-center">No students found</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="tableBody">
+                    <?php foreach ($students as $s): ?>
+                        <tr>
+                            <td><?php echo $s['user_id']; ?></td>
+                            <td><?php echo htmlspecialchars($s['matrix_number']); ?></td>
+                            <td><?php echo htmlspecialchars($s['user_name']); ?></td>
+                            <td><?php echo htmlspecialchars($s['utm_email']); ?></td>
+                            <td>
+                                <a href="edit_student.php?id=<?php echo $s['user_id']; ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
+                                <a href="manage_students.php?delete_id=<?php echo $s['user_id']; ?>" class="action-btn btn-delete" onclick="return confirm('Delete this student?')"><i class="bi bi-trash"></i> Delete</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if (empty($students)): ?>
+                        <tr><td colspan="5" class="text-center">No students found</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+            <div id="noResultsMsg" class="no-results" style="display: none;">No students match your search.</div>
+        </div>
     </div>
 </div>
 <script>
@@ -180,6 +221,41 @@ if ($result) {
             document.querySelector('.main-content').classList.add('expanded');
         }
     })();
+    
+    // Live filtering
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('studentsTable');
+    const noResultsMsg = document.getElementById('noResultsMsg');
+    const rows = table.getElementsByTagName('tr');
+    
+    function filterTable() {
+        const filter = searchInput.value.toLowerCase().trim();
+        let hasVisible = false;
+        
+        // Skip the header row (index 0)
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            if (cells.length === 0) continue;
+            
+            const nameCell = cells[2]; // Name column (index 2)
+            const matrixCell = cells[1]; // Matrix column (index 1)
+            const name = nameCell ? nameCell.textContent.toLowerCase() : '';
+            const matrix = matrixCell ? matrixCell.textContent.toLowerCase() : '';
+            
+            if (name.includes(filter) || matrix.includes(filter)) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        }
+        
+        noResultsMsg.style.display = hasVisible ? 'none' : 'block';
+    }
+    
+    // Attach event listener for live search
+    searchInput.addEventListener('input', filterTable);
 </script>
 </body>
 </html>
