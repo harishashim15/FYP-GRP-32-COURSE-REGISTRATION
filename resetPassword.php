@@ -54,7 +54,7 @@ function handleCheckEmail() {
     }
 
     // Query fypdb3.users by utm_email
-    $stmt = $pdo->prepare("SELECT user_id, user_name FROM users WHERE utm_email = :email LIMIT 1");
+    $stmt = $pdo->prepare("SELECT user_id, user_name FROM users WHERE second_email = :email LIMIT 1");
     $stmt->execute([':email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
