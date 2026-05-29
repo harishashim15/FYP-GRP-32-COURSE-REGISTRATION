@@ -1,5 +1,10 @@
 <?php
 header('Content-Type: application/json');
+session_set_cookie_params([
+    'path' => '/',
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 session_start();
 
 define('DB_HOST', 'localhost');
