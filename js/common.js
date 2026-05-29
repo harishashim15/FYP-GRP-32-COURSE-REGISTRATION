@@ -1,6 +1,6 @@
 // Get the base path from the current HTML file's location
-const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-const API_BASE = basePath + 'api';
+const API_BASE = 'api';
+console.log('API_BASE:', API_BASE);
 
 console.log('Detected API_BASE:', API_BASE);
 
