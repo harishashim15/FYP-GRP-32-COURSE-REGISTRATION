@@ -1,6 +1,11 @@
-// Get the correct base path dynamically
-const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-const API_BASE = basePath + 'api';
+// Dynamically determine the API base path
+const scripts = document.getElementsByTagName('script');
+const currentScript = scripts[scripts.length - 1];
+const scriptSrc = currentScript.src;
+const scriptPath = scriptSrc.substring(0, scriptSrc.lastIndexOf('/'));
+const API_BASE = scriptPath + '/api';
+
+console.log('API_BASE:', API_BASE); // For debugging – remove later
 
 async function apiGet(endpoint) {
     const response = await fetch(`${API_BASE}/${endpoint}`, { credentials: 'include' });
