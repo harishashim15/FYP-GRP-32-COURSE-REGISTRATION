@@ -1,8 +1,5 @@
-// Get the base path from the current HTML file's location
+// Use relative path – works for any folder name
 const API_BASE = 'api';
-console.log('API_BASE:', API_BASE);
-
-console.log('Detected API_BASE:', API_BASE);
 
 async function apiGet(endpoint) {
     const response = await fetch(`${API_BASE}/${endpoint}`, { credentials: 'include' });
