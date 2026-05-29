@@ -6,22 +6,38 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-include("db.php");
+include("db_connect.php");
 
-// Fetch student name from database
+// Fetch student name from database - FIXED: user_name instead of name
 $user_id = $_SESSION['user_id'];
-$user_query = "SELECT name FROM users WHERE id = '$user_id'";
+$user_query = "SELECT user_name FROM users WHERE user_id = '$user_id'";
 $user_result = mysqli_query($conn, $user_query);
 $user = mysqli_fetch_assoc($user_result);
-$student_name = $user ? $user['name'] : "Student";
+$student_name = $user ? $user['user_name'] : "Student";
 
-// Fetch submitted registrations
-$query = "SELECT r.*, c.course_name 
-          FROM registrations r 
-          JOIN courses c ON r.course_id = c.course_code 
-          WHERE r.user_id = '$user_id' 
-          ORDER BY r.submitted_date DESC";
+// Fetch submitted registrations with courses - COMPLETELY REWRITTEN
+$query = "SELECT 
+            cr.id as registration_id,
+            cr.submission_date,
+            cr.status,
+            cr.advisor_remarks,
+            cr.section as reg_section,
+            cr.session,
+            rc.subject_code,
+            s.subject_name,
+            s.credits,
+            rc.section as course_section
+          FROM course_registrations cr
+          LEFT JOIN registration_courses rc ON cr.id = rc.registration_id
+          LEFT JOIN subjects s ON rc.subject_code = s.subject_code
+          WHERE cr.student_id = '$user_id'
+          ORDER BY cr.submission_date DESC, cr.id DESC";
+
 $result = mysqli_query($conn, $query);
+
+if (!$result) {
+    die("Query failed: " . mysqli_error($conn));
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -400,8 +416,8 @@ $result = mysqli_query($conn, $query);
     </div>
 
     <?php
-    // Calculate statistics
-    $stats_query = "SELECT status, COUNT(*) as count FROM registrations WHERE user_id = '$user_id' GROUP BY status";
+    // Calculate statistics - FIXED: using course_registrations table
+    $stats_query = "SELECT status, COUNT(*) as count FROM course_registrations WHERE student_id = '$user_id' GROUP BY status";
     $stats_result = mysqli_query($conn, $stats_query);
     $stats = ['pending' => 0, 'approved' => 0, 'rejected' => 0];
     while ($row = mysqli_fetch_assoc($stats_result)) {
@@ -431,39 +447,81 @@ $result = mysqli_query($conn, $query);
     <div class="history-table">
         <h3><i class="bi bi-journal-text me-2"></i>Submitted Registrations</h3>
         <div style="overflow-x: auto;">
-            <table>
+            <table class="table">
                 <thead>
                     <tr>
+                        <th>Registration ID</th>
                         <th>Course Code</th>
                         <th>Course Name</th>
+                        <th>Credits</th>
                         <th>Section</th>
                         <th>Session</th>
                         <th>Submitted Date</th>
                         <th>Status</th>
+                        <th>Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php 
                     $has_results = false;
-                    while ($row = mysqli_fetch_assoc($result)): 
+                    $current_reg_id = null;
+                    $rowspan_count = 0;
+                    
+                    // First, fetch all results to calculate rowspans
+                    $all_rows = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $all_rows[] = $row;
+                    }
+                    
+                    // Calculate rowspans
+                    $rowspans = [];
+                    foreach ($all_rows as $row) {
+                        $reg_id = $row['registration_id'];
+                        if (!isset($rowspans[$reg_id])) {
+                            $rowspans[$reg_id] = 0;
+                        }
+                        $rowspans[$reg_id]++;
+                    }
+                    
+                    // Display rows with rowspans
+                    $displayed_regs = [];
+                    foreach ($all_rows as $index => $row):
                         $has_results = true;
+                        $reg_id = $row['registration_id'];
+                        $is_first_course = !in_array($reg_id, $displayed_regs);
+                        $span = $rowspans[$reg_id];
                     ?>
                     <tr>
-                        <td><strong><?php echo htmlspecialchars($row['course_id']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($row['course_name']); ?></td>
-                        <td><?php echo htmlspecialchars($row['section'] ?: 'TBD'); ?></td>
+                        <?php if ($is_first_course): ?>
+                        <td rowspan="<?php echo $span; ?>">
+                            <strong>#<?php echo htmlspecialchars($row['registration_id']); ?></strong>
+                        </td>
+                        <?php 
+                            $displayed_regs[] = $reg_id;
+                        endif; 
+                        ?>
+                        <td><?php echo htmlspecialchars($row['subject_code'] ?? 'N/A'); ?></td>
+                        <td><?php echo htmlspecialchars($row['subject_name'] ?? 'N/A'); ?></td>
+                        <td><?php echo htmlspecialchars($row['credits'] ?? '-'); ?></td>
+                        <td><?php echo htmlspecialchars($row['course_section'] ?: ($row['reg_section'] ?: 'TBD')); ?></td>
                         <td><?php echo htmlspecialchars($row['session'] ?: '2025/2026 - Semester 2'); ?></td>
-                        <td><?php echo date('d M Y, h:i A', strtotime($row['submitted_date'])); ?></td>
-                        <td>
+                        <?php if ($is_first_course): ?>
+                        <td rowspan="<?php echo $span; ?>"><?php echo date('d M Y, h:i A', strtotime($row['submission_date'])); ?></td>
+                        <td rowspan="<?php echo $span; ?>">
                             <span class="status-badge status-<?php echo $row['status']; ?>">
                                 <?php echo ucfirst($row['status']); ?>
                             </span>
                         </td>
+                        <td rowspan="<?php echo $span; ?>">
+                            <?php echo htmlspecialchars($row['advisor_remarks'] ?: 'No remarks'); ?>
+                        </td>
+                        <?php endif; ?>
                     </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
+                    
                     <?php if (!$has_results): ?>
                     <tr>
-                        <td colspan="6">
+                        <td colspan="9">
                             <div class="empty-state">
                                 <i class="bi bi-inbox"></i>
                                 <h4>No registration history found</h4>

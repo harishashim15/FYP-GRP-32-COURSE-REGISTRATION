@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-include("db._connect.php");
+include("db_connect.php");
 
 // Fetch student name from database
 $user_id = $_SESSION['user_id'];

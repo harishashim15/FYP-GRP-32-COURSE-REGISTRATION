@@ -4,97 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Courses - UTM Student</title>
+    <link rel="icon" type="image/png" href="images/logoWebsite.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f8f6f4; }
-        .sidebar { width: 280px; height: 100vh; background: linear-gradient(to bottom, #670019, #8b0022); position: fixed; padding: 30px 20px; color: white; display: flex; flex-direction: column; }
-        .sidebar a { display: block; color: white; text-decoration: none; padding: 12px 20px; border-radius: 14px; margin-bottom: 12px; }
-        .sidebar a:hover, .sidebar a.active { background: #f4a000; }
-        .logout-link { margin-top: auto; padding-top: 20px; }
-        .main-content { margin-left: 280px; padding: 30px; }
-        .topbar { background: white; padding: 15px 25px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 30px; }
-        .page-header { background: #f7f2ee; border-radius: 25px; padding: 35px 40px; margin-bottom: 30px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f8f6f4; overflow-x: hidden; }
+        
+        .sidebar {
+            width: 280px; height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed; padding: 30px 20px; color: white;
+            transition: transform 0.3s ease; z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar.collapsed { transform: translateX(-280px); }
+        .logo { text-align: center; margin-bottom: 50px; }
+        .logo img { width: 130px; }
+        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .menu a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
+        }
+        .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
+        .menu i { font-size: 20px; }
+        .logout {
+            position: absolute; bottom: 30px;
+            width: calc(100% - 40px); left: 20px;
+        }
+        .logout a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; transition: 0.3s; font-size: 16px;
+            background: rgba(255,255,255,0.1);
+        }
+        .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
+        
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content.expanded { margin-left: 0; }
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; background: white; padding: 15px 25px;
+            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        
+        .page-header {
+            background: #f7f2ee; border-radius: 25px; padding: 35px 40px;
+            margin-bottom: 30px; border: 1px solid #eee;
+        }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
-        .cart-summary { background: #fff7ef; border: 1px solid #f4a000; border-radius: 25px; padding: 15px 25px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
+        
+        .cart-summary {
+            background: #fff7ef; border: 1px solid #f4a000; border-radius: 25px;
+            padding: 15px 25px; margin-bottom: 25px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .cart-info { display: flex; align-items: center; gap: 10px; }
+        .cart-info i { font-size: 24px; color: #670019; }
+        .cart-info .count { background: #670019; color: white; padding: 2px 10px; border-radius: 20px; }
+        .view-cart-btn {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white; border: none; padding: 10px 25px; border-radius: 25px;
+            text-decoration: none; font-size: 14px; font-weight: 500;
+        }
+        
         .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
         .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; }
+        
         .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
-        .course-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #f0e8e8; }
+        .course-card {
+            background: white; border-radius: 25px; padding: 25px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+            transition: 0.3s; border: 1px solid #f0e8e8;
+        }
         .course-card:hover { transform: translateY(-5px); }
         .course-code { background: #670019; color: white; padding: 5px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-size: 12px; }
-        .course-card h4 { color: #670019; margin-bottom: 10px; }
+        .course-card h4 { color: #670019; font-weight: 700; margin-bottom: 10px; font-size: 18px; }
         .course-info { display: flex; gap: 15px; margin: 15px 0; padding: 12px 0; border-top: 1px solid #f0e8e8; border-bottom: 1px solid #f0e8e8; }
-        .cart-btn { width: 100%; padding: 12px; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 15px; text-align: center; border: none; background: linear-gradient(to right, #670019, #8b0022); color: white; }
-        .cart-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
-        .cart-btn.disabled { background: #ccc; cursor: not-allowed; transform: none; }
-        .alert-custom { position: fixed; top: 20px; right: 20px; z-index: 1100; min-width: 300px; padding: 12px 20px; border-radius: 12px; display: none; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
-        .alert-success { border-left: 4px solid #2e7d32; color: #2e7d32; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        .cart-btn {
+            width: 100%; padding: 12px; border-radius: 14px; font-weight: 600;
+            cursor: pointer; margin-top: 15px; text-align: center; border: none;
+            background: linear-gradient(to right, #670019, #8b0022); color: white;
+        }
+        .cart-btn.remove { background: #dc3545; }
         @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
     </style>
 </head>
 <body>
-<div class="sidebar">
-    <div class="logo text-center mb-5"><img src="images/utmlogo.png" width="130" alt="UTM"><div class="system-title text-warning mt-2">COURSE REGISTRATION SYSTEM</div></div>
-    <a href="student_dashboard.html"><i class="bi bi-house-fill me-2"></i> Dashboard</a>
-    <a href="student_profile.html"><i class="bi bi-person-fill me-2"></i> Profile</a>
-    <a href="student_courses.html" class="active"><i class="bi bi-book-fill me-2"></i> Courses</a>
-    <a href="student_register.html"><i class="bi bi-journal-text me-2"></i> Register</a>
-    <a href="student_registration_history.html"><i class="bi bi-clock-history me-2"></i> Registration History</a>
-    <a href="student_change_password.html"><i class="bi bi-lock-fill me-2"></i> Change Password</a>
-    <div class="logout-link"><a href="index.html"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo"><img src="images/utmlogo.png" alt="UTM"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+    <div class="menu">
+        <a href="student_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="student_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="student_courses.html" class="active"><i class="bi bi-book-fill"></i> Courses</a>
+        <a href="student_register.html"><i class="bi bi-journal-text"></i> Register</a>
+        <a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
+        <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
+        <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
+    </div>
+    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
+
 <div class="main-content">
-    <div class="topbar"><div><h6 class="mb-0" id="studentName">Student</h6><small>Student</small></div><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="40" style="border-radius:50%"></div>
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box" onclick="location.href='student_profile.html'">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div><h6 class="mb-0" id="studentName">Haris</h6><small>Student</small></div>
+        </div>
+    </div>
+
     <div class="page-header"><h2>Available Courses</h2><p>Browse and add courses to your registration cart</p></div>
-    <div id="cartSummary" class="cart-summary" style="display: none;"><div class="cart-info"><i class="bi bi-bag-check"></i> You have <strong id="cartCount">0</strong> course(s) in your cart</div><a href="student_register.html" class="view-cart-btn btn" style="background:#670019; color:white; border-radius:25px; padding:8px 20px;">Proceed to Register</a></div>
+
+    <div id="cartSummary" class="cart-summary" style="display: none;">
+        <div class="cart-info"><i class="bi bi-bag-check"></i> You have <strong id="cartCount" class="count">0</strong> course(s) in your cart</div>
+        <a href="student_register.html" class="view-cart-btn">Proceed to Register</a>
+    </div>
+
     <div class="search-bar"><input type="text" id="searchInput" placeholder="Search by course name or code..."><button onclick="filterCourses()">Search</button></div>
     <div class="courses-grid" id="coursesGrid"><div class="text-center">Loading courses...</div></div>
 </div>
-<div id="alertToast" class="alert-custom alert-success"><i class="bi bi-check-circle-fill"></i> <span id="alertMessage"></span></div>
+
 <script src="js/common.js"></script>
 <script>
     let allCourses = [];
     let cartCourses = [];
-    let isRegistrationOpen = false;
 
-    function showAlert(message, type = 'success') {
-        const toast = document.getElementById('alertToast');
-        toast.className = `alert-custom alert-${type}`;
-        document.getElementById('alertMessage').innerText = message;
-        toast.style.display = 'flex';
-        setTimeout(() => toast.style.display = 'none', 3000);
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-
-    function showPeriodClosedModal() {
-        let modal = document.getElementById('periodClosedModal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'periodClosedModal';
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            modal.style.display = 'flex';
-            modal.style.alignItems = 'center';
-            modal.style.justifyContent = 'center';
-            modal.style.zIndex = '2000';
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 25px; padding: 30px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-                    <i class="bi bi-calendar-x" style="font-size: 48px; color: #dc3545;"></i>
-                    <h3 style="margin-top: 15px; color: #670019;">Registration Period Closed</h3>
-                    <p style="margin-top: 10px; color: #666;">The registration period is currently closed. Please contact your academic advisor for assistance.</p>
-                    <button onclick="this.closest('#periodClosedModal').remove()" style="background: #670019; color: white; border: none; padding: 10px 25px; border-radius: 25px; margin-top: 20px; cursor: pointer;">OK</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-    }
+    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
     async function loadCartCount() {
         try {
@@ -108,14 +162,9 @@
 
     async function loadCourses() {
         try {
-            // Check registration period
-            const period = await apiGet('registrations/period.php');
-            isRegistrationOpen = period.is_open;
-            if (!isRegistrationOpen) showPeriodClosedModal();
-
             const data = await apiGet('courses/list.php');
-            allCourses = data.courses;
-            document.getElementById('studentName').innerText = data.student_name || 'Student';
+            allCourses = data.courses || [];
+            document.getElementById('studentName').innerText = data.student_name || 'Haris';
             await loadCartCount();
             renderCourses(allCourses);
         } catch(err) {
@@ -132,59 +181,31 @@
             const isInCart = cartCourses.includes(course.code);
             const card = document.createElement('div');
             card.className = 'course-card';
-            let btnHtml = '';
-            if (!isRegistrationOpen) {
-                btnHtml = `<button class="cart-btn disabled" disabled><i class="bi bi-ban me-1"></i> Registration Closed</button>`;
-            } else if (isInCart) {
-                btnHtml = `<button class="cart-btn remove" data-code="${course.code}"><i class="bi bi-dash-circle me-1"></i> Remove from Cart</button>`;
-            } else {
-                btnHtml = `<button class="cart-btn" data-code="${course.code}"><i class="bi bi-plus-circle me-1"></i> Add to Cart</button>`;
-            }
             card.innerHTML = `
                 <span class="course-code">${escapeHtml(course.code)}</span>
                 <h4>${escapeHtml(course.name)}</h4>
                 <div class="course-info"><div><i class="bi bi-clock"></i> ${course.credits} Credit Hours</div><div><i class="bi bi-people"></i> ${course.enrolled || 0} Students</div></div>
-                ${btnHtml}
+                <button class="cart-btn ${isInCart ? 'remove' : ''}" data-code="${course.code}"><i class="bi bi-${isInCart ? 'dash-circle' : 'plus-circle'} me-1"></i> ${isInCart ? 'Remove from Cart' : 'Add Courses'}</button>
             `;
             grid.appendChild(card);
         });
-        // Attach event listeners for non-disabled buttons
-        if (isRegistrationOpen) {
-            document.querySelectorAll('.cart-btn:not(.disabled)').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const code = btn.dataset.code;
-                    if (btn.classList.contains('remove')) {
-                        await removeFromCart(code, btn);
-                    } else {
-                        await addToCart(code, btn);
-                    }
-                });
+        document.querySelectorAll('.cart-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const code = btn.dataset.code;
+                if (btn.classList.contains('remove')) {
+                    await apiPost('cart/remove.php', { course_code: code });
+                    btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add Courses';
+                    btn.classList.remove('remove');
+                    cartCourses = cartCourses.filter(c => c !== code);
+                } else {
+                    await apiPost('cart/add.php', { course_code: code });
+                    btn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Remove from Cart';
+                    btn.classList.add('remove');
+                    cartCourses.push(code);
+                }
+                await loadCartCount();
             });
-        }
-    }
-
-    async function addToCart(code, btn) {
-        try {
-            await apiPost('cart/add.php', { course_code: code });
-            btn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Remove from Cart';
-            btn.classList.remove('added');
-            btn.classList.add('remove');
-            cartCourses.push(code);
-            await loadCartCount();
-            showAlert('Course added to cart', 'success');
-        } catch(err) { showAlert(err.message, 'error'); }
-    }
-
-    async function removeFromCart(code, btn) {
-        try {
-            await apiPost('cart/remove.php', { course_code: code });
-            btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add to Cart';
-            btn.classList.remove('remove');
-            cartCourses = cartCourses.filter(c => c !== code);
-            await loadCartCount();
-            showAlert('Course removed from cart', 'success');
-        } catch(err) { showAlert(err.message, 'error'); }
+        });
     }
 
     function filterCourses() {
@@ -194,7 +215,6 @@
     }
 
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
-
     loadCourses();
 </script>
 </body>
