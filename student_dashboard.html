@@ -174,10 +174,10 @@
                 <span class="badge bg-light text-dark me-1">${period.semester}</span>
                 <span class="badge bg-light text-dark me-1">${period.session}</span>
             `;
-        } catch (err) {
-            console.error('Dashboard error:', err);
-            document.getElementById('heroGreeting').innerText = 'Error loading dashboard. Please login again.';
-        }
+       } catch (err) {
+    console.error('Dashboard error details:', err);
+    document.getElementById('heroGreeting').innerHTML = 'Error: ' + err.message;
+}
     }
     loadDashboard();
 
