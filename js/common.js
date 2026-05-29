@@ -1,10 +1,9 @@
-// Hardcoded API base path for your exact folder
-const API_BASE = '/FYP/FYP%20COURSE%20REGISTRATION/api';
+// Get the correct base path dynamically
+const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+const API_BASE = basePath + 'api';
 
 async function apiGet(endpoint) {
-    const url = `${API_BASE}/${endpoint}`;
-    console.log('API GET:', url);
-    const response = await fetch(url, { credentials: 'include' });
+    const response = await fetch(`${API_BASE}/${endpoint}`, { credentials: 'include' });
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || `HTTP ${response.status}`);
@@ -13,9 +12,7 @@ async function apiGet(endpoint) {
 }
 
 async function apiPost(endpoint, data) {
-    const url = `${API_BASE}/${endpoint}`;
-    console.log('API POST:', url);
-    const response = await fetch(url, {
+    const response = await fetch(`${API_BASE}/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
