@@ -34,7 +34,7 @@
                 if (response === 'admin') {
                     window.location.href = 'admin/admin_dashboard.php';
                 } else if (response === 'advisor') {
-                    window.location.href = 'advisor_dashboard.html';
+                    window.location.href = 'advisor_dashboard.php';
                 } else if (response === 'student') {
                     window.location.href = 'student_dashboard.html';
                 } else if (response === 'invalid') {
