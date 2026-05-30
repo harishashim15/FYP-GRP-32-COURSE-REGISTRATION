@@ -1,14 +1,20 @@
 <?php
-require_once 'config.php';
+require_once 'db_connect.php';
 
-$advisor_matrix = 'AA0001';
+session_start();
 
-$sql = "SELECT password FROM users WHERE matrix = ? AND role = 'advisor'";
+// Get advisor ID (from session or hardcoded for now)
+$advisor_id = 1; // Miss Asyikin (user_id = 1)
+
+// Get advisor password from users table using user_id
+$sql = "SELECT password, user_name FROM users WHERE user_id = ? AND role = 'advisor'";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $user = mysqli_fetch_assoc($result);
+
+$advisor_name = $user['user_name'] ?? 'Miss Nurul Asyikin';
 
 $message = '';
 $message_type = '';
@@ -28,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $message = 'New passwords do not match!';
         $message_type = 'danger';
     } else {
-        $sql = "UPDATE users SET password = ? WHERE matrix = ?";
+        $sql = "UPDATE users SET password = ? WHERE user_id = ?";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ss", $new_password, $advisor_matrix);
+        mysqli_stmt_bind_param($stmt, "si", $new_password, $advisor_id);
         
         if (mysqli_stmt_execute($stmt)) {
             $message = 'Password updated successfully!';
@@ -68,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .profile-box { display: flex; align-items: center; gap: 15px; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .page-header { background: #f7f2ee; border-radius: 25px; padding: 35px 40px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; border: 1px solid #eee; }
@@ -119,16 +125,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <a href="advisor_profile.php"><i class="bi bi-person-fill"></i> Profile</a>
             <a href="#" class="active"><i class="bi bi-lock-fill"></i> Change Password</a>
         </div>
-        <div class="logout"><a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+        <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
     </div>
 
     <div class="main-content">
         <div class="topbar">
             <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
+            <div class="profile-box" onclick="location.href='advisor_profile.php'">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+                <div><h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6><small class="text-muted">Academic Advisor</small></div>
             </div>
         </div>
 

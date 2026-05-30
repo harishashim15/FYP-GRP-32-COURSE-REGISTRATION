@@ -1,6 +1,12 @@
 <?php
-require_once 'config.php';
+require_once 'db_connect.php';
 
+session_start();
+
+// Get advisor ID for name display
+$advisor_id = 1; // Miss Asyikin
+
+// Get student matrix from URL
 $student_matrix = isset($_GET['matrix']) ? $_GET['matrix'] : '';
 
 if (empty($student_matrix)) {
@@ -8,7 +14,11 @@ if (empty($student_matrix)) {
     exit;
 }
 
-$sql = "SELECT * FROM students WHERE matrix = ?";
+// Get student information (JOIN with users table)
+$sql = "SELECT s.*, u.matrix_number, u.user_name, u.utm_email 
+        FROM students s
+        JOIN users u ON s.user_id = u.user_id
+        WHERE u.matrix_number = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "s", $student_matrix);
 mysqli_stmt_execute($stmt);
@@ -20,29 +30,37 @@ if (!$student) {
     exit;
 }
 
-$sql = "SELECT c.*, r.status as reg_status, r.id as reg_id 
-        FROM registrations r 
-        JOIN courses c ON r.course_id = c.id 
-        WHERE r.student_matrix = ?";
+// Get student's registered courses using correct table structure
+// course_registrations -> registration_courses -> subjects
+$sql = "SELECT sub.*, cr.status as reg_status, cr.id as reg_id 
+        FROM course_registrations cr 
+        JOIN registration_courses rc ON cr.id = rc.registration_id
+        JOIN subjects sub ON rc.subject_code = sub.subject_code
+        WHERE cr.student_id = ?";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $student_matrix);
+mysqli_stmt_bind_param($stmt, "i", $student['user_id']);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $courses = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
+// Calculate total credits
 $total_credits = 0;
-foreach ($courses as $course) { $total_credits += $course['credit_hours']; }
+foreach ($courses as $course) { 
+    $total_credits += $course['credits']; 
+}
 $reg_status = !empty($courses) ? $courses[0]['reg_status'] : 'pending';
 
+// Handle approve/reject action
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $action = $_POST['action'];
     $remarks = $_POST['remarks'] ?? '';
     $new_status = ($action == 'approve') ? 'approved' : 'rejected';
     $message = ($action == 'approve') ? "Registration approved successfully!" : "Registration rejected!";
     
-    $sql = "UPDATE registrations SET status = ?, advisor_remarks = ? WHERE student_matrix = ?";
+    // Update all registrations for this student
+    $sql = "UPDATE course_registrations SET status = ?, advisor_remarks = ? WHERE student_id = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "sss", $new_status, $remarks, $student_matrix);
+    mysqli_stmt_bind_param($stmt, "ssi", $new_status, $remarks, $student['user_id']);
     
     if (mysqli_stmt_execute($stmt)) {
         echo "<script>alert('$message'); window.location.href='advisor_registrations.php';</script>";
@@ -50,6 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<script>alert('Error updating registration');</script>";
     }
 }
+
+// Get advisor name for topbar
+$sql_advisor = "SELECT user_name FROM users WHERE user_id = ?";
+$stmt_advisor = mysqli_prepare($conn, $sql_advisor);
+mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
+mysqli_stmt_execute($stmt_advisor);
+$result_advisor = mysqli_stmt_get_result($stmt_advisor);
+$advisor = mysqli_fetch_assoc($result_advisor);
+$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -77,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .profile-box { display: flex; align-items: center; gap: 15px; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .page-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
@@ -119,30 +146,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <a href="advisor_profile.php"><i class="bi bi-person-fill"></i> Profile</a>
             <a href="advisor_change_password.php"><i class="bi bi-lock-fill"></i> Change Password</a>
         </div>
-        <div class="logout"><a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+        <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
     </div>
 
     <div class="main-content">
         <div class="topbar">
             <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
+            <div class="profile-box" onclick="location.href='advisor_profile.php'">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+                <div>
+                    <h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6>
+                    <small class="text-muted">Academic Advisor</small>
+                </div>
             </div>
         </div>
 
         <div class="page-header">
             <button class="back-btn" onclick="history.back()"><i class="bi bi-arrow-left"></i></button>
-            <h2>Verify Registration — <?php echo htmlspecialchars($student['name']); ?></h2>
+            <h2>Verify Registration — <?php echo htmlspecialchars($student['user_name']); ?></h2>
             <span class="status-badge status-<?php echo $reg_status; ?>"><?php echo ucfirst($reg_status); ?></span>
         </div>
 
         <div class="student-card">
-            <div class="student-avatar"><?php echo strtoupper(substr($student['name'], 0, 2)); ?></div>
+            <div class="student-avatar"><?php echo strtoupper(substr($student['user_name'], 0, 2)); ?></div>
             <div class="student-info">
-                <h3><?php echo htmlspecialchars($student['name']); ?></h3>
-                <p><?php echo htmlspecialchars($student['matrix']); ?> · <?php echo htmlspecialchars($student['programme']); ?> · Year <?php echo $student['year']; ?> · Sem 3</p>
+                <h3><?php echo htmlspecialchars($student['user_name']); ?></h3>
+                <p><?php echo htmlspecialchars($student['matrix_number']); ?> · <?php echo htmlspecialchars($student['programme']); ?> · Year <?php echo $student['year']; ?> · Sem 3</p>
             </div>
         </div>
 
@@ -150,13 +180,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <h4><i class="bi bi-book"></i> Registered courses (<?php echo count($courses); ?>)</h4>
             <?php if (!empty($courses)): ?>
                 <table class="table">
-                    <thead><tr><th>Course Code</th><th>Course Name</th><th>Credit Hours</th><th>Section</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Credits</th>
+                            <th>Section</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php $section = 1; foreach ($courses as $course): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($course['course_code']); ?></td>
-                                <td><?php echo htmlspecialchars($course['course_name']); ?></small>
-                                <td><?php echo $course['credit_hours']; ?></small>
+                                <td><?php echo htmlspecialchars($course['subject_code']); ?></td>
+                                <td><?php echo htmlspecialchars($course['subject_name']); ?></small>
+                                <td><?php echo $course['credits']; ?></small>
                                 <td>0<?php echo $section++; ?></small>
                             </tr>
                         <?php endforeach; ?>
@@ -183,9 +220,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="action-card">
                 <div class="alert-info">This registration has been <strong><?php echo $reg_status; ?></strong>.</div>
                 <?php 
-                $sql_remarks = "SELECT advisor_remarks FROM registrations WHERE student_matrix = ? LIMIT 1";
+                $sql_remarks = "SELECT advisor_remarks FROM course_registrations WHERE student_id = ? LIMIT 1";
                 $stmt_remarks = mysqli_prepare($conn, $sql_remarks);
-                mysqli_stmt_bind_param($stmt_remarks, "s", $student_matrix);
+                mysqli_stmt_bind_param($stmt_remarks, "i", $student['user_id']);
                 mysqli_stmt_execute($stmt_remarks);
                 $result_remarks = mysqli_stmt_get_result($stmt_remarks);
                 $remarks_row = mysqli_fetch_assoc($result_remarks);

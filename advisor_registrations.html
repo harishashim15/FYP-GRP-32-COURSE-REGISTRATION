@@ -53,7 +53,7 @@
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        .profile-box { display: flex; align-items: center; gap: 15px; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
 
         /* PAGE HEADER */
@@ -134,7 +134,7 @@
 <div class="main-content">
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-        <div class="profile-box">
+        <div class="profile-box" onclick="location.href='advisor_profile.html'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
             <div><h6 class="mb-0" id="advisorName">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
@@ -154,7 +154,7 @@
     </div>
 
     <div class="registrations-table">
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>Student Name</th>

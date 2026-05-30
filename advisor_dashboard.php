@@ -1,64 +1,80 @@
 <?php
-require_once 'config.php';
+require_once 'db_connect.php';
 
-// For now, hardcode advisor_matrix = 'AA0001' (Miss Nurul Asyikin)
-$advisor_matrix = 'AA0001';
+session_start();
 
-// Get total students
-$sql = "SELECT COUNT(*) as total FROM students WHERE advisor_matrix = ?";
+// Get advisor ID from session (after login)
+$advisor_id = 1;
+
+// Get total students under this advisor
+$sql = "SELECT COUNT(*) as total FROM students WHERE advisor_id = ?";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $total_students = mysqli_fetch_assoc($result)['total'];
 
-// Get pending approvals count (count distinct students, not courses)
-$sql = "SELECT COUNT(DISTINCT r.student_matrix) as pending 
-        FROM registrations r 
-        JOIN students s ON r.student_matrix = s.matrix 
-        WHERE s.advisor_matrix = ? AND r.status = 'pending'";
+// Get pending approvals count (count distinct students with pending registrations)
+$sql = "SELECT COUNT(DISTINCT cr.student_id) as pending 
+        FROM course_registrations cr 
+        WHERE cr.status = 'pending' 
+        AND cr.student_id IN (SELECT user_id FROM students WHERE advisor_id = ?)";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $pending_count = mysqli_fetch_assoc($result)['pending'];
 
 // Get approved registrations this week
-$sql = "SELECT COUNT(*) as approved FROM registrations r 
-        JOIN students s ON r.student_matrix = s.matrix 
-        WHERE s.advisor_matrix = ? AND r.status = 'approved' 
-        AND WEEK(r.registration_date) = WEEK(CURDATE())";
+$sql = "SELECT COUNT(*) as approved 
+        FROM course_registrations cr 
+        WHERE cr.status = 'approved' 
+        AND cr.student_id IN (SELECT user_id FROM students WHERE advisor_id = ?)
+        AND WEEK(cr.submission_date) = WEEK(CURDATE())";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $approved_count = mysqli_fetch_assoc($result)['approved'];
 
 // Get recent pending registration requests
-$sql = "SELECT DISTINCT s.matrix, s.name, 
-        (SELECT COUNT(*) FROM registrations WHERE student_matrix = s.matrix) as course_count,
-        r.status
-        FROM registrations r
-        JOIN students s ON r.student_matrix = s.matrix
-        WHERE s.advisor_matrix = ? AND r.status = 'pending'
-        ORDER BY r.registration_date DESC LIMIT 5";
+$sql = "SELECT DISTINCT u.user_id, u.matrix_number, u.user_name,
+        (SELECT COUNT(*) FROM registration_courses rc 
+         JOIN course_registrations cr2 ON rc.registration_id = cr2.id 
+         WHERE cr2.student_id = u.user_id) as course_count,
+        cr.status, cr.submission_date
+        FROM course_registrations cr
+        JOIN users u ON cr.student_id = u.user_id
+        WHERE cr.status = 'pending' 
+        AND cr.student_id IN (SELECT user_id FROM students WHERE advisor_id = ?)
+        ORDER BY cr.submission_date DESC LIMIT 5";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $pending_requests = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-// Get approved registrations
-$sql_approved = "SELECT DISTINCT s.matrix, s.name, r.status
-        FROM registrations r
-        JOIN students s ON r.student_matrix = s.matrix
-        WHERE s.advisor_matrix = ? AND r.status = 'approved'
-        ORDER BY r.registration_date DESC LIMIT 5";
+// Get recent approved registrations
+$sql_approved = "SELECT DISTINCT u.user_id, u.matrix_number, u.user_name, cr.status
+        FROM course_registrations cr
+        JOIN users u ON cr.student_id = u.user_id
+        WHERE cr.status = 'approved' 
+        AND cr.student_id IN (SELECT user_id FROM students WHERE advisor_id = ?)
+        ORDER BY cr.submission_date DESC LIMIT 5";
 $stmt_approved = mysqli_prepare($conn, $sql_approved);
-mysqli_stmt_bind_param($stmt_approved, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt_approved, "i", $advisor_id);
 mysqli_stmt_execute($stmt_approved);
 $result_approved = mysqli_stmt_get_result($stmt_approved);
 $approved_requests = mysqli_fetch_all($result_approved, MYSQLI_ASSOC);
+
+// Get advisor name
+$sql_advisor = "SELECT user_name FROM users WHERE user_id = ?";
+$stmt_advisor = mysqli_prepare($conn, $sql_advisor);
+mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
+mysqli_stmt_execute($stmt_advisor);
+$result_advisor = mysqli_stmt_get_result($stmt_advisor);
+$advisor = mysqli_fetch_assoc($result_advisor);
+$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
 
 // Merge requests
 $all_requests = array_merge($pending_requests, $approved_requests);
@@ -76,56 +92,28 @@ $all_requests = array_slice($all_requests, 0, 6);
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
-        .sidebar {
-            width: 280px; height: 100vh;
-            background: linear-gradient(to bottom, #670019, #8b0022);
-            position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease;
-        }
+        .sidebar { width: 280px; height: 100vh; background: linear-gradient(to bottom, #670019, #8b0022); position: fixed; padding: 30px 20px; color: white; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
-        .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
-        }
+        .menu a { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; padding: 12px 20px; border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px; }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
-        .logout {
-            position: absolute; bottom: 30px;
-            width: calc(100% - 40px); left: 20px;
-        }
-        .logout a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 16px;
-            background: rgba(255,255,255,0.1);
-        }
+        .logout { position: absolute; bottom: 30px; width: calc(100% - 40px); left: 20px; }
+        .logout a { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; padding: 12px 20px; border-radius: 14px; transition: 0.3s; font-size: 16px; background: rgba(255,255,255,0.1); }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
-        .topbar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; background: white; padding: 15px 25px;
-            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .profile-box { display: flex; align-items: center; gap: 15px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        .hero {
-            background: #f7f2ee; border-radius: 25px; padding: 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 35px; border: 1px solid #eee;
-        }
+        .hero { background: #f7f2ee; border-radius: 25px; padding: 40px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; border: 1px solid #eee; }
         .hero h1 { font-size: 40px; font-weight: 700; color: #670019; }
         .hero p { color: #666; margin-top: 10px; font-size: 16px; }
         .hero img { width: 200px; }
-        .dashboard-card {
-            border: none; border-radius: 25px; padding: 25px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.05); transition: 0.3s; height: 100%; background: white;
-        }
+        .dashboard-card { border: none; border-radius: 25px; padding: 25px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); transition: 0.3s; height: 100%; background: white; }
         .dashboard-card:hover { transform: translateY(-5px); }
         .card-icon { width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 15px; }
         .yellow { background: #fff2cc; color: #d48a00; }
@@ -134,7 +122,7 @@ $all_requests = array_slice($all_requests, 0, 6);
         .dashboard-card h2 { font-size: 36px; font-weight: 700; color: #670019; margin-bottom: 5px; }
         .dashboard-card h5 { font-size: 16px; font-weight: 600; margin-top: 5px; }
         .dashboard-card p { color: #666; margin-top: 5px; font-size: 13px; }
-        .period-card { background: white; border-radius: 25px; padding: 20px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); }
+        .period-card { background: white; border-radius: 25px; padding: 20px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); margin-bottom: 35px; }
         .period-card h4 { color: #670019; font-weight: 600; margin-bottom: 15px; font-size: 18px; }
         .period-status { display: inline-block; padding: 5px 12px; background: #d4edda; color: #155724; border-radius: 20px; font-size: 12px; margin-bottom: 15px; }
         .pending-requests { background: white; border-radius: 25px; padding: 25px; margin-top: 35px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); }
@@ -169,21 +157,27 @@ $all_requests = array_slice($all_requests, 0, 6);
             <a href="advisor_profile.php"><i class="bi bi-person-fill"></i> Profile</a>
             <a href="advisor_change_password.php"><i class="bi bi-lock-fill"></i> Change Password</a>
         </div>
-        <div class="logout"><a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+        <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
     </div>
 
     <div class="main-content">
         <div class="topbar">
             <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
+            <div class="profile-box" onclick="location.href='advisor_profile.php'">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+                <div>
+                    <h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6>
+                    <small class="text-muted">Academic Advisor</small>
+                </div>
             </div>
         </div>
 
         <div class="hero">
-            <div><h1>Welcome back, Miss Nurul 👩‍🏫</h1><p>Manage your students' course registrations here.</p></div>
+            <div>
+                <h1>Welcome back, <?php echo htmlspecialchars($advisor_name); ?>!</h1>
+                <p>Manage your students' course registrations here.</p>
+            </div>
         </div>
 
         <div class="row g-4">
@@ -207,25 +201,21 @@ $all_requests = array_slice($all_requests, 0, 6);
                 <div class="dashboard-card">
                     <div class="card-icon green"><i class="bi bi-check-circle"></i></div>
                     <h2><?php echo $approved_count; ?></h2>
-                    <h5>Approved This Week</h5>
+                    <h5>Approved</h5>
                     <p>Registrations approved this week</p>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4 mt-2">
-            <div class="col-md-12">
-                <div class="period-card">
-                    <h4><i class="bi bi-calendar-event"></i> Registration Period</h4>
-                    <span class="period-status">🟢 Currently open</span>
-                    <div class="mt-3">
-                        <strong>1 May – 15 May 2026</strong>
-                        <div class="mt-2">
-                            <span class="badge bg-light text-dark me-1">Semester 2</span>
-                            <span class="badge bg-light text-dark me-1">2025/2026</span>
-                            <span class="badge bg-success">Active</span>
-                        </div>
-                    </div>
+        <div class="period-card">
+            <h4><i class="bi bi-calendar-event"></i> Registration Period</h4>
+            <span class="period-status">🟢 Currently open</span>
+            <div class="mt-3">
+                <strong>1 May – 15 May 2026</strong>
+                <div class="mt-2">
+                    <span class="badge bg-light text-dark me-1">Semester 2</span>
+                    <span class="badge bg-light text-dark me-1">2025/2026</span>
+                    <span class="badge bg-success">Active</span>
                 </div>
             </div>
         </div>
@@ -234,27 +224,35 @@ $all_requests = array_slice($all_requests, 0, 6);
             <h3><i class="bi bi-clock-history"></i> Recent Registration Requests</h3>
             <div style="overflow-x: auto;">
                 <table class="table-custom">
-                    <thead><tr><th>Student</th><th>Matrix</th><th>Courses</th><th>Status</th><th>Action</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Matrix</th>
+                            <th>Courses</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php if (!empty($all_requests)): ?>
                             <?php foreach ($all_requests as $request): ?>
                                 <tr>
-                                    <td><strong><?php echo htmlspecialchars($request['name']); ?></strong><br><small><?php echo htmlspecialchars($request['matrix']); ?></small></td>
-                                    <td><?php echo htmlspecialchars($request['matrix']); ?></td>
-                                    <td><?php echo isset($request['course_count']) ? $request['course_count'] : '0'; ?> courses</td>
-                                    <td><span class="status-badge status-<?php echo $request['status']; ?>"><?php echo ucfirst($request['status']); ?></span></td>
+                                    <td><strong><?php echo htmlspecialchars($request['user_name']); ?></strong><br><small><?php echo htmlspecialchars($request['matrix_number']); ?></small></td>
+                                    <td><?php echo htmlspecialchars($request['matrix_number']); ?></td>
+                                    <td><?php echo isset($request['course_count']) ? $request['course_count'] : '0'; ?> courses</small></td>
+                                    <td><span class="status-badge status-<?php echo $request['status']; ?>"><?php echo ucfirst($request['status']); ?></span></small></td>
                                     <td>
                                         <?php if ($request['status'] == 'pending'): ?>
-                                            <button class="btn-approve" onclick="location.href='advisor_verify_registration.php?matrix=<?php echo $request['matrix']; ?>'"><i class="bi bi-check"></i> Approve</button>
-                                            <button class="btn-reject" onclick="location.href='advisor_verify_registration.php?matrix=<?php echo $request['matrix']; ?>'"><i class="bi bi-x"></i> Reject</button>
+                                            <button class="btn-approve" onclick="location.href='advisor_verify_registration.php?id=<?php echo $request['user_id']; ?>'"><i class="bi bi-check"></i> Approve</button>
+                                            <button class="btn-reject" onclick="location.href='advisor_verify_registration.php?id=<?php echo $request['user_id']; ?>'"><i class="bi bi-x"></i> Reject</button>
                                         <?php else: ?>
-                                            <a href="advisor_verify_registration.php?matrix=<?php echo $request['matrix']; ?>" class="action-link">View Details</a>
+                                            <a href="advisor_verify_registration.php?id=<?php echo $request['user_id']; ?>" class="action-link">View Details</a>
                                         <?php endif; ?>
-                                    </td>
+                                     </small>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="5" class="text-center">No registration requests found</td></tr>
+                            <tr><td colspan="5" class="text-center">No registration requests found</small></td>
                         <?php endif; ?>
                     </tbody>
                 </table>

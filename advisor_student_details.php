@@ -1,6 +1,7 @@
 <?php
-require_once 'config.php';
+require_once 'db_connect.php';
 
+// Get student matrix from URL
 $student_matrix = isset($_GET['matrix']) ? $_GET['matrix'] : '';
 
 if (empty($student_matrix)) {
@@ -8,7 +9,11 @@ if (empty($student_matrix)) {
     exit;
 }
 
-$sql = "SELECT * FROM students WHERE matrix = ?";
+// Get student information (JOIN with users table)
+$sql = "SELECT s.*, u.matrix_number, u.user_name, u.utm_email 
+        FROM students s
+        JOIN users u ON s.user_id = u.user_id
+        WHERE u.matrix_number = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "s", $student_matrix);
 mysqli_stmt_execute($stmt);
@@ -20,45 +25,57 @@ if (!$student) {
     exit;
 }
 
-$sql_status = "SELECT status FROM registrations WHERE student_matrix = ? LIMIT 1";
+// Get student's registration status from course_registrations
+$sql_status = "SELECT status FROM course_registrations WHERE student_id = ? LIMIT 1";
 $stmt_status = mysqli_prepare($conn, $sql_status);
-mysqli_stmt_bind_param($stmt_status, "s", $student_matrix);
+mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
 mysqli_stmt_execute($stmt_status);
 $result_status = mysqli_stmt_get_result($stmt_status);
 $reg = mysqli_fetch_assoc($result_status);
 $reg_status = $reg ? $reg['status'] : 'pending';
 
-$sql_courses = "SELECT c.*, r.status as reg_status, r.registration_date
-                FROM registrations r 
-                JOIN courses c ON r.course_id = c.id 
-                WHERE r.student_matrix = ?";
+// Get student's registered courses using the correct table structure
+// course_registrations -> registration_courses -> subjects
+$sql_courses = "SELECT sub.*, cr.status as reg_status, cr.submission_date
+                FROM course_registrations cr 
+                JOIN registration_courses rc ON cr.id = rc.registration_id
+                JOIN subjects sub ON rc.subject_code = sub.subject_code
+                WHERE cr.student_id = ?";
 $stmt_courses = mysqli_prepare($conn, $sql_courses);
-mysqli_stmt_bind_param($stmt_courses, "s", $student_matrix);
+mysqli_stmt_bind_param($stmt_courses, "i", $student['user_id']);
 mysqli_stmt_execute($stmt_courses);
 $result_courses = mysqli_stmt_get_result($stmt_courses);
 $courses = mysqli_fetch_all($result_courses, MYSQLI_ASSOC);
 
+// Get advisor name for topbar
+$advisor_id = 1; // Should come from session
+$sql_advisor = "SELECT user_name FROM users WHERE user_id = ?";
+$stmt_advisor = mysqli_prepare($conn, $sql_advisor);
+mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
+mysqli_stmt_execute($stmt_advisor);
+$result_advisor = mysqli_stmt_get_result($stmt_advisor);
+$advisor = mysqli_fetch_assoc($result_advisor);
+$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
+
 // DYNAMIC SEMESTER HISTORY BASED ON STUDENT
 $student_year = $student['year'];
-$student_id_num = (int)substr($student['matrix'], -4); // Get last 4 digits (0112, 0204, etc.)
+$student_id_num = (int)substr($student['matrix_number'], -4);
 
-// Generate unique CPA values based on student ID (different for each student)
-$base_cpa = 2.50 + ($student_id_num % 150) / 100; // Range: 2.50 to 4.00
-$cpa_improvement = 0.03; // Slight improvement each semester
+// Generate unique CPA values based on student ID
+$base_cpa = 2.50 + ($student_id_num % 150) / 100;
+$cpa_improvement = 0.03;
 
-// Current semester code based on year (last digit indicates year)
-// Format: YYYY + Semester number + Year
+// Current semester code based on year
 $current_semester_code = "20252026" . $student_year;
 
-// Get student's earliest registration date from their courses
-$earliest_reg_date = !empty($courses) ? $courses[0]['registration_date'] : '2026-05-06';
+// Get student's earliest submission date from their courses
+$earliest_reg_date = !empty($courses) ? $courses[0]['submission_date'] : '2026-05-06';
 $reg_timestamp = strtotime($earliest_reg_date);
 
 // Generate semester history based on year
 $semester_history = [];
 
 if ($student_year == 1) {
-    // Year 1 student - 3 semesters
     $semester_dates = [
         date('d M Y', strtotime('-10 months', $reg_timestamp)),
         date('d M Y', strtotime('-5 months', $reg_timestamp)),
@@ -78,7 +95,6 @@ if ($student_year == 1) {
     ];
     
 } elseif ($student_year == 2) {
-    // Year 2 student - 6 semesters
     $semester_dates = [
         date('d M Y', strtotime('-22 months', $reg_timestamp)),
         date('d M Y', strtotime('-19 months', $reg_timestamp)),
@@ -110,7 +126,6 @@ if ($student_year == 1) {
     ];
     
 } elseif ($student_year == 3) {
-    // Year 3 student - 9 semesters
     $semester_dates = [
         date('d M Y', strtotime('-34 months', $reg_timestamp)),
         date('d M Y', strtotime('-31 months', $reg_timestamp)),
@@ -182,7 +197,7 @@ $current_programme = $student_year . ' / DSPD';
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .profile-box { display: flex; align-items: center; gap: 15px; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .page-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
@@ -235,16 +250,19 @@ $current_programme = $student_year . ' / DSPD';
             <a href="advisor_profile.php"><i class="bi bi-person-fill"></i> Profile</a>
             <a href="advisor_change_password.php"><i class="bi bi-lock-fill"></i> Change Password</a>
         </div>
-        <div class="logout"><a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+        <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
     </div>
 
     <div class="main-content">
         <div class="topbar">
             <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
+            <div class="profile-box" onclick="location.href='advisor_profile.php'">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+                <div>
+                    <h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6>
+                    <small class="text-muted">Academic Advisor</small>
+                </div>
             </div>
         </div>
 
@@ -256,17 +274,17 @@ $current_programme = $student_year . ' / DSPD';
 
         <div class="profile-card">
             <div class="profile-header">
-                <div class="student-avatar"><?php echo strtoupper(substr($student['name'], 0, 2)); ?></div>
+                <div class="student-avatar"><?php echo strtoupper(substr($student['user_name'], 0, 2)); ?></div>
                 <div class="student-basic">
-                    <h3><?php echo htmlspecialchars($student['name']); ?></h3>
-                    <p><i class="bi bi-envelope"></i> <?php echo htmlspecialchars($student['email']); ?></p>
+                    <h3><?php echo htmlspecialchars($student['user_name']); ?></h3>
+                    <p><i class="bi bi-envelope"></i> <?php echo htmlspecialchars($student['utm_email']); ?></p>
                 </div>
             </div>
             <div class="student-details-grid">
-                <div class="detail-item"><div class="detail-icon"><i class="bi bi-card-text"></i></div><div class="detail-text"><small>Matrix</small><strong><?php echo htmlspecialchars($student['matrix']); ?></strong></div></div>
+                <div class="detail-item"><div class="detail-icon"><i class="bi bi-card-text"></i></div><div class="detail-text"><small>Matrix</small><strong><?php echo htmlspecialchars($student['matrix_number']); ?></strong></div></div>
                 <div class="detail-item"><div class="detail-icon"><i class="bi bi-mortarboard"></i></div><div class="detail-text"><small>Programme</small><strong><?php echo htmlspecialchars($student['programme']); ?></strong></div></div>
                 <div class="detail-item"><div class="detail-icon"><i class="bi bi-calendar"></i></div><div class="detail-text"><small>Year</small><strong>Year <?php echo $student['year']; ?></strong></div></div>
-                <div class="detail-item"><div class="detail-icon"><i class="bi bi-person-badge"></i></div><div class="detail-text"><small>Advisor Matrix</small><strong><?php echo htmlspecialchars($student['advisor_matrix']); ?></strong></div></div>
+                <div class="detail-item"><div class="detail-icon"><i class="bi bi-person-badge"></i></div><div class="detail-text"><small>Advisor ID</small><strong><?php echo $student['advisor_id']; ?></strong></div></div>
             </div>
         </div>
 
@@ -274,13 +292,20 @@ $current_programme = $student_year . ' / DSPD';
             <h4><i class="bi bi-book"></i> Registered Courses (<?php echo count($courses); ?>)</h4>
             <?php if (!empty($courses)): ?>
                 <table class="table">
-                    <thead><tr><th>Course Code</th><th>Course Name</th><th>Credit Hours</th><th>Status</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Credits</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php foreach ($courses as $course): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($course['course_code']); ?></td>
-                                <td><?php echo htmlspecialchars($course['course_name']); ?></small>
-                                <td><?php echo $course['credit_hours']; ?></small>
+                                <td><?php echo htmlspecialchars($course['subject_code']); ?></td>
+                                <td><?php echo htmlspecialchars($course['subject_name']); ?></small>
+                                <td><?php echo $course['credits']; ?></small>
                                 <td><span class="status-badge status-<?php echo $course['reg_status']; ?>"><?php echo ucfirst($course['reg_status']); ?></span></small>
                             </tr>
                         <?php endforeach; ?>
@@ -309,7 +334,7 @@ $current_programme = $student_year . ' / DSPD';
 
         <div class="action-buttons">
             <a href="advisor_my_students.php" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Students</a>
-            <a href="advisor_verify_registration.php?matrix=<?php echo $student['matrix']; ?>" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
+            <a href="advisor_verify_registration.php?matrix=<?php echo $student['matrix_number']; ?>" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
         </div>
     </div>
 
@@ -324,7 +349,14 @@ $current_programme = $student_year . ' / DSPD';
             if (currentPage > totalPages) currentPage = totalPages;
             const start = (currentPage - 1) * perPage;
             const pageData = filtered.slice(start, start + perPage);
-            document.getElementById('semTableBody').innerHTML = pageData.map(r => `<tr><td>${r.session}</td><td>${r.programme}</td><td>${r.noSem}</td><td>${r.regDate}</td><td>${r.activeCode}</td><td>${r.cpa}</td>`).join('');
+            document.getElementById('semTableBody').innerHTML = pageData.map(r => `<tr>
+                <td>${r.session}</td>
+                <td>${r.programme}</td>
+                <td>${r.noSem}</td>
+                <td>${r.regDate}</td>
+                <td>${r.activeCode}</td>
+                <td>${r.cpa}</td>
+            </tr>`).join('');
             const from = filtered.length === 0 ? 0 : start + 1;
             const to = Math.min(start + perPage, filtered.length);
             document.getElementById('tableInfo').textContent = `Showing ${from} to ${to} of ${filtered.length} entries`;

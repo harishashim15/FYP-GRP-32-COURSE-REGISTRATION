@@ -1,29 +1,47 @@
 <?php
-require_once 'config.php';
+require_once 'db_connect.php';
 
-$advisor_matrix = 'AA0001';
+session_start();
 
+// Get advisor ID (from session or hardcoded for now)
+$advisor_id = 1; // Miss Asyikin
+
+// Get all registrations for students under this advisor
+// Using correct table structure: course_registrations, students, users
 $sql = "SELECT 
-            s.matrix as student_matrix,
-            s.name as student_name,
-            COUNT(r.id) as course_count,
-            MIN(r.registration_date) as submitted_date,
-            r.status
-        FROM registrations r
-        JOIN students s ON r.student_matrix = s.matrix
-        WHERE s.advisor_matrix = ?
-        GROUP BY s.matrix, s.name, r.status
-        ORDER BY r.registration_date DESC";
+            u.user_id as student_id,
+            u.matrix_number as student_matrix,
+            u.user_name as student_name,
+            COUNT(DISTINCT rc.id) as course_count,
+            MIN(cr.submission_date) as submitted_date,
+            cr.status
+        FROM course_registrations cr
+        JOIN students s ON cr.student_id = s.user_id
+        JOIN users u ON s.user_id = u.user_id
+        LEFT JOIN registration_courses rc ON cr.id = rc.registration_id
+        WHERE s.advisor_id = ?
+        GROUP BY u.user_id, u.matrix_number, u.user_name, cr.status
+        ORDER BY cr.submission_date DESC";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $registrations = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
+// Calculate pending count
 $pending_count = 0;
 foreach ($registrations as $reg) {
     if ($reg['status'] == 'pending') $pending_count++;
 }
+
+// Get advisor name for topbar
+$sql_advisor = "SELECT user_name FROM users WHERE user_id = ?";
+$stmt_advisor = mysqli_prepare($conn, $sql_advisor);
+mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
+mysqli_stmt_execute($stmt_advisor);
+$result_advisor = mysqli_stmt_get_result($stmt_advisor);
+$advisor = mysqli_fetch_assoc($result_advisor);
+$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +69,7 @@ foreach ($registrations as $reg) {
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .profile-box { display: flex; align-items: center; gap: 15px; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .page-header { margin-bottom: 30px; }
@@ -84,16 +102,19 @@ foreach ($registrations as $reg) {
             <a href="advisor_profile.php"><i class="bi bi-person-fill"></i> Profile</a>
             <a href="advisor_change_password.php"><i class="bi bi-lock-fill"></i> Change Password</a>
         </div>
-        <div class="logout"><a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+        <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
     </div>
 
     <div class="main-content">
         <div class="topbar">
             <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
+            <div class="profile-box" onclick="location.href='advisor_profile.php'">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+                <div>
+                    <h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6>
+                    <small class="text-muted">Academic Advisor</small>
+                </div>
             </div>
         </div>
 
@@ -112,7 +133,14 @@ foreach ($registrations as $reg) {
         <div class="registrations-table">
             <table class="table">
                 <thead>
-                    <tr><th>Student Name</th><th>Matrix</th><th>Courses</th><th>Submitted Date</th><th>Status</th><th>Action</th></tr>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Matrix</th>
+                        <th>Courses</th>
+                        <th>Submitted Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
                 </thead>
                 <tbody id="regTableBody">
                     <?php if (!empty($registrations)): ?>
@@ -133,7 +161,7 @@ foreach ($registrations as $reg) {
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="6" class="text-center">No registrations found</td></tr>
+                        <tr><td colspan="6" class="text-center">No registrations found</small></td>
                     <?php endif; ?>
                 </tbody>
             </table>

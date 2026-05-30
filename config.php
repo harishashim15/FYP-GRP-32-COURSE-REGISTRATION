@@ -1,5 +1,5 @@
 <?php
-$host = "localhost";
+$host = "127.0.0.1";
 $user = "root";
 $pass = "";
 $db   = "fypdb3";
@@ -10,5 +10,8 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-session_start();
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>

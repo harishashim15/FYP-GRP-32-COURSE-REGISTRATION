@@ -1,36 +1,59 @@
 <?php
-require_once 'config.php';
+require_once 'db_connect.php';
 
-$advisor_matrix = 'AA0001';
+session_start();
 
-$sql = "SELECT * FROM students WHERE advisor_matrix = ? ORDER BY name";
+// Get advisor ID from session (after login)
+$advisor_id = 1;
+
+// Get all students under this advisor
+$sql = "SELECT s.*, u.matrix_number, u.user_name, u.utm_email 
+        FROM students s
+        JOIN users u ON s.user_id = u.user_id
+        WHERE s.advisor_id = ? 
+        ORDER BY u.user_name";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $advisor_matrix);
+mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $students = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
+// Calculate statistics
 $total_students = count($students);
 $completed_count = 0;
 $pending_registration_count = 0;
 $pending_approval_count = 0;
 
 foreach ($students as $student) {
-    $sql_status = "SELECT status FROM registrations WHERE student_matrix = ? LIMIT 1";
+    // Get student's registration status from course_registrations
+    $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? LIMIT 1";
     $stmt_status = mysqli_prepare($conn, $sql_status);
-    mysqli_stmt_bind_param($stmt_status, "s", $student['matrix']);
+    mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
     mysqli_stmt_execute($stmt_status);
     $result_status = mysqli_stmt_get_result($stmt_status);
     $reg = mysqli_fetch_assoc($result_status);
     
     if ($reg) {
-        if ($reg['status'] == 'approved') $completed_count++;
-        elseif ($reg['status'] == 'pending') $pending_registration_count++;
-        else $pending_approval_count++;
+        if ($reg['status'] == 'approved') {
+            $completed_count++;
+        } elseif ($reg['status'] == 'pending') {
+            $pending_registration_count++;
+        } else {
+            $pending_approval_count++;
+        }
     } else {
         $pending_registration_count++;
     }
 }
+
+// Get advisor name
+$sql_advisor = "SELECT user_name FROM users WHERE user_id = ?";
+$stmt_advisor = mysqli_prepare($conn, $sql_advisor);
+mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
+mysqli_stmt_execute($stmt_advisor);
+$result_advisor = mysqli_stmt_get_result($stmt_advisor);
+$advisor = mysqli_fetch_assoc($result_advisor);
+$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,16 +81,14 @@ foreach ($students as $student) {
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .profile-box { display: flex; align-items: center; gap: 15px; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .page-header { background: #f7f2ee; border-radius: 25px; padding: 35px 40px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border: 1px solid #eee; }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
-        .page-header img { width: 180px; }
         .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; font-size: 14px; outline: none; background: white; }
-        .search-bar input:focus { border-color: #670019; box-shadow: 0 0 0 4px rgba(103,0,25,0.08); }
         .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 14px; font-weight: 500; }
         .students-table { background: white; border-radius: 25px; padding: 25px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); }
         .students-table h3 { color: #670019; font-weight: 700; font-size: 20px; margin-bottom: 20px; }
@@ -96,16 +117,19 @@ foreach ($students as $student) {
             <a href="advisor_profile.php"><i class="bi bi-person-fill"></i> Profile</a>
             <a href="advisor_change_password.php"><i class="bi bi-lock-fill"></i> Change Password</a>
         </div>
-        <div class="logout"><a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+        <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
     </div>
 
     <div class="main-content">
         <div class="topbar">
             <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-            <div class="profile-box">
+            <div class="profile-box" onclick="location.href='advisor_profile.php'">
                 <i class="bi bi-bell fs-5"></i>
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <div><h6 class="mb-0">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+                <div>
+                    <h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6>
+                    <small class="text-muted">Academic Advisor</small>
+                </div>
             </div>
         </div>
 
@@ -129,14 +153,23 @@ foreach ($students as $student) {
             <h3><i class="bi bi-people-fill me-2"></i>Student List</h3>
             <div style="overflow-x: auto;">
                 <table class="table">
-                    <thead><tr><th>Student Name</th><th>Matrix</th><th>Programme</th><th>Year</th><th>Status</th><th>Action</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Matrix</th>
+                            <th>Programme</th>
+                            <th>Year</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
                     <tbody id="studentTableBody">
                         <?php if (!empty($students)): ?>
                             <?php foreach ($students as $student): ?>
                                 <?php
-                                $sql_status = "SELECT status FROM registrations WHERE student_matrix = ? LIMIT 1";
+                                $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? LIMIT 1";
                                 $stmt_status = mysqli_prepare($conn, $sql_status);
-                                mysqli_stmt_bind_param($stmt_status, "s", $student['matrix']);
+                                mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
                                 mysqli_stmt_execute($stmt_status);
                                 $result_status = mysqli_stmt_get_result($stmt_status);
                                 $reg = mysqli_fetch_assoc($result_status);
@@ -148,16 +181,16 @@ foreach ($students as $student) {
                                 } else { $status_class = 'status-pending'; $status_text = 'Pending Registration'; }
                                 ?>
                                 <tr>
-                                    <td><strong><?php echo htmlspecialchars($student['name']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($student['matrix']); ?></td>
+                                    <td><strong><?php echo htmlspecialchars($student['user_name']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($student['matrix_number']); ?></td>
                                     <td><?php echo htmlspecialchars($student['programme']); ?></td>
                                     <td>Year <?php echo $student['year']; ?></td>
                                     <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
-                                    <td><button class="view-btn" onclick="location.href='advisor_student_details.php?matrix=<?php echo $student['matrix']; ?>'"><i class="bi bi-eye me-1"></i>View Details</button></td>
+                                    <td><button class="view-btn" onclick="location.href='advisor_student_details.php?matrix=<?php echo $student['matrix_number']; ?>'"><i class="bi bi-eye me-1"></i>View Details</button></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="6" class="text-center">No students found</td></tr>
+                            <tr><td colspan="6" class="text-center">No students found</small></td>
                         <?php endif; ?>
                     </tbody>
                 </table>
