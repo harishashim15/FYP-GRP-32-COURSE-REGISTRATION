@@ -140,7 +140,7 @@ $subjects_count = $result->fetch_row()[0];
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon yellow"><i class="bi bi-people-fill"></i></div>
-                <h2 id="studentsCount">0</h2>
+                <h2><?php echo $students_count; ?></h2>
                 <h5>Total Students</h5>
                 <p>Registered students</p>
             </div>
@@ -148,7 +148,7 @@ $subjects_count = $result->fetch_row()[0];
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon red"><i class="bi bi-person-badge-fill"></i></div>
-                <h2 id="advisorsCount">0</h2>
+                <h2><?php echo $advisors_count; ?></h2>
                 <h5>Total Advisors</h5>
                 <p>Academic advisors</p>
             </div>
@@ -156,14 +156,13 @@ $subjects_count = $result->fetch_row()[0];
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon green"><i class="bi bi-book-fill"></i></div>
-                <h2 id="subjectsCount">0</h2>
+                <h2><?php echo $subjects_count; ?></h2>
                 <h5>Subjects</h5>
                 <p>Available courses</p>
             </div>
         </div>
     </div>
 </div>
-<script src="../js/common.js"></script>
 <script>
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -179,76 +178,51 @@ $subjects_count = $result->fetch_row()[0];
         }
     })();
 
-    // Count-up animation function
-    function animateNumber(element, target, duration = 1000) {
-        let start = 0;
-        const increment = target / (duration / 16);
-        let current = start;
-        
-        const updateNumber = () => {
-            current += increment;
-            if (current < target) {
-                element.innerText = Math.floor(current);
-                requestAnimationFrame(updateNumber);
-            } else {
-                element.innerText = target;
-            }
-        };
-        updateNumber();
-    }
+        // Add this inside the existing <script> block or as a new block at the end of the page
 
-    // Animate the stat cards
-    const studentsTarget = <?php echo $students_count; ?>;
-    const advisorsTarget = <?php echo $advisors_count; ?>;
-    const subjectsTarget = <?php echo $subjects_count; ?>;
-    
-    animateNumber(document.getElementById('studentsCount'), studentsTarget);
-    animateNumber(document.getElementById('advisorsCount'), advisorsTarget);
-    animateNumber(document.getElementById('subjectsCount'), subjectsTarget);
-
-    // Default password check
-    async function checkDefaultPassword() {
-        try {
-            const res = await apiGet('auth/check_default_password.php');
-            if (res.is_default) {
-                showDefaultPasswordModal();
-            }
-        } catch(e) {
-            console.error('Failed to check default password:', e);
+async function checkDefaultPassword() {
+    try {
+        const res = await apiGet('auth/check_default_password.php');
+        if (res.is_default) {
+            showDefaultPasswordModal();
         }
+    } catch(e) {
+        console.error('Failed to check default password:', e);
     }
+}
 
-    function showDefaultPasswordModal() {
-        let modal = document.getElementById('defaultPasswordModal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'defaultPasswordModal';
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            modal.style.display = 'flex';
-            modal.style.alignItems = 'center';
-            modal.style.justifyContent = 'center';
-            modal.style.zIndex = '2000';
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 25px; padding: 30px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-                    <i class="bi bi-shield-exclamation" style="font-size: 48px; color: #f4a000;"></i>
-                    <h3 style="margin-top: 15px; color: #670019;">Default Password Detected</h3>
-                    <p style="margin-top: 10px; color: #666;">For security reasons, please change your default password immediately.</p>
-                    <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
-                        <button onclick="document.getElementById('defaultPasswordModal').remove();" style="background: #6c757d; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Remind Me Later</button>
-                        <button onclick="window.location.href='change_password.php';" style="background: #670019; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Change Password Now</button>
-                    </div>
+function showDefaultPasswordModal() {
+    let modal = document.getElementById('defaultPasswordModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'defaultPasswordModal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.zIndex = '2000';
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 25px; padding: 30px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                <i class="bi bi-shield-exclamation" style="font-size: 48px; color: #f4a000;"></i>
+                <h3 style="margin-top: 15px; color: #670019;">Default Password Detected</h3>
+                <p style="margin-top: 10px; color: #666;">For security reasons, please change your default password immediately.</p>
+                <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
+                    <button onclick="document.getElementById('defaultPasswordModal').remove();" style="background: #6c757d; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Remind Me Later</button>
+                    <button onclick="window.location.href='reset_password_form.html';" style="background: #670019; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Change Password Now</button>
                 </div>
-            `;
-            document.body.appendChild(modal);
-        }
+            </div>
+        `;
+        document.body.appendChild(modal);
     }
+}
 
-    checkDefaultPassword();
+// Call this after loading dashboard data
+checkDefaultPassword();
 </script>
 </body>
 </html>
