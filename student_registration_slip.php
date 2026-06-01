@@ -1,8 +1,4 @@
 <?php
-// Add error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -13,50 +9,26 @@ if (!isset($_SESSION['user_id'])) {
 include("db_connect.php");
 
 $user_id = $_SESSION['user_id'];
-
-// DEBUG: Check what ID is being received
-echo "<!-- DEBUG: GET parameters: ";
-print_r($_GET);
-echo " -->";
-
 $registration_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// If no ID in GET, try to get from POST
-if ($registration_id == 0 && isset($_POST['id'])) {
-    $registration_id = (int)$_POST['id'];
+if (!$registration_id) {
+    die("No registration ID provided.");
 }
 
-// DEBUG: Show the ID being used
-echo "<!-- DEBUG: registration_id = " . $registration_id . " -->";
-
-if ($registration_id == 0) {
-    die("
-    <!DOCTYPE html>
-    <html>
-    <head><title>Error</title></head>
-    <body style='font-family: Arial; padding: 50px; text-align: center;'>
-        <h2>Error: No Registration ID Provided</h2>
-        <p>Please go back and try again.</p>
-        <a href='student_registration_history.html'>← Back to Registration History</a>
-        <hr>
-        <p style='color: #666; font-size: 12px;'>Debug info: ID received = <?php echo $registration_id; ?></p>
-    </body>
-    </html>
-    ");
-}
-
-// Fetch student info
-$student_query = "SELECT user_name, matrix_number FROM users WHERE user_id = '$user_id'";
+// Fetch student info with additional details
+$student_query = "SELECT u.user_name, u.matrix_number, u.utm_email, u.second_email, u.phone,
+                         s.programme, s.year, s.semester, s.ic_number, s.address, s.advisor_id
+                  FROM users u
+                  LEFT JOIN students s ON u.user_id = s.user_id
+                  WHERE u.user_id = '$user_id'";
 $student_result = mysqli_query($conn, $student_query);
 $student = mysqli_fetch_assoc($student_result);
 $student_name = $student ? $student['user_name'] : "Student";
 $matrix_number = $student ? $student['matrix_number'] : "";
-
-// Fetch programme from students table
-$programme_query = "SELECT programme FROM students WHERE user_id = '$user_id'";
-$programme_result = mysqli_query($conn, $programme_query);
-$programme_row = mysqli_fetch_assoc($programme_result);
-$programme = $programme_row ? $programme_row['programme'] : "Computer Science";
+$programme = $student ? $student['programme'] : "Computer Science";
+$year = $student ? $student['year'] : "2";
+$ic_number = $student && $student['ic_number'] ? $student['ic_number'] : "Not provided";
+$address = $student && $student['address'] ? $student['address'] : "Not provided";
 
 // Fetch registration details
 $reg_query = "SELECT cr.id, cr.submission_date, cr.status, cr.session, cr.reviewed_at, 
@@ -65,26 +37,10 @@ $reg_query = "SELECT cr.id, cr.submission_date, cr.status, cr.session, cr.review
               LEFT JOIN users u ON cr.reviewed_by = u.user_id
               WHERE cr.id = $registration_id AND cr.student_id = $user_id";
 $reg_result = mysqli_query($conn, $reg_query);
-
-if (!$reg_result) {
-    die("Database error: " . mysqli_error($conn));
-}
-
 $registration = mysqli_fetch_assoc($reg_result);
 
 if (!$registration) {
-    die("
-    <!DOCTYPE html>
-    <html>
-    <head><title>Error</title></head>
-    <body style='font-family: Arial; padding: 50px; text-align: center;'>
-        <h2>Error: Registration Not Found</h2>
-        <p>No registration found with ID: $registration_id</p>
-        <p>Please make sure you have submitted a registration and it has been approved.</p>
-        <a href='student_registration_history.html'>← Back to Registration History</a>
-    </body>
-    </html>
-    ");
+    die("Registration not found.");
 }
 
 // Fetch registered courses for this registration
@@ -99,6 +55,9 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
     $courses[] = $row;
     $total_credits += $row['credits'];
 }
+
+// Calculate total credits formatted
+$total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -160,6 +119,7 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
         .page-header { margin-bottom: 30px; }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         
+        /* Registration Slip Styles */
         .registration-slip {
             background: white;
             border-radius: 25px;
@@ -175,89 +135,145 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
             border-bottom: 2px solid #670019;
         }
         
+        .slip-header .logo-img {
+            max-width: 80px;
+            margin-bottom: 15px;
+        }
+        
         .slip-header h3 {
             color: #670019;
             font-weight: 700;
-            font-size: 24px;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .slip-header .subtitle {
+            color: #666;
+            font-size: 12px;
         }
         
         .slip-header .university-name {
-            color: #666;
+            color: #333;
             font-size: 14px;
+            font-weight: 500;
+            margin-top: 10px;
         }
         
         .info-section {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         
         .info-section h4 {
             color: #670019;
             font-weight: 600;
-            font-size: 18px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            font-size: 16px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
         }
         
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
         }
         
         .info-item {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .info-item label {
-            font-size: 13px;
+            font-size: 11px;
             color: #888;
             display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .info-item span {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 500;
             color: #333;
         }
         
         .status-badge {
-            padding: 5px 14px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             display: inline-block;
         }
-        .status-pending { background: #fff3cd; color: #856404; }
         .status-approved { background: #d4edda; color: #155724; }
-        .status-rejected { background: #f8d7da; color: #721c24; }
         
         .courses-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            font-size: 12px;
         }
         .courses-table th {
             background: #f8f6f4;
-            padding: 12px;
+            padding: 10px 8px;
             text-align: left;
             color: #670019;
             font-weight: 600;
-            font-size: 13px;
+            border: 1px solid #e0e0e0;
         }
         .courses-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
         }
         
         .total-credits {
             text-align: right;
             margin-top: 15px;
             padding-top: 10px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #ddd;
             font-weight: 600;
             color: #670019;
+            font-size: 13px;
+        }
+        
+        .verification-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .verification-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .verification-item {
+            margin-bottom: 15px;
+        }
+        
+        .verification-item label {
+            font-size: 11px;
+            color: #888;
+            display: block;
+        }
+        
+        .verification-item span {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .signature-line {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+        }
+        
+        .footer-note {
+            margin-top: 30px;
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+            line-height: 1.4;
         }
         
         .print-btn {
@@ -305,7 +321,7 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
         @media print {
             .sidebar, .topbar, .print-btn, .back-btn, .logout { display: none !important; }
             .main-content { margin-left: 0 !important; padding: 0 !important; }
-            .registration-slip { box-shadow: none; padding: 20px; }
+            .registration-slip { box-shadow: none; padding: 20px; margin: 0; }
             body { background: white; }
         }
     </style>
@@ -340,34 +356,47 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
 
     <div class="registration-slip" id="slipContainer">
         <div class="slip-header">
-            <h3>OFFICIAL REGISTRATION SLIP</h3>
+            <img src="images/utmlogo.png" alt="UTM Logo" class="logo-img" style="width: 70px;">
+            <h3>COURSE REGISTRATION SLIP</h3>
             <div class="university-name">Universiti Teknologi Malaysia<br>Course Registration System</div>
         </div>
         
         <div class="info-section">
-            <h4>Registration Information</h4>
+            <h4>STUDENT INFORMATION</h4>
             <div class="info-grid">
-                <div class="info-item"><label>Student Name</label><span><?php echo htmlspecialchars($student_name); ?></span></div>
-                <div class="info-item"><label>Student ID</label><span><?php echo htmlspecialchars($matrix_number); ?></span></div>
-                <div class="info-item"><label>Programme</label><span><?php echo htmlspecialchars($programme); ?></span></div>
-                <div class="info-item"><label>Session</label><span><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></span></div>
-                <div class="info-item"><label>Submitted Date</label><span><?php echo date('d/m/Y h:i A', strtotime($registration['submission_date'])); ?></span></div>
-                <div class="info-item"><label>Approved Date</label><span><?php echo $registration['reviewed_at'] ? date('d/m/Y h:i A', strtotime($registration['reviewed_at'])) : '-'; ?></span></div>
-                <div class="info-item"><label>Approved By</label><span><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></span></div>
-                <div class="info-item"><label>Status</label><span class="status-badge status-<?php echo $registration['status']; ?>"><?php echo ucfirst($registration['status']); ?></span></div>
+                <div class="info-item"><label>NAME</label><span><?php echo htmlspecialchars($student_name); ?></span></div>
+                <div class="info-item"><label>MATRIC NO.</label><span><?php echo htmlspecialchars($matrix_number); ?></span></div>
+                <div class="info-item"><label>IC/PASSPORT</label><span><?php echo htmlspecialchars($ic_number); ?></span></div>
+                <div class="info-item"><label>PROGRAMME</label><span><?php echo htmlspecialchars($programme); ?></span></div>
+                <div class="info-item"><label>YEAR</label><span><?php echo htmlspecialchars($year); ?></span></div>
+                <div class="info-item"><label>EMAIL</label><span><?php echo htmlspecialchars($student['utm_email'] ?? '-'); ?></span></div>
+                <div class="info-item"><label>PHONE</label><span><?php echo htmlspecialchars($student['phone'] ?? '-'); ?></span></div>
+                <div class="info-item"><label>ADDRESS</label><span><?php echo htmlspecialchars($address); ?></span></div>
             </div>
         </div>
         
         <div class="info-section">
-            <h4>Registered Courses</h4>
+            <h4>REGISTRATION DETAILS</h4>
+            <div class="info-grid">
+                <div class="info-item"><label>SESSION/SEMESTER</label><span><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></span></div>
+                <div class="info-item"><label>YEAR/PROGRAMME</label><span><?php echo htmlspecialchars($year); ?> / <?php echo htmlspecialchars($programme); ?></span></div>
+                <div class="info-item"><label>SUBMITTED DATE</label><span><?php echo date('d-M-Y', strtotime($registration['submission_date'])); ?></span></div>
+                <div class="info-item"><label>APPROVED DATE</label><span><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '-'; ?></span></div>
+                <div class="info-item"><label>APPROVED BY</label><span><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></span></div>
+                <div class="info-item"><label>STATUS</label><span class="status-badge status-approved">APPROVED</span></div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h4>REGISTERED COURSES</h4>
             <table class="courses-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Course Code</th>
-                        <th>Course Name</th>
-                        <th>Credits</th>
-                        <th>Section</th>
+                        <th>NO.</th>
+                        <th>CODE</th>
+                        <th>COURSE TITLE</th>
+                        <th>CREDIT</th>
+                        <th>SECTION</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -375,24 +404,53 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
                         <?php $counter = 1; foreach ($courses as $course): ?>
                         <tr>
                             <td><?php echo $counter++; ?></td>
-                            <td><strong><?php echo htmlspecialchars($course['subject_code']); ?></strong></td>
+                            <td><?php echo htmlspecialchars($course['subject_code']); ?></td>
                             <td><?php echo htmlspecialchars($course['subject_name']); ?></td>
                             <td><?php echo $course['credits']; ?></td>
                             <td><?php echo htmlspecialchars($course['section'] ?? 'TBD'); ?></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr>
-                            <td colspan="5" class="text-center">No courses found for this registration</td>
-                        </tr>
+                        <tr><td colspan="5" class="text-center">No courses found for this registration</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
-            <div class="total-credits">Total Credit Hours: <?php echo $total_credits; ?></div>
+            <div class="total-credits">TOTAL CREDIT REGISTERED: <?php echo $total_credits_formatted; ?></div>
         </div>
         
-        <div class="text-center mt-4">
-            <small class="text-muted">This is an official registration slip. Please keep for your records.</small>
+        <div class="verification-section">
+            <h4>VERIFICATION FROM ACADEMIC ADVISOR</h4>
+            <div class="verification-grid">
+                <div class="verification-item">
+                    <label>VERIFIED BY</label>
+                    <span><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________________'); ?></span>
+                </div>
+                <div class="verification-item">
+                    <label>DATE VERIFIED</label>
+                    <span><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '_________________________'; ?></span>
+                </div>
+            </div>
+            <div class="verification-item">
+                <label>REMARKS</label>
+                <span><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></span>
+            </div>
+            <div class="signature-line">
+                <div class="info-grid">
+                    <div class="info-item"><label>STUDENT SIGNATURE</label><span>_________________________</span></div>
+                    <div class="info-item"><label>ADVISOR SIGNATURE</label><span>_________________________</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-note">
+            <strong>DATE: <?php echo date('d-M-Y'); ?></strong><br>
+            # PLEASE CHECK YOUR NAME AND ADDRESS. CORRECTIONS CAN BE MADE AT YOUR FACULTY/SCHOOL.<br><br>
+            <strong>Learning Method Definition:</strong><br>
+            OL = Online Learning | FC = Face to face | BL = Blended Learning | BLS = Blended Learning Substitution<br><br>
+            <strong>Examination Type Definition:</strong><br>
+            AA = Alternative Assessment | NFE = No Final Exam | ASYNC O = Asynchronous online exam<br>
+            SYNC O = Synchronous online exam (no invigilation) | SYNC OP = Synchronous online exam with online proctoring<br>
+            SYNC OV = Synchronous online exam with online invigilation | SYNC P = Synchronous online exam with physical invigilation | FTF = Face-to-face final exam
         </div>
     </div>
 
