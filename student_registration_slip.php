@@ -64,7 +64,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Slip - UTM Student</title>
     <link rel="icon" type="image/png" href="images/logoWebsite.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -74,7 +74,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #f8f6f4; overflow-x: hidden; }
+        body { background: #f8f6f4; }
         
         .sidebar {
             width: 280px; height: 100vh;
@@ -117,144 +117,141 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
         
-        .page-header { margin-bottom: 30px; }
-        .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
+        .page-header { margin-bottom: 15px; }
+        .page-header h2 { font-size: 24px; font-weight: 700; color: #670019; }
         
-        /* Registration Slip Styles - PDF Optimized */
+        /* Registration Slip Styles - EXTRA COMPACT FOR ONE PAGE */
         .registration-slip {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            max-width: 100%;
-            overflow-x: auto;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
         }
         
         .slip-header {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 2px solid #670019;
         }
         
         .slip-header .logo-img {
-            max-width: 60px;
-            margin-bottom: 10px;
+            max-width: 40px;
+            margin-bottom: 3px;
         }
         
         .slip-header h3 {
             color: #670019;
             font-weight: 700;
-            font-size: 18px;
-            margin-bottom: 3px;
+            font-size: 14px;
+            margin-bottom: 2px;
         }
         
         .slip-header .university-name {
             color: #333;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 9px;
         }
         
         .info-section {
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
         
         .info-section h4 {
             color: #670019;
             font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
+            font-size: 11px;
+            margin-bottom: 5px;
+            padding-bottom: 2px;
             border-bottom: 1px solid #ddd;
         }
         
-        /* Two column layout for PDF */
-        .info-row {
+        /* Two column layout - COMPACT */
+        .info-grid-2col {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #f0f0f0;
-            padding: 6px 0;
+        }
+        
+        .info-item {
+            width: 50%;
+            margin-bottom: 4px;
         }
         
         .info-label {
-            width: 30%;
-            font-size: 12px;
+            font-size: 9px;
             color: #888;
-            font-weight: 500;
+            display: inline-block;
+            width: 85px;
         }
         
         .info-value {
-            width: 70%;
-            font-size: 12px;
+            font-size: 10px;
             color: #333;
             font-weight: 500;
+            display: inline-block;
         }
         
         .courses-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11px;
+            font-size: 9px;
         }
         .courses-table th {
             background: #f8f6f4;
-            padding: 8px 6px;
+            padding: 4px 3px;
             text-align: left;
             color: #670019;
             font-weight: 600;
             border: 1px solid #ddd;
         }
         .courses-table td {
-            padding: 6px;
+            padding: 3px;
             border: 1px solid #ddd;
         }
         
         .total-credits {
             text-align: right;
-            margin-top: 10px;
-            padding-top: 8px;
+            margin-top: 4px;
+            padding-top: 3px;
             border-top: 1px solid #ddd;
             font-weight: 600;
             color: #670019;
-            font-size: 12px;
+            font-size: 9px;
         }
         
         .verification-section {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 8px;
+            padding-top: 5px;
             border-top: 1px solid #ddd;
         }
         
-        .verification-row {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
+        .verification-item {
+            margin-bottom: 3px;
         }
         
         .verification-label {
-            width: 25%;
-            font-size: 11px;
+            font-size: 9px;
             color: #888;
+            width: 85px;
+            display: inline-block;
         }
         
         .verification-value {
-            width: 75%;
-            font-size: 12px;
+            font-size: 10px;
             color: #333;
             font-weight: 500;
+            display: inline-block;
         }
         
         .signature-line {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 8px;
+            padding-top: 5px;
             border-top: 1px dashed #ccc;
         }
         
         .signature-row {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
         }
         
         .signature-item {
@@ -263,22 +260,20 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         }
         
         .signature-item span {
-            font-size: 11px;
+            font-size: 8px;
             color: #888;
         }
         
         .signature-line-dash {
-            margin-top: 5px;
+            margin-top: 2px;
             border-top: 1px dashed #999;
-            width: 100%;
         }
         
         .footer-note {
-            margin-top: 20px;
-            font-size: 8px;
+            margin-top: 8px;
+            font-size: 7px;
             color: #999;
             text-align: center;
-            line-height: 1.3;
         }
         
         .print-btn {
@@ -322,7 +317,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             .main-content { margin-left: 0; }
         }
         
-        /* Print/PDF specific styles */
+        /* Print/PDF - FORCED ONE PAGE */
         @media print {
             .sidebar, .topbar, .print-btn, .back-btn, .logout { 
                 display: none !important; 
@@ -333,20 +328,23 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             }
             .registration-slip { 
                 box-shadow: none; 
-                padding: 10px;
+                padding: 8px;
                 margin: 0;
                 border-radius: 0;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             body { 
                 background: white; 
                 margin: 0;
                 padding: 0;
             }
-            .info-label { width: 25%; }
-            .info-value { width: 75%; }
-            .courses-table { font-size: 9px; }
-            .courses-table th, .courses-table td { padding: 4px; }
-            .footer-note { font-size: 7px; }
+            .info-item { width: 50%; }
+            .info-label { width: 80px; }
+            .courses-table { font-size: 8px; }
+            .courses-table th, .courses-table td { padding: 2px; }
+            .footer-note { font-size: 6px; }
         }
     </style>
 </head>
@@ -380,90 +378,47 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 
     <div class="registration-slip" id="slipContainer">
         <div class="slip-header">
-            <img src="images/utmlogo.png" alt="UTM Logo" class="logo-img" style="width: 55px;">
+            <img src="images/utmlogo.png" alt="UTM Logo" class="logo-img">
             <h3>COURSE REGISTRATION SLIP</h3>
             <div class="university-name">Universiti Teknologi Malaysia</div>
         </div>
         
         <div class="info-section">
             <h4>STUDENT INFORMATION</h4>
-            <div class="info-row">
-                <div class="info-label">NAME</div>
-                <div class="info-value"><?php echo htmlspecialchars($student_name); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">MATRIC NO.</div>
-                <div class="info-value"><?php echo htmlspecialchars($matrix_number); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">IC/PASSPORT</div>
-                <div class="info-value"><?php echo htmlspecialchars($ic_number); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">PROGRAMME</div>
-                <div class="info-value"><?php echo htmlspecialchars($programme); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">YEAR</div>
-                <div class="info-value"><?php echo htmlspecialchars($year); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">EMAIL</div>
-                <div class="info-value"><?php echo htmlspecialchars($email); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">PHONE</div>
-                <div class="info-value"><?php echo htmlspecialchars($phone); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">ADDRESS</div>
-                <div class="info-value"><?php echo nl2br(htmlspecialchars($address)); ?></div>
+            <div class="info-grid-2col">
+                <div class="info-item"><span class="info-label">NAME:</span><span class="info-value"><?php echo htmlspecialchars($student_name); ?></span></div>
+                <div class="info-item"><span class="info-label">MATRIC NO.:</span><span class="info-value"><?php echo htmlspecialchars($matrix_number); ?></span></div>
+                <div class="info-item"><span class="info-label">IC/PASSPORT:</span><span class="info-value"><?php echo htmlspecialchars($ic_number); ?></span></div>
+                <div class="info-item"><span class="info-label">PROGRAMME:</span><span class="info-value"><?php echo htmlspecialchars($programme); ?></span></div>
+                <div class="info-item"><span class="info-label">YEAR:</span><span class="info-value"><?php echo htmlspecialchars($year); ?></span></div>
+                <div class="info-item"><span class="info-label">EMAIL:</span><span class="info-value"><?php echo htmlspecialchars($email); ?></span></div>
+                <div class="info-item"><span class="info-label">PHONE:</span><span class="info-value"><?php echo htmlspecialchars($phone); ?></span></div>
+                <div class="info-item"><span class="info-label">ADDRESS:</span><span class="info-value"><?php echo htmlspecialchars(substr($address, 0, 35)); ?></span></div>
             </div>
         </div>
         
         <div class="info-section">
             <h4>REGISTRATION DETAILS</h4>
-            <div class="info-row">
-                <div class="info-label">SESSION/SEMESTER</div>
-                <div class="info-value"><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">SUBMITTED DATE</div>
-                <div class="info-value"><?php echo date('d-M-Y', strtotime($registration['submission_date'])); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">APPROVED DATE</div>
-                <div class="info-value"><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '-'; ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">APPROVED BY</div>
-                <div class="info-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">STATUS</div>
-                <div class="info-value"><span class="status-badge" style="background:#d4edda; color:#155724; padding:2px 10px; border-radius:15px;">APPROVED</span></div>
+            <div class="info-grid-2col">
+                <div class="info-item"><span class="info-label">SESSION:</span><span class="info-value"><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Sem 2'); ?></span></div>
+                <div class="info-item"><span class="info-label">SUBMITTED:</span><span class="info-value"><?php echo date('d-m-Y', strtotime($registration['submission_date'])); ?></span></div>
+                <div class="info-item"><span class="info-label">APPROVED:</span><span class="info-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '-'; ?></span></div>
+                <div class="info-item"><span class="info-label">APPROVED BY:</span><span class="info-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></span></div>
+                <div class="info-item"><span class="info-label">STATUS:</span><span class="info-value" style="background:#d4edda; color:#155724; padding:2px 6px; border-radius:10px; font-size:9px;">APPROVED</span></div>
             </div>
         </div>
         
         <div class="info-section">
             <h4>REGISTERED COURSES</h4>
             <table class="courses-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>CODE</th>
-                        <th>COURSE TITLE</th>
-                        <th>CR</th>
-                        <th>SEC</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>#</th><th>CODE</th><th>COURSE TITLE</th><th>CR</th><th>SEC</th></tr></thead>
                 <tbody>
                     <?php if (count($courses) > 0): ?>
                         <?php $counter = 1; foreach ($courses as $course): ?>
                         <tr>
                             <td><?php echo $counter++; ?></td>
                             <td><?php echo htmlspecialchars($course['subject_code']); ?></td>
-                            <td><?php echo htmlspecialchars($course['subject_name']); ?></td>
+                            <td><?php echo htmlspecialchars(substr($course['subject_name'], 0, 28)); ?></td>
                             <td><?php echo $course['credits']; ?></td>
                             <td><?php echo htmlspecialchars($course['section'] ?? 'TBD'); ?></td>
                         </tr>
@@ -473,41 +428,25 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
                     <?php endif; ?>
                 </tbody>
             </table>
-            <div class="total-credits">TOTAL CREDIT REGISTERED: <?php echo $total_credits_formatted; ?></div>
+            <div class="total-credits">TOTAL CREDIT: <?php echo $total_credits_formatted; ?></div>
         </div>
         
         <div class="verification-section">
             <h4>VERIFICATION FROM ACADEMIC ADVISOR</h4>
-            <div class="verification-row">
-                <div class="verification-label">VERIFIED BY</div>
-                <div class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________________'); ?></div>
-            </div>
-            <div class="verification-row">
-                <div class="verification-label">DATE VERIFIED</div>
-                <div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '_________________________'; ?></div>
-            </div>
-            <div class="verification-row">
-                <div class="verification-label">REMARKS</div>
-                <div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div>
-            </div>
+            <div><span class="verification-label">VERIFIED BY:</span><span class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________'); ?></span></div>
+            <div><span class="verification-label">DATE:</span><span class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________'; ?></span></div>
+            <div><span class="verification-label">REMARKS:</span><span class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></span></div>
         </div>
         
         <div class="signature-line">
             <div class="signature-row">
-                <div class="signature-item">
-                    <span>STUDENT SIGNATURE</span>
-                    <div class="signature-line-dash"></div>
-                </div>
-                <div class="signature-item">
-                    <span>ADVISOR SIGNATURE</span>
-                    <div class="signature-line-dash"></div>
-                </div>
+                <div class="signature-item"><span>STUDENT SIGNATURE</span><div class="signature-line-dash"></div></div>
+                <div class="signature-item"><span>ADVISOR SIGNATURE</span><div class="signature-line-dash"></div></div>
             </div>
         </div>
         
         <div class="footer-note">
-            <strong>DATE: <?php echo date('d-M-Y'); ?></strong><br>
-            # PLEASE CHECK YOUR NAME AND ADDRESS. CORRECTIONS CAN BE MADE AT YOUR FACULTY/SCHOOL.
+            DATE: <?php echo date('d-m-Y'); ?> | PLEASE CHECK YOUR DETAILS. CORRECTIONS AT YOUR FACULTY.
         </div>
     </div>
 
@@ -530,17 +469,17 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
     document.getElementById('printBtn').addEventListener('click', function() {
         const element = document.getElementById('slipContainer');
         
-        // Show loading
         const originalText = this.innerHTML;
         this.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating PDF...';
         this.disabled = true;
         
         const opt = {
-            margin: [0.5, 0.5, 0.5, 0.5],
+            margin: [0.2, 0.2, 0.2, 0.2],
             filename: 'Registration_Slip_<?php echo $registration_id; ?>_<?php echo date('Y-m-d'); ?>.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, letterRendering: true, useCORS: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: 'avoid-all' }
         };
         
         html2pdf().set(opt).from(element).save().then(() => {
