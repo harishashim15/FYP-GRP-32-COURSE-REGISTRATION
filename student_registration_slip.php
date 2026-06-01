@@ -15,7 +15,7 @@ if (!$registration_id) {
     die("No registration ID provided.");
 }
 
-// Fetch student info with additional details
+// Fetch student info
 $student_query = "SELECT u.user_name, u.matrix_number, u.utm_email, u.second_email, u.phone,
                          s.programme, s.year, s.semester, s.ic_number, s.address, s.advisor_id
                   FROM users u
@@ -45,7 +45,7 @@ if (!$registration) {
     die("Registration not found.");
 }
 
-// Fetch registered courses for this registration
+// Fetch registered courses
 $courses_query = "SELECT rc.subject_code, s.subject_name, s.credits, rc.section
                   FROM registration_courses rc
                   JOIN subjects s ON rc.subject_code = s.subject_code
@@ -117,169 +117,147 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
         
-        .page-header { margin-bottom: 15px; }
-        .page-header h2 { font-size: 24px; font-weight: 700; color: #670019; }
+        .page-header { margin-bottom: 20px; }
+        .page-header h2 { font-size: 28px; font-weight: 700; color: #670019; }
         
-        /* Registration Slip Styles - EXTRA COMPACT FOR ONE PAGE */
-        .registration-slip {
+        /* PDF CONTAINER - FIXED WIDTH */
+        .pdf-container {
             background: white;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
+        /* SLIP HEADER */
         .slip-header {
             text-align: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #670019;
         }
+        .slip-header .logo-img { width: 60px; margin-bottom: 10px; }
+        .slip-header h3 { color: #670019; font-weight: 700; font-size: 18px; }
+        .slip-header .university-name { color: #666; font-size: 12px; }
         
-        .slip-header .logo-img {
-            max-width: 40px;
-            margin-bottom: 3px;
-        }
-        
-        .slip-header h3 {
-            color: #670019;
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-        
-        .slip-header .university-name {
-            color: #333;
-            font-size: 9px;
-        }
-        
-        .info-section {
-            margin-bottom: 8px;
-        }
-        
-        .info-section h4 {
+        /* SECTION STYLES */
+        .section-title {
             color: #670019;
             font-weight: 600;
-            font-size: 11px;
-            margin-bottom: 5px;
-            padding-bottom: 2px;
+            font-size: 14px;
+            margin: 15px 0 10px 0;
+            padding-bottom: 5px;
             border-bottom: 1px solid #ddd;
         }
         
-        /* Two column layout - COMPACT */
-        .info-grid-2col {
+        /* TWO COLUMN LAYOUT */
+        .info-row {
             display: flex;
             flex-wrap: wrap;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #f5f5f5;
+            padding-bottom: 6px;
         }
-        
-        .info-item {
-            width: 50%;
-            margin-bottom: 4px;
-        }
-        
         .info-label {
-            font-size: 9px;
-            color: #888;
-            display: inline-block;
-            width: 85px;
+            width: 130px;
+            font-size: 12px;
+            color: #777;
+            font-weight: 500;
         }
-        
         .info-value {
-            font-size: 10px;
+            flex: 1;
+            font-size: 12px;
             color: #333;
             font-weight: 500;
-            display: inline-block;
         }
         
+        /* TABLE STYLES */
         .courses-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9px;
+            margin-top: 10px;
+            font-size: 12px;
         }
         .courses-table th {
             background: #f8f6f4;
-            padding: 4px 3px;
+            padding: 8px;
             text-align: left;
             color: #670019;
             font-weight: 600;
-            border: 1px solid #ddd;
+            border: 1px solid #e0e0e0;
         }
         .courses-table td {
-            padding: 3px;
-            border: 1px solid #ddd;
+            padding: 6px 8px;
+            border: 1px solid #e0e0e0;
         }
         
         .total-credits {
             text-align: right;
-            margin-top: 4px;
-            padding-top: 3px;
+            margin-top: 10px;
+            padding-top: 8px;
             border-top: 1px solid #ddd;
             font-weight: 600;
             color: #670019;
-            font-size: 9px;
+            font-size: 12px;
         }
         
+        /* VERIFICATION SECTION */
         .verification-section {
-            margin-top: 8px;
-            padding-top: 5px;
+            margin-top: 15px;
+            padding-top: 10px;
             border-top: 1px solid #ddd;
         }
-        
-        .verification-item {
-            margin-bottom: 3px;
+        .verification-row {
+            display: flex;
+            margin-bottom: 8px;
         }
-        
         .verification-label {
-            font-size: 9px;
-            color: #888;
-            width: 85px;
-            display: inline-block;
+            width: 120px;
+            font-size: 12px;
+            color: #777;
         }
-        
         .verification-value {
-            font-size: 10px;
+            flex: 1;
+            font-size: 12px;
             color: #333;
             font-weight: 500;
-            display: inline-block;
         }
         
-        .signature-line {
-            margin-top: 8px;
-            padding-top: 5px;
+        /* SIGNATURE SECTION */
+        .signature-section {
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 1px dashed #ccc;
-        }
-        
-        .signature-row {
             display: flex;
             justify-content: space-between;
         }
-        
-        .signature-item {
+        .signature-box {
             text-align: center;
             width: 45%;
         }
-        
-        .signature-item span {
-            font-size: 8px;
+        .signature-box span {
+            font-size: 10px;
             color: #888;
         }
-        
-        .signature-line-dash {
-            margin-top: 2px;
+        .signature-line {
+            margin-top: 5px;
             border-top: 1px dashed #999;
+            padding-top: 20px;
         }
         
+        /* FOOTER */
         .footer-note {
-            margin-top: 8px;
-            font-size: 7px;
-            color: #999;
+            margin-top: 15px;
             text-align: center;
+            font-size: 9px;
+            color: #999;
         }
         
-        .print-btn {
-            background: linear-gradient(to right, #670019, #8b0022);
-            color: white;
-            border: none;
+        .print-btn, .back-btn {
             padding: 12px 30px;
             border-radius: 14px;
             font-size: 14px;
@@ -289,62 +267,31 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             display: inline-flex;
             align-items: center;
             gap: 8px;
-        }
-        
-        .print-btn:hover {
-            background: linear-gradient(to right, #8b0022, #a80028);
-            transform: translateY(-2px);
-        }
-        
-        .back-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
+        .print-btn { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; }
+        .print-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
+        .back-btn { background: #6c757d; color: white; border: none; }
         
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
         }
         
-        /* Print/PDF - FORCED ONE PAGE */
+        /* PRINT STYLES - FOR PDF */
         @media print {
-            .sidebar, .topbar, .print-btn, .back-btn, .logout { 
-                display: none !important; 
-            }
-            .main-content { 
-                margin-left: 0 !important; 
-                padding: 0 !important; 
-            }
-            .registration-slip { 
+            .sidebar, .topbar, .print-btn, .back-btn, .logout { display: none !important; }
+            .main-content { margin-left: 0 !important; padding: 0 !important; }
+            .pdf-container { 
                 box-shadow: none; 
-                padding: 8px;
-                margin: 0;
-                border-radius: 0;
-                page-break-after: avoid;
-                page-break-inside: avoid;
-                break-inside: avoid;
+                padding: 15px;
+                margin: 0 auto;
+                max-width: 100%;
             }
-            body { 
-                background: white; 
-                margin: 0;
-                padding: 0;
-            }
-            .info-item { width: 50%; }
-            .info-label { width: 80px; }
-            .courses-table { font-size: 8px; }
-            .courses-table th, .courses-table td { padding: 2px; }
-            .footer-note { font-size: 6px; }
+            body { background: white; margin: 0; padding: 0; }
+            .info-label { width: 120px; }
+            .courses-table { font-size: 11px; }
+            .courses-table th, .courses-table td { padding: 5px; }
         }
     </style>
 </head>
@@ -376,77 +323,133 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 
     <div class="page-header"><h2>Registration Slip</h2></div>
 
-    <div class="registration-slip" id="slipContainer">
+    <div class="pdf-container" id="slipContainer">
         <div class="slip-header">
             <img src="images/utmlogo.png" alt="UTM Logo" class="logo-img">
             <h3>COURSE REGISTRATION SLIP</h3>
             <div class="university-name">Universiti Teknologi Malaysia</div>
         </div>
         
-        <div class="info-section">
-            <h4>STUDENT INFORMATION</h4>
-            <div class="info-grid-2col">
-                <div class="info-item"><span class="info-label">NAME:</span><span class="info-value"><?php echo htmlspecialchars($student_name); ?></span></div>
-                <div class="info-item"><span class="info-label">MATRIC NO.:</span><span class="info-value"><?php echo htmlspecialchars($matrix_number); ?></span></div>
-                <div class="info-item"><span class="info-label">IC/PASSPORT:</span><span class="info-value"><?php echo htmlspecialchars($ic_number); ?></span></div>
-                <div class="info-item"><span class="info-label">PROGRAMME:</span><span class="info-value"><?php echo htmlspecialchars($programme); ?></span></div>
-                <div class="info-item"><span class="info-label">YEAR:</span><span class="info-value"><?php echo htmlspecialchars($year); ?></span></div>
-                <div class="info-item"><span class="info-label">EMAIL:</span><span class="info-value"><?php echo htmlspecialchars($email); ?></span></div>
-                <div class="info-item"><span class="info-label">PHONE:</span><span class="info-value"><?php echo htmlspecialchars($phone); ?></span></div>
-                <div class="info-item"><span class="info-label">ADDRESS:</span><span class="info-value"><?php echo htmlspecialchars(substr($address, 0, 35)); ?></span></div>
-            </div>
+        <!-- STUDENT INFORMATION -->
+        <div class="section-title">STUDENT INFORMATION</div>
+        <div class="info-row">
+            <div class="info-label">NAME</div>
+            <div class="info-value"><?php echo htmlspecialchars($student_name); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">MATRIC NO.</div>
+            <div class="info-value"><?php echo htmlspecialchars($matrix_number); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">IC/PASSPORT</div>
+            <div class="info-value"><?php echo htmlspecialchars($ic_number); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">PROGRAMME</div>
+            <div class="info-value"><?php echo htmlspecialchars($programme); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">YEAR</div>
+            <div class="info-value"><?php echo htmlspecialchars($year); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">EMAIL</div>
+            <div class="info-value"><?php echo htmlspecialchars($email); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">PHONE</div>
+            <div class="info-value"><?php echo htmlspecialchars($phone); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">ADDRESS</div>
+            <div class="info-value"><?php echo nl2br(htmlspecialchars($address)); ?></div>
         </div>
         
-        <div class="info-section">
-            <h4>REGISTRATION DETAILS</h4>
-            <div class="info-grid-2col">
-                <div class="info-item"><span class="info-label">SESSION:</span><span class="info-value"><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Sem 2'); ?></span></div>
-                <div class="info-item"><span class="info-label">SUBMITTED:</span><span class="info-value"><?php echo date('d-m-Y', strtotime($registration['submission_date'])); ?></span></div>
-                <div class="info-item"><span class="info-label">APPROVED:</span><span class="info-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '-'; ?></span></div>
-                <div class="info-item"><span class="info-label">APPROVED BY:</span><span class="info-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></span></div>
-                <div class="info-item"><span class="info-label">STATUS:</span><span class="info-value" style="background:#d4edda; color:#155724; padding:2px 6px; border-radius:10px; font-size:9px;">APPROVED</span></div>
-            </div>
+        <!-- REGISTRATION DETAILS -->
+        <div class="section-title">REGISTRATION DETAILS</div>
+        <div class="info-row">
+            <div class="info-label">SESSION/SEMESTER</div>
+            <div class="info-value"><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">SUBMITTED DATE</div>
+            <div class="info-value"><?php echo date('d-m-Y', strtotime($registration['submission_date'])); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">APPROVED DATE</div>
+            <div class="info-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '-'; ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">APPROVED BY</div>
+            <div class="info-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">STATUS</div>
+            <div class="info-value"><span style="background:#d4edda; color:#155724; padding:2px 12px; border-radius:15px;">APPROVED</span></div>
         </div>
         
-        <div class="info-section">
-            <h4>REGISTERED COURSES</h4>
-            <table class="courses-table">
-                <thead><tr><th>#</th><th>CODE</th><th>COURSE TITLE</th><th>CR</th><th>SEC</th></tr></thead>
-                <tbody>
-                    <?php if (count($courses) > 0): ?>
-                        <?php $counter = 1; foreach ($courses as $course): ?>
-                        <tr>
-                            <td><?php echo $counter++; ?></td>
-                            <td><?php echo htmlspecialchars($course['subject_code']); ?></td>
-                            <td><?php echo htmlspecialchars(substr($course['subject_name'], 0, 28)); ?></td>
-                            <td><?php echo $course['credits']; ?></td>
-                            <td><?php echo htmlspecialchars($course['section'] ?? 'TBD'); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr><td colspan="5" class="text-center">No courses found</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-            <div class="total-credits">TOTAL CREDIT: <?php echo $total_credits_formatted; ?></div>
-        </div>
+        <!-- REGISTERED COURSES -->
+        <div class="section-title">REGISTERED COURSES</div>
+        <table class="courses-table">
+            <thead>
+                <tr>
+                    <th width="5%">#</th>
+                    <th width="20%">CODE</th>
+                    <th width="50%">COURSE TITLE</th>
+                    <th width="10%">CR</th>
+                    <th width="15%">SECTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (count($courses) > 0): ?>
+                    <?php $counter = 1; foreach ($courses as $course): ?>
+                    <tr>
+                        <td><?php echo $counter++; ?></td>
+                        <td><?php echo htmlspecialchars($course['subject_code']); ?></td>
+                        <td><?php echo htmlspecialchars($course['subject_name']); ?></td>
+                        <td><?php echo $course['credits']; ?></td>
+                        <td><?php echo htmlspecialchars($course['section'] ?? 'TBD'); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr><td colspan="5" class="text-center">No courses found</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+        <div class="total-credits">TOTAL CREDIT REGISTERED: <?php echo $total_credits_formatted; ?></div>
         
+        <!-- VERIFICATION -->
         <div class="verification-section">
-            <h4>VERIFICATION FROM ACADEMIC ADVISOR</h4>
-            <div><span class="verification-label">VERIFIED BY:</span><span class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________'); ?></span></div>
-            <div><span class="verification-label">DATE:</span><span class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________'; ?></span></div>
-            <div><span class="verification-label">REMARKS:</span><span class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></span></div>
-        </div>
-        
-        <div class="signature-line">
-            <div class="signature-row">
-                <div class="signature-item"><span>STUDENT SIGNATURE</span><div class="signature-line-dash"></div></div>
-                <div class="signature-item"><span>ADVISOR SIGNATURE</span><div class="signature-line-dash"></div></div>
+            <div class="section-title">VERIFICATION FROM ACADEMIC ADVISOR</div>
+            <div class="verification-row">
+                <div class="verification-label">VERIFIED BY</div>
+                <div class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________________'); ?></div>
+            </div>
+            <div class="verification-row">
+                <div class="verification-label">DATE VERIFIED</div>
+                <div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________________'; ?></div>
+            </div>
+            <div class="verification-row">
+                <div class="verification-label">REMARKS</div>
+                <div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div>
             </div>
         </div>
         
+        <!-- SIGNATURES -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <span>STUDENT SIGNATURE</span>
+                <div class="signature-line"></div>
+            </div>
+            <div class="signature-box">
+                <span>ADVISOR SIGNATURE</span>
+                <div class="signature-line"></div>
+            </div>
+        </div>
+        
+        <!-- FOOTER -->
         <div class="footer-note">
-            DATE: <?php echo date('d-m-Y'); ?> | PLEASE CHECK YOUR DETAILS. CORRECTIONS AT YOUR FACULTY.
+            DATE: <?php echo date('d-m-Y'); ?> | PLEASE CHECK YOUR DETAILS. CORRECTIONS CAN BE MADE AT YOUR FACULTY.
         </div>
     </div>
 
@@ -474,12 +477,11 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         this.disabled = true;
         
         const opt = {
-            margin: [0.2, 0.2, 0.2, 0.2],
+            margin: [0.4, 0.4, 0.4, 0.4],
             filename: 'Registration_Slip_<?php echo $registration_id; ?>_<?php echo date('Y-m-d'); ?>.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, letterRendering: true, useCORS: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: 'avoid-all' }
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
         
         html2pdf().set(opt).from(element).save().then(() => {
