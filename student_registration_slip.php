@@ -73,190 +73,271 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #f8f6f4; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background: #f8f6f4;
+        }
         
+        /* SIDEBAR STYLES */
         .sidebar {
-            width: 280px; height: 100vh;
+            width: 280px;
+            height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
-            position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease; z-index: 1000;
+            position: fixed;
+            padding: 30px 20px;
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
             overflow-y: auto;
         }
-        .sidebar.collapsed { transform: translateX(-280px); }
-        .logo { text-align: center; margin-bottom: 50px; }
-        .logo img { width: 130px; }
-        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-        .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
+        .sidebar.collapsed {
+            transform: translateX(-280px);
         }
-        .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
-        .menu i { font-size: 20px; }
+        .logo {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .logo img {
+            width: 130px;
+        }
+        .system-title {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .menu a:hover, .menu .active {
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
+        .menu i {
+            font-size: 20px;
+        }
         .logout {
-            position: absolute; bottom: 30px;
-            width: calc(100% - 40px); left: 20px;
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
         }
         .logout a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 16px;
             background: rgba(255,255,255,0.1);
         }
-        .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
+        .logout a:hover {
+            background: linear-gradient(to right, #f4a000, #e08700);
+        }
         
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
-        .main-content.expanded { margin-left: 0; }
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.expanded {
+            margin-left: 0;
+        }
         .topbar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; background: white; padding: 15px 25px;
-            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
-        
-        .page-header { margin-bottom: 20px; }
-        .page-header h2 { font-size: 28px; font-weight: 700; color: #670019; }
-        
-        /* PDF CONTAINER - FIXED WIDTH */
-        .pdf-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
             background: white;
+            padding: 15px 25px;
             border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #333;
+            cursor: pointer;
+        }
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        .profile-box img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
         }
         
-        /* SLIP HEADER */
+        .page-header {
+            margin-bottom: 20px;
+        }
+        .page-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #670019;
+        }
+        
+        /* ========== SLIP CONTAINER - SIMPLE LAYOUT ========== */
+        .slip-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* HEADER */
         .slip-header {
             text-align: center;
             margin-bottom: 20px;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #670019;
         }
-        .slip-header .logo-img { width: 60px; margin-bottom: 10px; }
-        .slip-header h3 { color: #670019; font-weight: 700; font-size: 18px; }
-        .slip-header .university-name { color: #666; font-size: 12px; }
+        .slip-header img {
+            width: 50px;
+            margin-bottom: 5px;
+        }
+        .slip-header h3 {
+            color: #670019;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .slip-header p {
+            color: #666;
+            font-size: 10px;
+        }
         
-        /* SECTION STYLES */
+        /* SECTION TITLE */
         .section-title {
             color: #670019;
+            font-size: 12px;
             font-weight: 600;
-            font-size: 14px;
-            margin: 15px 0 10px 0;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ddd;
+            margin: 15px 0 8px 0;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #eee;
         }
         
-        /* TWO COLUMN LAYOUT */
+        /* INFO ROW - SIMPLE */
         .info-row {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #f5f5f5;
-            padding-bottom: 6px;
+            display: table;
+            width: 100%;
+            margin-bottom: 5px;
         }
         .info-label {
-            width: 130px;
-            font-size: 12px;
-            color: #777;
-            font-weight: 500;
+            display: table-cell;
+            width: 120px;
+            font-size: 11px;
+            color: #888;
+            padding: 3px 0;
         }
         .info-value {
-            flex: 1;
-            font-size: 12px;
+            display: table-cell;
+            font-size: 11px;
             color: #333;
             font-weight: 500;
+            padding: 3px 0;
         }
         
-        /* TABLE STYLES */
+        /* TABLE */
         .courses-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 12px;
+            font-size: 10px;
         }
         .courses-table th {
             background: #f8f6f4;
-            padding: 8px;
+            padding: 5px;
             text-align: left;
+            border: 1px solid #ddd;
             color: #670019;
-            font-weight: 600;
-            border: 1px solid #e0e0e0;
         }
         .courses-table td {
-            padding: 6px 8px;
-            border: 1px solid #e0e0e0;
+            padding: 4px 5px;
+            border: 1px solid #ddd;
         }
         
         .total-credits {
             text-align: right;
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px solid #ddd;
+            font-size: 11px;
             font-weight: 600;
             color: #670019;
-            font-size: 12px;
+            margin-top: 8px;
+            padding-top: 5px;
+            border-top: 1px solid #eee;
         }
         
-        /* VERIFICATION SECTION */
-        .verification-section {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-        }
+        /* VERIFICATION */
         .verification-row {
-            display: flex;
-            margin-bottom: 8px;
+            display: table;
+            width: 100%;
+            margin-bottom: 5px;
         }
         .verification-label {
+            display: table-cell;
             width: 120px;
-            font-size: 12px;
-            color: #777;
+            font-size: 11px;
+            color: #888;
         }
         .verification-value {
-            flex: 1;
-            font-size: 12px;
+            display: table-cell;
+            font-size: 11px;
             color: #333;
-            font-weight: 500;
         }
         
-        /* SIGNATURE SECTION */
-        .signature-section {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px dashed #ccc;
+        /* SIGNATURE */
+        .signature-row {
             display: flex;
             justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
         }
         .signature-box {
             text-align: center;
             width: 45%;
         }
         .signature-box span {
-            font-size: 10px;
+            font-size: 9px;
             color: #888;
         }
         .signature-line {
             margin-top: 5px;
             border-top: 1px dashed #999;
-            padding-top: 20px;
+            padding-top: 15px;
         }
         
         /* FOOTER */
-        .footer-note {
+        .footer {
             margin-top: 15px;
             text-align: center;
-            font-size: 9px;
+            font-size: 8px;
             color: #999;
         }
         
+        /* BUTTONS */
         .print-btn, .back-btn {
             padding: 12px 30px;
             border-radius: 14px;
@@ -268,30 +349,52 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             align-items: center;
             gap: 8px;
             text-decoration: none;
+            border: none;
         }
-        .print-btn { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; }
-        .print-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
-        .back-btn { background: #6c757d; color: white; border: none; }
+        .print-btn {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+        }
+        .print-btn:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+            transform: translateY(-2px);
+        }
+        .back-btn {
+            background: #6c757d;
+            color: white;
+        }
         
         @media (max-width: 992px) {
-            .sidebar { transform: translateX(-280px); }
-            .main-content { margin-left: 0; }
+            .sidebar {
+                transform: translateX(-280px);
+            }
+            .main-content {
+                margin-left: 0;
+            }
         }
         
-        /* PRINT STYLES - FOR PDF */
+        /* PDF PRINT STYLES */
         @media print {
-            .sidebar, .topbar, .print-btn, .back-btn, .logout { display: none !important; }
-            .main-content { margin-left: 0 !important; padding: 0 !important; }
-            .pdf-container { 
-                box-shadow: none; 
-                padding: 15px;
-                margin: 0 auto;
+            .sidebar, .topbar, .print-btn, .back-btn, .logout {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            .slip-container {
+                box-shadow: none;
+                padding: 10px;
                 max-width: 100%;
             }
-            body { background: white; margin: 0; padding: 0; }
-            .info-label { width: 120px; }
-            .courses-table { font-size: 11px; }
-            .courses-table th, .courses-table td { padding: 5px; }
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            .info-label {
+                width: 100px;
+            }
         }
     </style>
 </head>
@@ -323,83 +426,37 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 
     <div class="page-header"><h2>Registration Slip</h2></div>
 
-    <div class="pdf-container" id="slipContainer">
+    <div class="slip-container" id="slipContainer">
+        <!-- HEADER -->
         <div class="slip-header">
-            <img src="images/utmlogo.png" alt="UTM Logo" class="logo-img">
+            <img src="images/utmlogo.png" alt="UTM Logo">
             <h3>COURSE REGISTRATION SLIP</h3>
-            <div class="university-name">Universiti Teknologi Malaysia</div>
+            <p>Universiti Teknologi Malaysia</p>
         </div>
         
-        <!-- STUDENT INFORMATION -->
+        <!-- STUDENT INFO -->
         <div class="section-title">STUDENT INFORMATION</div>
-        <div class="info-row">
-            <div class="info-label">NAME</div>
-            <div class="info-value"><?php echo htmlspecialchars($student_name); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">MATRIC NO.</div>
-            <div class="info-value"><?php echo htmlspecialchars($matrix_number); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">IC/PASSPORT</div>
-            <div class="info-value"><?php echo htmlspecialchars($ic_number); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">PROGRAMME</div>
-            <div class="info-value"><?php echo htmlspecialchars($programme); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">YEAR</div>
-            <div class="info-value"><?php echo htmlspecialchars($year); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">EMAIL</div>
-            <div class="info-value"><?php echo htmlspecialchars($email); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">PHONE</div>
-            <div class="info-value"><?php echo htmlspecialchars($phone); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">ADDRESS</div>
-            <div class="info-value"><?php echo nl2br(htmlspecialchars($address)); ?></div>
-        </div>
+        <div class="info-row"><div class="info-label">Name</div><div class="info-value"><?php echo htmlspecialchars($student_name); ?></div></div>
+        <div class="info-row"><div class="info-label">Matric No.</div><div class="info-value"><?php echo htmlspecialchars($matrix_number); ?></div></div>
+        <div class="info-row"><div class="info-label">IC/Passport</div><div class="info-value"><?php echo htmlspecialchars($ic_number); ?></div></div>
+        <div class="info-row"><div class="info-label">Programme</div><div class="info-value"><?php echo htmlspecialchars($programme); ?></div></div>
+        <div class="info-row"><div class="info-label">Year</div><div class="info-value"><?php echo htmlspecialchars($year); ?></div></div>
+        <div class="info-row"><div class="info-label">Email</div><div class="info-value"><?php echo htmlspecialchars($email); ?></div></div>
+        <div class="info-row"><div class="info-label">Phone</div><div class="info-value"><?php echo htmlspecialchars($phone); ?></div></div>
+        <div class="info-row"><div class="info-label">Address</div><div class="info-value"><?php echo htmlspecialchars(substr($address, 0, 50)); ?></div></div>
         
-        <!-- REGISTRATION DETAILS -->
+        <!-- REGISTRATION INFO -->
         <div class="section-title">REGISTRATION DETAILS</div>
-        <div class="info-row">
-            <div class="info-label">SESSION/SEMESTER</div>
-            <div class="info-value"><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">SUBMITTED DATE</div>
-            <div class="info-value"><?php echo date('d-m-Y', strtotime($registration['submission_date'])); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">APPROVED DATE</div>
-            <div class="info-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '-'; ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">APPROVED BY</div>
-            <div class="info-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">STATUS</div>
-            <div class="info-value"><span style="background:#d4edda; color:#155724; padding:2px 12px; border-radius:15px;">APPROVED</span></div>
-        </div>
+        <div class="info-row"><div class="info-label">Session</div><div class="info-value"><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></div></div>
+        <div class="info-row"><div class="info-label">Submitted Date</div><div class="info-value"><?php echo date('d-m-Y', strtotime($registration['submission_date'])); ?></div></div>
+        <div class="info-row"><div class="info-label">Approved Date</div><div class="info-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '-'; ?></div></div>
+        <div class="info-row"><div class="info-label">Approved By</div><div class="info-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></div></div>
+        <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span style="background:#d4edda; color:#155724; padding:2px 10px; border-radius:12px;">APPROVED</span></div></div>
         
-        <!-- REGISTERED COURSES -->
+        <!-- COURSES -->
         <div class="section-title">REGISTERED COURSES</div>
         <table class="courses-table">
-            <thead>
-                <tr>
-                    <th width="5%">#</th>
-                    <th width="20%">CODE</th>
-                    <th width="50%">COURSE TITLE</th>
-                    <th width="10%">CR</th>
-                    <th width="15%">SECTION</th>
-                </tr>
-            </thead>
+            <thead><tr><th width="5%">#</th><th width="20%">Code</th><th width="50%">Course Title</th><th width="10%">Cr</th><th width="15%">Sec</th></tr></thead>
             <tbody>
                 <?php if (count($courses) > 0): ?>
                     <?php $counter = 1; foreach ($courses as $course): ?>
@@ -416,44 +473,25 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
                 <?php endif; ?>
             </tbody>
         </table>
-        <div class="total-credits">TOTAL CREDIT REGISTERED: <?php echo $total_credits_formatted; ?></div>
+        <div class="total-credits">TOTAL CREDIT: <?php echo $total_credits_formatted; ?></div>
         
         <!-- VERIFICATION -->
-        <div class="verification-section">
-            <div class="section-title">VERIFICATION FROM ACADEMIC ADVISOR</div>
-            <div class="verification-row">
-                <div class="verification-label">VERIFIED BY</div>
-                <div class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________________'); ?></div>
-            </div>
-            <div class="verification-row">
-                <div class="verification-label">DATE VERIFIED</div>
-                <div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________________'; ?></div>
-            </div>
-            <div class="verification-row">
-                <div class="verification-label">REMARKS</div>
-                <div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div>
-            </div>
-        </div>
+        <div class="section-title">VERIFICATION FROM ACADEMIC ADVISOR</div>
+        <div class="verification-row"><div class="verification-label">Verified By</div><div class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________'); ?></div></div>
+        <div class="verification-row"><div class="verification-label">Date Verified</div><div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________'; ?></div></div>
+        <div class="verification-row"><div class="verification-label">Remarks</div><div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div></div>
         
         <!-- SIGNATURES -->
-        <div class="signature-section">
-            <div class="signature-box">
-                <span>STUDENT SIGNATURE</span>
-                <div class="signature-line"></div>
-            </div>
-            <div class="signature-box">
-                <span>ADVISOR SIGNATURE</span>
-                <div class="signature-line"></div>
-            </div>
+        <div class="signature-row">
+            <div class="signature-box"><span>STUDENT SIGNATURE</span><div class="signature-line"></div></div>
+            <div class="signature-box"><span>ADVISOR SIGNATURE</span><div class="signature-line"></div></div>
         </div>
         
         <!-- FOOTER -->
-        <div class="footer-note">
-            DATE: <?php echo date('d-m-Y'); ?> | PLEASE CHECK YOUR DETAILS. CORRECTIONS CAN BE MADE AT YOUR FACULTY.
-        </div>
+        <div class="footer">DATE: <?php echo date('d-m-Y'); ?> | Please check your details. Corrections can be made at your faculty.</div>
     </div>
 
-    <div class="d-flex gap-3">
+    <div class="d-flex gap-3 mt-3">
         <button class="print-btn" id="printBtn"><i class="bi bi-printer"></i> Print Registration Slip (PDF)</button>
         <a href="student_registration_history.html" class="back-btn"><i class="bi bi-arrow-left"></i> Back to History</a>
     </div>
@@ -467,18 +505,22 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
 
     document.getElementById('printBtn').addEventListener('click', function() {
         const element = document.getElementById('slipContainer');
-        
         const originalText = this.innerHTML;
         this.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating PDF...';
         this.disabled = true;
         
         const opt = {
-            margin: [0.4, 0.4, 0.4, 0.4],
-            filename: 'Registration_Slip_<?php echo $registration_id; ?>_<?php echo date('Y-m-d'); ?>.pdf',
+            margin: [0.3, 0.3, 0.3, 0.3],
+            filename: 'Registration_Slip_<?php echo $registration_id; ?>.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, letterRendering: true, useCORS: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
