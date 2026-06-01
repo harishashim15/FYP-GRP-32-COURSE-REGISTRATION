@@ -13,32 +13,54 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
         
+        /* Sidebar */
         .sidebar {
-            width: 280px; height: 100vh;
+            width: 280px;
+            height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
-            position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease; z-index: 1000;
+            position: fixed;
+            padding: 30px 20px;
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
             overflow-y: auto;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
+        /* FIX 1: Changed from #ffc107 to white */
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        /* FIX 9: Improved sidebar spacing */
         .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+            font-size: 15px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
-        .menu i { font-size: 20px; }
+        .menu i { font-size: 20px; width: 24px; }
         .logout {
-            position: absolute; bottom: 30px;
-            width: calc(100% - 40px); left: 20px;
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
         }
         .logout a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 15px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
@@ -93,13 +115,93 @@
         .cart-btn {
             width: 100%; padding: 12px; border-radius: 14px; font-weight: 600;
             cursor: pointer; margin-top: 15px; text-align: center; border: none;
-            background: linear-gradient(to right, #670019, #8b0022); color: white;
             transition: 0.3s;
         }
-        .cart-btn.remove { background: #dc3545; }
-        .cart-btn.added { background: #2e7d32; cursor: not-allowed; opacity: 0.7; }
+        .cart-btn.add { background: linear-gradient(to right, #670019, #8b0022); color: white; }
+        .cart-btn.add:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
+        .cart-btn.added { background: #2e7d32; color: white; cursor: default; }
         .cart-btn.added:hover { transform: none; }
-        .cart-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+        .cart-btn.pending { background: #ffc107; color: #333; cursor: default; }
+        .cart-btn.pending:hover { transform: none; }
+        .cart-btn.disabled-btn { background: #6c757d; color: white; cursor: not-allowed; opacity: 0.7; }
+        
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 25px;
+            width: 400px;
+            max-width: 90%;
+            padding: 30px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: 0.3s;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+        .modal-icon {
+            font-size: 50px;
+            color: #f4a000;
+            margin-bottom: 15px;
+        }
+        .modal-container h3 {
+            color: #670019;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .modal-container p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .modal-btn {
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+        }
+        .modal-btn.yes {
+            background: #2e7d32;
+            color: white;
+        }
+        .modal-btn.yes:hover {
+            background: #1b5e20;
+            transform: translateY(-2px);
+        }
+        .modal-btn.no {
+            background: #dc3545;
+            color: white;
+        }
+        .modal-btn.no:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
         
         @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
     </style>
@@ -141,11 +243,25 @@
     <div class="courses-grid" id="coursesGrid"><div class="text-center">Loading courses...</div></div>
 </div>
 
+<!-- MODAL -->
+<div id="addCourseModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-icon"><i class="bi bi-question-circle-fill"></i></div>
+        <h3>Add Course</h3>
+        <p id="modalCourseName">Do you want to add this subject?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn yes" id="modalYesBtn">Yes</button>
+            <button class="modal-btn no" id="modalNoBtn">No</button>
+        </div>
+    </div>
+</div>
+
 <script src="js/common.js"></script>
 <script>
     let allCourses = [];
     let cartCourses = [];
-    let rejectedCourses = []; // Track rejected courses that can be re-added
+    let courseStatus = {}; // Stores status for each course: 'none', 'pending', 'approved'
+    let pendingAddCourse = null;
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -156,6 +272,18 @@
     }
     (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
+    // Load course status from server (pending/approved submissions)
+    async function loadCourseStatus() {
+        try {
+            const data = await apiGet('registrations/student_course_status.php');
+            if (data.courses) {
+                data.courses.forEach(course => {
+                    courseStatus[course.code] = course.status;
+                });
+            }
+        } catch(e) { console.error('Failed to load course status:', e); }
+    }
+
     async function loadCartCount() {
         try {
             const cart = await apiGet('cart/get.php');
@@ -165,18 +293,10 @@
             cartCourses = cart.items.map(item => item.code);
         } catch(e) { console.error(e); }
     }
-    
-    // Load rejected courses (courses that were rejected and can be re-added)
-    async function loadRejectedCourses() {
-        try {
-            const data = await apiGet('registrations/rejected_courses.php');
-            rejectedCourses = data.courses || [];
-        } catch(e) { console.error(e); }
-    }
 
     async function loadCourses() {
         try {
-            await loadRejectedCourses();
+            await loadCourseStatus();
             const data = await apiGet('courses/list.php');
             allCourses = data.courses || [];
             document.getElementById('studentName').innerText = data.student_name || 'Haris';
@@ -188,53 +308,116 @@
         }
     }
 
+    function getButtonConfig(course) {
+        const status = courseStatus[course.code];
+        const isInCart = cartCourses.includes(course.code);
+        
+        // Priority: In Cart > Approved > Pending > Available
+        if (isInCart) {
+            return { text: 'Added', class: 'added', disabled: true, action: null };
+        }
+        if (status === 'approved') {
+            return { text: 'Approved', class: 'disabled-btn', disabled: true, action: null };
+        }
+        if (status === 'pending') {
+            return { text: 'Pending', class: 'pending', disabled: true, action: null };
+        }
+        return { text: 'Add Courses', class: 'add', disabled: false, action: 'add' };
+    }
+
+    function showModal(course, callback) {
+        pendingAddCourse = { course, callback };
+        document.getElementById('modalCourseName').innerHTML = `Do you want to add <strong>${escapeHtml(course.name)}</strong>?`;
+        document.getElementById('addCourseModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('addCourseModal').classList.remove('active');
+        pendingAddCourse = null;
+    }
+
+    async function confirmAddCourse() {
+        if (!pendingAddCourse) return;
+        const { course, callback } = pendingAddCourse;
+        closeModal();
+        await callback(course);
+    }
+
+    document.getElementById('modalYesBtn').addEventListener('click', confirmAddCourse);
+    document.getElementById('modalNoBtn').addEventListener('click', closeModal);
+
+    async function addToCart(course, btnElement) {
+        try {
+            await apiPost('cart/add.php', { course_code: course.code });
+            btnElement.innerHTML = '<i class="bi bi-check-circle me-1"></i> Added';
+            btnElement.classList.remove('add');
+            btnElement.classList.add('added');
+            btnElement.disabled = true;
+            cartCourses.push(course.code);
+            await loadCartCount();
+        } catch(err) {
+            console.error(err);
+            alert('Failed to add course: ' + err.message);
+        }
+    }
+
+    async function removeFromCart(course, btnElement) {
+        try {
+            await apiPost('cart/remove.php', { course_code: course.code });
+            btnElement.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add Courses';
+            btnElement.classList.remove('added');
+            btnElement.classList.add('add');
+            btnElement.disabled = false;
+            cartCourses = cartCourses.filter(c => c !== course.code);
+            await loadCartCount();
+        } catch(err) {
+            console.error(err);
+            alert('Failed to remove course: ' + err.message);
+        }
+    }
+
     function renderCourses(courses) {
         const grid = document.getElementById('coursesGrid');
         if (!courses.length) { grid.innerHTML = '<div class="text-center">No courses available.</div>'; return; }
         grid.innerHTML = '';
         courses.forEach(course => {
+            const config = getButtonConfig(course);
             const isInCart = cartCourses.includes(course.code);
-            const isRejected = rejectedCourses.includes(course.code);
-            // Course is only available if: not in cart AND (not approved OR is rejected)
-            const isAvailable = !isInCart && !isRejected;
             
             const card = document.createElement('div');
             card.className = 'course-card';
-            let btnHtml = '';
-            
-            if (isInCart) {
-                btnHtml = `<button class="cart-btn remove" data-code="${course.code}"><i class="bi bi-dash-circle me-1"></i> Remove from Cart</button>`;
-            } else if (!isAvailable) {
-                btnHtml = `<button class="cart-btn added" disabled data-code="${course.code}"><i class="bi bi-check-circle me-1"></i> Already Added</button>`;
-            } else {
-                btnHtml = `<button class="cart-btn" data-code="${course.code}"><i class="bi bi-plus-circle me-1"></i> Add Courses</button>`;
-            }
-            
             card.innerHTML = `
                 <span class="course-code">${escapeHtml(course.code)}</span>
                 <h4>${escapeHtml(course.name)}</h4>
                 <div class="course-info"><div><i class="bi bi-clock"></i> ${course.credits} Credit Hours</div><div><i class="bi bi-people"></i> ${course.enrolled || 0} Students</div></div>
-                ${btnHtml}
+                <button class="cart-btn ${config.class}" data-code="${course.code}" ${config.disabled ? 'disabled' : ''}>
+                    <i class="bi bi-${config.text === 'Add Courses' ? 'plus-circle' : (config.text === 'Added' ? 'check-circle' : 'clock-history')} me-1"></i> ${config.text}
+                </button>
             `;
             grid.appendChild(card);
         });
         
-        document.querySelectorAll('.cart-btn:not(:disabled)').forEach(btn => {
+        document.querySelectorAll('.cart-btn.add').forEach(btn => {
             btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
                 const code = btn.dataset.code;
-                if (btn.classList.contains('remove')) {
-                    await apiPost('cart/remove.php', { course_code: code });
-                    btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add Courses';
-                    btn.classList.remove('remove');
-                    cartCourses = cartCourses.filter(c => c !== code);
-                } else {
-                    await apiPost('cart/add.php', { course_code: code });
-                    btn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Already Added';
-                    btn.classList.add('added');
-                    btn.disabled = true;
-                    cartCourses.push(code);
+                const course = allCourses.find(c => c.code === code);
+                if (course) {
+                    showModal(course, async (selectedCourse) => {
+                        await addToCart(selectedCourse, btn);
+                    });
                 }
-                await loadCartCount();
+            });
+        });
+        
+        document.querySelectorAll('.cart-btn.added').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const code = btn.dataset.code;
+                const course = allCourses.find(c => c.code === code);
+                if (course && confirm(`Remove "${course.name}" from your cart?`)) {
+                    await removeFromCart(course, btn);
+                }
             });
         });
     }

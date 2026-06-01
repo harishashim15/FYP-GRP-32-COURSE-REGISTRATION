@@ -23,22 +23,39 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        /* FIX 1: Changed from #ffc107 to white */
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        /* FIX 9: Improved sidebar spacing */
         .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+            font-size: 15px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
-        .menu i { font-size: 20px; }
+        .menu i { font-size: 20px; width: 24px; }
         .logout {
-            position: absolute; bottom: 30px;
-            width: calc(100% - 40px); left: 20px;
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
         }
         .logout a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 15px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
@@ -84,7 +101,7 @@
         <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
-    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 
 <div class="main-content">
