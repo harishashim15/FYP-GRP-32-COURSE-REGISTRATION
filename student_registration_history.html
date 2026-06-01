@@ -176,38 +176,29 @@
                 return;
             }
             
-            // Group by registration ID
-            const grouped = {};
-            registrations.forEach(reg => {
-                if (!grouped[reg.registration_id]) {
-                    grouped[reg.registration_id] = {
-                        id: reg.registration_id,
-                        session: reg.session || '2025/2026 - Semester 2',
-                        submission_date: reg.submission_date,
-                        status: reg.status,
-                        courses: []
-                    };
-                }
-                grouped[reg.registration_id].courses.push(reg);
-            });
-            
             let html = `<table><thead><tr><th>SESSION</th><th>SUBMITTED DATE</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>`;
-            Object.values(grouped).forEach(reg => {
+            registrations.forEach(reg => {
                 const canView = reg.status === 'approved';
                 html += `<tr>
-                    <td>${escapeHtml(reg.session)}</strong></td>
+                    <td>${escapeHtml(reg.session || '2025/2026 - Semester 2')}</td>
                     <td>${formatDate(reg.submission_date)}</strong></td>
-                    <td><span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span></td>
-                    <td><button class="view-btn ${!canView ? 'disabled' : ''}" data-id="${reg.id}" ${!canView ? 'disabled' : ''}>View</button></td>
+                    <td><span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span></strong></td>
+                    <td><button class="view-btn ${!canView ? 'disabled' : ''}" data-id="${reg.registration_id}" ${!canView ? 'disabled' : ''}>View</button></strong></td>
                 </tr>`;
             });
-            html += `</tbody></table>`;
+            html += `</tbody><tr>`;
             container.innerHTML = html;
             
-            // THIS IS THE FIX - Changed from .html to .php
+            // FIXED: Using registration_id from the data
             document.querySelectorAll('.view-btn:not(.disabled)').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    window.location.href = `student_registration_slip.php?id=${btn.dataset.id}`;
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    console.log('View button clicked, ID:', id);
+                    if (id) {
+                        window.location.href = `student_registration_slip.php?id=${id}`;
+                    } else {
+                        alert('Error: Registration ID not found');
+                    }
                 });
             });
         } catch (err) {

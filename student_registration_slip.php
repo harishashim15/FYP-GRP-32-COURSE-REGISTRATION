@@ -1,4 +1,8 @@
 <?php
+// Add error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -9,10 +13,36 @@ if (!isset($_SESSION['user_id'])) {
 include("db_connect.php");
 
 $user_id = $_SESSION['user_id'];
+
+// DEBUG: Check what ID is being received
+echo "<!-- DEBUG: GET parameters: ";
+print_r($_GET);
+echo " -->";
+
 $registration_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-if (!$registration_id) {
-    die("No registration ID provided.");
+// If no ID in GET, try to get from POST
+if ($registration_id == 0 && isset($_POST['id'])) {
+    $registration_id = (int)$_POST['id'];
+}
+
+// DEBUG: Show the ID being used
+echo "<!-- DEBUG: registration_id = " . $registration_id . " -->";
+
+if ($registration_id == 0) {
+    die("
+    <!DOCTYPE html>
+    <html>
+    <head><title>Error</title></head>
+    <body style='font-family: Arial; padding: 50px; text-align: center;'>
+        <h2>Error: No Registration ID Provided</h2>
+        <p>Please go back and try again.</p>
+        <a href='student_registration_history.html'>← Back to Registration History</a>
+        <hr>
+        <p style='color: #666; font-size: 12px;'>Debug info: ID received = <?php echo $registration_id; ?></p>
+    </body>
+    </html>
+    ");
 }
 
 // Fetch student info
@@ -35,10 +65,26 @@ $reg_query = "SELECT cr.id, cr.submission_date, cr.status, cr.session, cr.review
               LEFT JOIN users u ON cr.reviewed_by = u.user_id
               WHERE cr.id = $registration_id AND cr.student_id = $user_id";
 $reg_result = mysqli_query($conn, $reg_query);
+
+if (!$reg_result) {
+    die("Database error: " . mysqli_error($conn));
+}
+
 $registration = mysqli_fetch_assoc($reg_result);
 
 if (!$registration) {
-    die("Registration not found.");
+    die("
+    <!DOCTYPE html>
+    <html>
+    <head><title>Error</title></head>
+    <body style='font-family: Arial; padding: 50px; text-align: center;'>
+        <h2>Error: Registration Not Found</h2>
+        <p>No registration found with ID: $registration_id</p>
+        <p>Please make sure you have submitted a registration and it has been approved.</p>
+        <a href='student_registration_history.html'>← Back to Registration History</a>
+    </body>
+    </html>
+    ");
 }
 
 // Fetch registered courses for this registration
@@ -114,7 +160,6 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
         .page-header { margin-bottom: 30px; }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         
-        /* Registration Slip Styles */
         .registration-slip {
             background: white;
             border-radius: 25px;
@@ -257,7 +302,6 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
             .info-grid { grid-template-columns: 1fr; }
         }
         
-        /* Print styles */
         @media print {
             .sidebar, .topbar, .print-btn, .back-btn, .logout { display: none !important; }
             .main-content { margin-left: 0 !important; padding: 0 !important; }
