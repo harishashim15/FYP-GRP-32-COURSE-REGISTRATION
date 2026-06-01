@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -24,7 +24,7 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
@@ -223,7 +223,7 @@
         <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
-    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 
 <div class="main-content" id="mainContent">
@@ -259,9 +259,20 @@
     }
     (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
-    // Get registration ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const registrationId = urlParams.get('id');
+
+    function formatDateTime(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleString('en-MY', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
 
     async function loadRegistrationDetails() {
         if (!registrationId) {
@@ -278,16 +289,20 @@
             
             let coursesHtml = '';
             let totalCredits = 0;
-            data.courses.forEach((course, idx) => {
-                coursesHtml += `<tr>
-                    <td>${idx + 1}</td>
-                    <td>${escapeHtml(course.code)}</td>
-                    <td>${escapeHtml(course.name)}</td>
-                    <td>${course.credits}</td>
-                    <td>${course.section || 'TBD'}</td>
-                </tr>`;
-                totalCredits += course.credits;
-            });
+            if (data.courses && data.courses.length > 0) {
+                data.courses.forEach((course, idx) => {
+                    coursesHtml += `<tr>
+                        <td>${idx + 1}</td>
+                        <td>${escapeHtml(course.code)}</strong></td>
+                        <td>${escapeHtml(course.name)}</strong></td>
+                        <td>${course.credits}</td>
+                        <td>${course.section || 'TBD'}</strong></td>
+                    </tr>`;
+                    totalCredits += course.credits;
+                });
+            } else {
+                coursesHtml = `<tr><td colspan="5" class="text-center">No courses found for this registration</td></tr>`;
+            }
             
             const slipHtml = `
                 <div class="slip-header">
@@ -302,8 +317,8 @@
                         <div class="info-item"><label>Student ID</label><span>${escapeHtml(data.matrix_number)}</span></div>
                         <div class="info-item"><label>Programme</label><span>${escapeHtml(data.programme)}</span></div>
                         <div class="info-item"><label>Session</label><span>${escapeHtml(data.session)}</span></div>
-                        <div class="info-item"><label>Submitted Date</label><span>${new Date(data.submission_date).toLocaleString()}</span></div>
-                        <div class="info-item"><label>Approved Date</label><span>${data.approved_date ? new Date(data.approved_date).toLocaleString() : '-'}</span></div>
+                        <div class="info-item"><label>Submitted Date</label><span>${formatDateTime(data.submission_date)}</span></div>
+                        <div class="info-item"><label>Approved Date</label><span>${data.approved_date ? formatDateTime(data.approved_date) : '-'}</span></div>
                         <div class="info-item"><label>Approved By</label><span>${escapeHtml(data.approved_by || '-')}</span></div>
                         <div class="info-item"><label>Status</label><span class="status-badge ${statusClass}">${statusText}</span></div>
                     </div>
@@ -336,7 +351,7 @@
         const element = document.getElementById('slipContainer');
         const opt = {
             margin: [0.5, 0.5, 0.5, 0.5],
-            filename: `Registration_Slip_${registrationId}.pdf`,
+            filename: `Registration_Slip_${registrationId}_${new Date().toISOString().slice(0,19)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, letterRendering: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }

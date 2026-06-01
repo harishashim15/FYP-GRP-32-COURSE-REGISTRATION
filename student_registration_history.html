@@ -23,7 +23,7 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
@@ -108,7 +108,7 @@
         <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
-    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 
 <div class="main-content">
@@ -141,6 +141,18 @@
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
     (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleString('en-MY', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
 
     async function loadHistory() {
         try {
@@ -184,7 +196,7 @@
                 const canView = reg.status === 'approved';
                 html += `<tr>
                     <td>${escapeHtml(reg.session)}</td>
-                    <td>${new Date(reg.submission_date).toLocaleString()}</td>
+                    <td>${formatDate(reg.submission_date)}</td>
                     <td><span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span></td>
                     <td><button class="view-btn ${!canView ? 'disabled' : ''}" data-id="${reg.id}" ${!canView ? 'disabled' : ''}>View</button></td>
                 </tr>`;

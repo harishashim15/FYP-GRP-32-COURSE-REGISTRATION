@@ -49,7 +49,7 @@
         }
         
         .system-title {
-            color: #ffc107;
+            color: white;  /* CHANGED: from #ffc107 to white */
             font-size: 16px;
             font-weight: 600;
             margin-top: 12px;
@@ -261,7 +261,7 @@
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
     <div class="logout">
-        <a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        <a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
 </div>
 
@@ -337,7 +337,6 @@
             const firstName = (stats.student_name || 'Haris').split(' ')[0];
             document.getElementById('heroGreeting').innerText = `Welcome back, ${firstName}!`;
             
-            // Animate numbers
             animateNumber(document.getElementById('registeredCourses'), stats.registered_courses || 0);
             animateNumber(document.getElementById('pendingApprovals'), stats.pending_approvals || 0);
             animateNumber(document.getElementById('approvedCourses'), stats.approved_courses || 0);

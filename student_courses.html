@@ -23,7 +23,7 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
@@ -94,8 +94,13 @@
             width: 100%; padding: 12px; border-radius: 14px; font-weight: 600;
             cursor: pointer; margin-top: 15px; text-align: center; border: none;
             background: linear-gradient(to right, #670019, #8b0022); color: white;
+            transition: 0.3s;
         }
         .cart-btn.remove { background: #dc3545; }
+        .cart-btn.added { background: #2e7d32; cursor: not-allowed; opacity: 0.7; }
+        .cart-btn.added:hover { transform: none; }
+        .cart-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+        
         @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
     </style>
 </head>
@@ -112,7 +117,7 @@
         <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
-    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 
 <div class="main-content">
@@ -140,6 +145,7 @@
 <script>
     let allCourses = [];
     let cartCourses = [];
+    let rejectedCourses = []; // Track rejected courses that can be re-added
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -159,9 +165,18 @@
             cartCourses = cart.items.map(item => item.code);
         } catch(e) { console.error(e); }
     }
+    
+    // Load rejected courses (courses that were rejected and can be re-added)
+    async function loadRejectedCourses() {
+        try {
+            const data = await apiGet('registrations/rejected_courses.php');
+            rejectedCourses = data.courses || [];
+        } catch(e) { console.error(e); }
+    }
 
     async function loadCourses() {
         try {
+            await loadRejectedCourses();
             const data = await apiGet('courses/list.php');
             allCourses = data.courses || [];
             document.getElementById('studentName').innerText = data.student_name || 'Haris';
@@ -179,17 +194,32 @@
         grid.innerHTML = '';
         courses.forEach(course => {
             const isInCart = cartCourses.includes(course.code);
+            const isRejected = rejectedCourses.includes(course.code);
+            // Course is only available if: not in cart AND (not approved OR is rejected)
+            const isAvailable = !isInCart && !isRejected;
+            
             const card = document.createElement('div');
             card.className = 'course-card';
+            let btnHtml = '';
+            
+            if (isInCart) {
+                btnHtml = `<button class="cart-btn remove" data-code="${course.code}"><i class="bi bi-dash-circle me-1"></i> Remove from Cart</button>`;
+            } else if (!isAvailable) {
+                btnHtml = `<button class="cart-btn added" disabled data-code="${course.code}"><i class="bi bi-check-circle me-1"></i> Already Added</button>`;
+            } else {
+                btnHtml = `<button class="cart-btn" data-code="${course.code}"><i class="bi bi-plus-circle me-1"></i> Add Courses</button>`;
+            }
+            
             card.innerHTML = `
                 <span class="course-code">${escapeHtml(course.code)}</span>
                 <h4>${escapeHtml(course.name)}</h4>
                 <div class="course-info"><div><i class="bi bi-clock"></i> ${course.credits} Credit Hours</div><div><i class="bi bi-people"></i> ${course.enrolled || 0} Students</div></div>
-                <button class="cart-btn ${isInCart ? 'remove' : ''}" data-code="${course.code}"><i class="bi bi-${isInCart ? 'dash-circle' : 'plus-circle'} me-1"></i> ${isInCart ? 'Remove from Cart' : 'Add Courses'}</button>
+                ${btnHtml}
             `;
             grid.appendChild(card);
         });
-        document.querySelectorAll('.cart-btn').forEach(btn => {
+        
+        document.querySelectorAll('.cart-btn:not(:disabled)').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const code = btn.dataset.code;
                 if (btn.classList.contains('remove')) {
@@ -199,8 +229,9 @@
                     cartCourses = cartCourses.filter(c => c !== code);
                 } else {
                     await apiPost('cart/add.php', { course_code: code });
-                    btn.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Remove from Cart';
-                    btn.classList.add('remove');
+                    btn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Already Added';
+                    btn.classList.add('added');
+                    btn.disabled = true;
                     cartCourses.push(code);
                 }
                 await loadCartCount();
