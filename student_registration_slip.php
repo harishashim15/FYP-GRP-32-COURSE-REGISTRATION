@@ -29,6 +29,8 @@ $programme = $student ? $student['programme'] : "Computer Science";
 $year = $student ? $student['year'] : "2";
 $ic_number = $student && $student['ic_number'] ? $student['ic_number'] : "Not provided";
 $address = $student && $student['address'] ? $student['address'] : "Not provided";
+$phone = $student && $student['phone'] ? $student['phone'] : "Not provided";
+$email = $student && $student['utm_email'] ? $student['utm_email'] : "Not provided";
 
 // Fetch registration details
 $reg_query = "SELECT cr.id, cr.submission_date, cr.status, cr.session, cr.reviewed_at, 
@@ -56,14 +58,13 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
     $total_credits += $row['credits'];
 }
 
-// Calculate total credits formatted
 $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Registration Slip - UTM Student</title>
     <link rel="icon" type="image/png" href="images/logoWebsite.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -119,161 +120,165 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         .page-header { margin-bottom: 30px; }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         
-        /* Registration Slip Styles */
+        /* Registration Slip Styles - PDF Optimized */
         .registration-slip {
             background: white;
-            border-radius: 25px;
-            padding: 40px;
+            border-radius: 15px;
+            padding: 25px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
             margin-bottom: 30px;
+            max-width: 100%;
+            overflow-x: auto;
         }
         
         .slip-header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #670019;
         }
         
         .slip-header .logo-img {
-            max-width: 80px;
-            margin-bottom: 15px;
+            max-width: 60px;
+            margin-bottom: 10px;
         }
         
         .slip-header h3 {
             color: #670019;
             font-weight: 700;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        
-        .slip-header .subtitle {
-            color: #666;
-            font-size: 12px;
+            font-size: 18px;
+            margin-bottom: 3px;
         }
         
         .slip-header .university-name {
             color: #333;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
-            margin-top: 10px;
         }
         
         .info-section {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .info-section h4 {
             color: #670019;
             font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
             border-bottom: 1px solid #ddd;
         }
         
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-        
-        .info-item {
+        /* Two column layout for PDF */
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
             margin-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 6px 0;
         }
         
-        .info-item label {
-            font-size: 11px;
+        .info-label {
+            width: 30%;
+            font-size: 12px;
             color: #888;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .info-item span {
-            font-size: 13px;
             font-weight: 500;
-            color: #333;
         }
         
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            display: inline-block;
+        .info-value {
+            width: 70%;
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
         }
-        .status-approved { background: #d4edda; color: #155724; }
         
         .courses-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+            font-size: 11px;
         }
         .courses-table th {
             background: #f8f6f4;
-            padding: 10px 8px;
+            padding: 8px 6px;
             text-align: left;
             color: #670019;
             font-weight: 600;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #ddd;
         }
         .courses-table td {
-            padding: 8px;
-            border: 1px solid #e0e0e0;
+            padding: 6px;
+            border: 1px solid #ddd;
         }
         
         .total-credits {
             text-align: right;
-            margin-top: 15px;
-            padding-top: 10px;
+            margin-top: 10px;
+            padding-top: 8px;
             border-top: 1px solid #ddd;
             font-weight: 600;
             color: #670019;
-            font-size: 13px;
+            font-size: 12px;
         }
         
         .verification-section {
-            margin-top: 30px;
-            padding-top: 20px;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 1px solid #ddd;
         }
         
-        .verification-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+        .verification-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
         }
         
-        .verification-item {
-            margin-bottom: 15px;
-        }
-        
-        .verification-item label {
+        .verification-label {
+            width: 25%;
             font-size: 11px;
             color: #888;
-            display: block;
         }
         
-        .verification-item span {
-            font-size: 13px;
-            font-weight: 500;
+        .verification-value {
+            width: 75%;
+            font-size: 12px;
             color: #333;
+            font-weight: 500;
         }
         
         .signature-line {
-            margin-top: 30px;
-            padding-top: 20px;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 1px dashed #ccc;
         }
         
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .signature-item {
+            text-align: center;
+            width: 45%;
+        }
+        
+        .signature-item span {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .signature-line-dash {
+            margin-top: 5px;
+            border-top: 1px dashed #999;
+            width: 100%;
+        }
+        
         .footer-note {
-            margin-top: 30px;
-            font-size: 10px;
+            margin-top: 20px;
+            font-size: 8px;
             color: #999;
             text-align: center;
-            line-height: 1.4;
+            line-height: 1.3;
         }
         
         .print-btn {
@@ -315,14 +320,33 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
-            .info-grid { grid-template-columns: 1fr; }
         }
         
+        /* Print/PDF specific styles */
         @media print {
-            .sidebar, .topbar, .print-btn, .back-btn, .logout { display: none !important; }
-            .main-content { margin-left: 0 !important; padding: 0 !important; }
-            .registration-slip { box-shadow: none; padding: 20px; margin: 0; }
-            body { background: white; }
+            .sidebar, .topbar, .print-btn, .back-btn, .logout { 
+                display: none !important; 
+            }
+            .main-content { 
+                margin-left: 0 !important; 
+                padding: 0 !important; 
+            }
+            .registration-slip { 
+                box-shadow: none; 
+                padding: 10px;
+                margin: 0;
+                border-radius: 0;
+            }
+            body { 
+                background: white; 
+                margin: 0;
+                padding: 0;
+            }
+            .info-label { width: 25%; }
+            .info-value { width: 75%; }
+            .courses-table { font-size: 9px; }
+            .courses-table th, .courses-table td { padding: 4px; }
+            .footer-note { font-size: 7px; }
         }
     </style>
 </head>
@@ -356,34 +380,68 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 
     <div class="registration-slip" id="slipContainer">
         <div class="slip-header">
-            <img src="images/utmlogo.png" alt="UTM Logo" class="logo-img" style="width: 70px;">
+            <img src="images/utmlogo.png" alt="UTM Logo" class="logo-img" style="width: 55px;">
             <h3>COURSE REGISTRATION SLIP</h3>
-            <div class="university-name">Universiti Teknologi Malaysia<br>Course Registration System</div>
+            <div class="university-name">Universiti Teknologi Malaysia</div>
         </div>
         
         <div class="info-section">
             <h4>STUDENT INFORMATION</h4>
-            <div class="info-grid">
-                <div class="info-item"><label>NAME</label><span><?php echo htmlspecialchars($student_name); ?></span></div>
-                <div class="info-item"><label>MATRIC NO.</label><span><?php echo htmlspecialchars($matrix_number); ?></span></div>
-                <div class="info-item"><label>IC/PASSPORT</label><span><?php echo htmlspecialchars($ic_number); ?></span></div>
-                <div class="info-item"><label>PROGRAMME</label><span><?php echo htmlspecialchars($programme); ?></span></div>
-                <div class="info-item"><label>YEAR</label><span><?php echo htmlspecialchars($year); ?></span></div>
-                <div class="info-item"><label>EMAIL</label><span><?php echo htmlspecialchars($student['utm_email'] ?? '-'); ?></span></div>
-                <div class="info-item"><label>PHONE</label><span><?php echo htmlspecialchars($student['phone'] ?? '-'); ?></span></div>
-                <div class="info-item"><label>ADDRESS</label><span><?php echo htmlspecialchars($address); ?></span></div>
+            <div class="info-row">
+                <div class="info-label">NAME</div>
+                <div class="info-value"><?php echo htmlspecialchars($student_name); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">MATRIC NO.</div>
+                <div class="info-value"><?php echo htmlspecialchars($matrix_number); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">IC/PASSPORT</div>
+                <div class="info-value"><?php echo htmlspecialchars($ic_number); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">PROGRAMME</div>
+                <div class="info-value"><?php echo htmlspecialchars($programme); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">YEAR</div>
+                <div class="info-value"><?php echo htmlspecialchars($year); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">EMAIL</div>
+                <div class="info-value"><?php echo htmlspecialchars($email); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">PHONE</div>
+                <div class="info-value"><?php echo htmlspecialchars($phone); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">ADDRESS</div>
+                <div class="info-value"><?php echo nl2br(htmlspecialchars($address)); ?></div>
             </div>
         </div>
         
         <div class="info-section">
             <h4>REGISTRATION DETAILS</h4>
-            <div class="info-grid">
-                <div class="info-item"><label>SESSION/SEMESTER</label><span><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></span></div>
-                <div class="info-item"><label>YEAR/PROGRAMME</label><span><?php echo htmlspecialchars($year); ?> / <?php echo htmlspecialchars($programme); ?></span></div>
-                <div class="info-item"><label>SUBMITTED DATE</label><span><?php echo date('d-M-Y', strtotime($registration['submission_date'])); ?></span></div>
-                <div class="info-item"><label>APPROVED DATE</label><span><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '-'; ?></span></div>
-                <div class="info-item"><label>APPROVED BY</label><span><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></span></div>
-                <div class="info-item"><label>STATUS</label><span class="status-badge status-approved">APPROVED</span></div>
+            <div class="info-row">
+                <div class="info-label">SESSION/SEMESTER</div>
+                <div class="info-value"><?php echo htmlspecialchars($registration['session'] ?? '2025/2026 - Semester 2'); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">SUBMITTED DATE</div>
+                <div class="info-value"><?php echo date('d-M-Y', strtotime($registration['submission_date'])); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">APPROVED DATE</div>
+                <div class="info-value"><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '-'; ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">APPROVED BY</div>
+                <div class="info-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '-'); ?></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">STATUS</div>
+                <div class="info-value"><span class="status-badge" style="background:#d4edda; color:#155724; padding:2px 10px; border-radius:15px;">APPROVED</span></div>
             </div>
         </div>
         
@@ -392,11 +450,11 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             <table class="courses-table">
                 <thead>
                     <tr>
-                        <th>NO.</th>
+                        <th>#</th>
                         <th>CODE</th>
                         <th>COURSE TITLE</th>
-                        <th>CREDIT</th>
-                        <th>SECTION</th>
+                        <th>CR</th>
+                        <th>SEC</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -411,7 +469,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="5" class="text-center">No courses found for this registration</td></tr>
+                        <tr><td colspan="5" class="text-center">No courses found</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -420,37 +478,36 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         
         <div class="verification-section">
             <h4>VERIFICATION FROM ACADEMIC ADVISOR</h4>
-            <div class="verification-grid">
-                <div class="verification-item">
-                    <label>VERIFIED BY</label>
-                    <span><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________________'); ?></span>
-                </div>
-                <div class="verification-item">
-                    <label>DATE VERIFIED</label>
-                    <span><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '_________________________'; ?></span>
-                </div>
+            <div class="verification-row">
+                <div class="verification-label">VERIFIED BY</div>
+                <div class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________________'); ?></div>
             </div>
-            <div class="verification-item">
-                <label>REMARKS</label>
-                <span><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></span>
+            <div class="verification-row">
+                <div class="verification-label">DATE VERIFIED</div>
+                <div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-M-Y', strtotime($registration['reviewed_at'])) : '_________________________'; ?></div>
             </div>
-            <div class="signature-line">
-                <div class="info-grid">
-                    <div class="info-item"><label>STUDENT SIGNATURE</label><span>_________________________</span></div>
-                    <div class="info-item"><label>ADVISOR SIGNATURE</label><span>_________________________</span></div>
+            <div class="verification-row">
+                <div class="verification-label">REMARKS</div>
+                <div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div>
+            </div>
+        </div>
+        
+        <div class="signature-line">
+            <div class="signature-row">
+                <div class="signature-item">
+                    <span>STUDENT SIGNATURE</span>
+                    <div class="signature-line-dash"></div>
+                </div>
+                <div class="signature-item">
+                    <span>ADVISOR SIGNATURE</span>
+                    <div class="signature-line-dash"></div>
                 </div>
             </div>
         </div>
         
         <div class="footer-note">
             <strong>DATE: <?php echo date('d-M-Y'); ?></strong><br>
-            # PLEASE CHECK YOUR NAME AND ADDRESS. CORRECTIONS CAN BE MADE AT YOUR FACULTY/SCHOOL.<br><br>
-            <strong>Learning Method Definition:</strong><br>
-            OL = Online Learning | FC = Face to face | BL = Blended Learning | BLS = Blended Learning Substitution<br><br>
-            <strong>Examination Type Definition:</strong><br>
-            AA = Alternative Assessment | NFE = No Final Exam | ASYNC O = Asynchronous online exam<br>
-            SYNC O = Synchronous online exam (no invigilation) | SYNC OP = Synchronous online exam with online proctoring<br>
-            SYNC OV = Synchronous online exam with online invigilation | SYNC P = Synchronous online exam with physical invigilation | FTF = Face-to-face final exam
+            # PLEASE CHECK YOUR NAME AND ADDRESS. CORRECTIONS CAN BE MADE AT YOUR FACULTY/SCHOOL.
         </div>
     </div>
 
@@ -472,14 +529,24 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 
     document.getElementById('printBtn').addEventListener('click', function() {
         const element = document.getElementById('slipContainer');
+        
+        // Show loading
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating PDF...';
+        this.disabled = true;
+        
         const opt = {
             margin: [0.5, 0.5, 0.5, 0.5],
             filename: 'Registration_Slip_<?php echo $registration_id; ?>_<?php echo date('Y-m-d'); ?>.pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, letterRendering: true },
+            html2canvas: { scale: 2, letterRendering: true, useCORS: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
-        html2pdf().set(opt).from(element).save();
+        
+        html2pdf().set(opt).from(element).save().then(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+        });
     });
 </script>
 </body>
