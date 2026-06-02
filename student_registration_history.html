@@ -13,11 +13,16 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
         
+        /* Sidebar Styles */
         .sidebar {
-            width: 280px; height: 100vh;
+            width: 280px;
+            height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
-            position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease; z-index: 1000;
+            position: fixed;
+            padding: 30px 20px;
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
             overflow-y: auto;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
@@ -25,75 +30,202 @@
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; margin-bottom: 8px;
-            transition: 0.3s; font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+            font-size: 15px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; width: 24px; }
         .logout {
-            position: absolute; bottom: 30px;
-            width: calc(100% - 40px); left: 20px;
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
         }
         .logout a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 15px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
         
+        /* Main Content */
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
+        
+        /* Topbar */
         .topbar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; background: white; padding: 15px 25px;
-            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
         
+        /* Page Header */
         .page-header {
-            background: #f7f2ee; border-radius: 25px; padding: 35px 40px;
-            margin-bottom: 30px; border: 1px solid #eee;
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 35px 40px;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
         }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
         
-        .summary-strip { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        /* Summary Strip */
+        .summary-strip {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
         .strip-item {
-            background: white; border-radius: 14px; padding: 12px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 13px;
-            display: flex; align-items: center; gap: 10px;
+            background: white;
+            border-radius: 14px;
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .strip-item strong { color: #670019; font-size: 18px; font-weight: 700; }
         .strip-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
         
+        /* History Table - FIXED LAYOUT */
         .history-table {
-            background: white; border-radius: 25px; padding: 30px;
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
-        .history-table h3 { color: #670019; font-weight: 700; font-size: 20px; margin-bottom: 25px; border-bottom: 2px solid #f0e8e8; padding-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f6f4; padding: 12px 15px; color: #670019; text-align: left; font-weight: 600; }
-        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
-        .status-badge { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-approved { background: #d4edda; color: #155724; }
-        .status-rejected { background: #f8d7da; color: #721c24; }
+        .history-table h3 {
+            color: #670019;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0e8e8;
+        }
+        
+        /* Table Styles - FIXED */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: #f8f6f4;
+            padding: 14px 15px;
+            color: #670019;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            border-bottom: 2px solid #e0d6d6;
+        }
+        .data-table td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #333;
+            vertical-align: middle;
+        }
+        .data-table tbody tr:hover td {
+            background: #fdf9f7;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* View Button */
         .view-btn {
-            background: #670019; color: white; border: none;
-            padding: 6px 15px; border-radius: 20px; font-size: 12px;
-            cursor: pointer; transition: 0.3s; text-decoration: none;
+            background: #670019;
+            color: white;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
         }
-        .view-btn.disabled, .view-btn:disabled {
-            background: #ccc; cursor: not-allowed;
+        .view-btn:hover {
+            background: #8b0022;
+            transform: translateY(-2px);
         }
-        .empty-state { text-align: center; padding: 60px 20px; }
-        .empty-state i { font-size: 64px; color: #ddd; margin-bottom: 20px; }
-        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
+        .view-btn.disabled-btn {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .view-btn.disabled-btn:hover {
+            transform: none;
+            background: #ccc;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .empty-state i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        .empty-state h4 {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .empty-state a {
+            color: #670019;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; }
+            .data-table th, .data-table td { padding: 10px; font-size: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -121,13 +253,20 @@
         </div>
     </div>
 
-    <div class="page-header"><h2>Registration History</h2><p>Track the status of your submitted registrations</p></div>
+    <div class="page-header">
+        <div>
+            <h2>Registration History</h2>
+            <p>Track the status of your submitted registrations</p>
+        </div>
+    </div>
 
     <div class="summary-strip" id="summaryStrip"></div>
 
     <div class="history-table">
         <h3><i class="bi bi-journal-text me-2"></i>Submitted Registrations</h3>
-        <div id="historyContainer">Loading...</div>
+        <div id="historyContainer">
+            <div class="text-center py-4">Loading registration history...</div>
+        </div>
     </div>
 </div>
 
@@ -140,8 +279,15 @@
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
+    
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
 
+    // Format date and time properly
     function formatDateTime(dateString) {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -151,7 +297,6 @@
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit',
             hour12: true
         });
     }
@@ -162,6 +307,7 @@
             document.getElementById('studentName').innerText = data.student_name || 'Haris';
             const registrations = data.registrations || [];
             
+            // Calculate statistics
             let pending = 0, approved = 0, rejected = 0;
             registrations.forEach(r => { 
                 if (r.status === 'pending') pending++; 
@@ -169,6 +315,8 @@
                 else if (r.status === 'rejected') rejected++; 
             });
             const total = registrations.length;
+            
+            // Update summary strip
             document.getElementById('summaryStrip').innerHTML = `
                 <div class="strip-item"><span class="strip-dot" style="background:#670019;"></span> Total &nbsp;<strong>${total}</strong> registrations</div>
                 <div class="strip-item"><span class="strip-dot" style="background:#856404;"></span> Pending &nbsp;<strong>${pending}</strong></div>
@@ -177,28 +325,67 @@
             `;
             
             const container = document.getElementById('historyContainer');
+            
             if (registrations.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i><h4>No registration history found</h4><p>You haven't submitted any course registrations yet.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>`;
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h4>No registration history found</h4>
+                        <p>You haven't submitted any course registrations yet.</p>
+                        <a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a>
+                    </div>
+                `;
                 return;
             }
             
-            let html = `</table><thead><tr><th>SESSION</th><th>SUBMITTED DATE & TIME</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>`;
-            registrations.forEach(reg => {
-                // Enable View for both Approved AND Rejected status
+            // Build the table - FIXED: Proper HTML structure
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>SESSION</th>
+                            <th>SUBMITTED DATE & TIME</th>
+                            <th>STATUS</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            for (const reg of registrations) {
+                const statusClass = reg.status;
+                const statusText = reg.status.charAt(0).toUpperCase() + reg.status.slice(1);
                 const canView = reg.status === 'approved' || reg.status === 'rejected';
                 const regId = reg.registration_id;
-                html += `<tr data-id="${regId}">
-                    <td>${escapeHtml(reg.session || '2025/2026 - Semester 2')}</td>
-                    <td>${formatDateTime(reg.submission_date)}</strong></td>
-                    <td><span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span></td>
-                    <td><button class="view-btn" data-id="${regId}" data-status="${reg.status}">View</button></td>
-                </tr>`;
-            });
-            html += `</tbody></table>`;
+                const sessionText = reg.session || '2025/2026 - Semester 2';
+                const formattedDate = formatDateTime(reg.submission_date);
+                
+                html += `
+                    <tr data-id="${regId}" data-status="${reg.status}">
+                        <td>${escapeHtml(sessionText)}</td>
+                        <td>${formattedDate}</td>
+                        <td><span class="status-badge status-${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="view-btn ${!canView ? 'disabled-btn' : ''}" 
+                                    data-id="${regId}" 
+                                    data-status="${reg.status}"
+                                    ${!canView ? 'disabled' : ''}>
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
             container.innerHTML = html;
             
-            // Handle View button clicks based on status
-            document.querySelectorAll('.view-btn').forEach(btn => {
+            // Attach event listeners to view buttons
+            document.querySelectorAll('.view-btn:not(.disabled-btn)').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
                     const status = this.getAttribute('data-status');
@@ -209,13 +396,27 @@
                     }
                 });
             });
+            
         } catch (err) {
             console.error('Error loading history:', err);
-            document.getElementById('historyContainer').innerHTML = '<div class="text-center text-danger">Failed to load registration history. Please refresh and try again.</div>';
+            document.getElementById('historyContainer').innerHTML = `
+                <div class="text-center text-danger py-4">
+                    Failed to load registration history. Please refresh and try again.
+                </div>
+            `;
         }
     }
     
-    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
     loadHistory();
 </script>
 </body>
