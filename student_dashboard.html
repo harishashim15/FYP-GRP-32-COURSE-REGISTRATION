@@ -22,7 +22,6 @@
             overflow-x: hidden;
         }
         
-        /* Sidebar */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -35,83 +34,46 @@
             overflow-y: auto;
         }
         
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        
-        .logo img {
-            width: 130px;
-        }
-        
-        .system-title {
-            color: white;  /* CHANGED: from #ffc107 to white */
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 12px;
-        }
-        
+        .sidebar.collapsed { transform: translateX(-280px); }
+        .logo { text-align: center; margin-bottom: 50px; }
+        .logo img { width: 130px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex;
             align-items: center;
             gap: 15px;
             text-decoration: none;
             color: white;
-            padding: 12px 20px;
+            padding: 14px 20px;
             border-radius: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             transition: 0.3s;
-            font-size: 16px;
+            font-size: 15px;
         }
-        
-        .menu a:hover, .menu .active {
-            background: linear-gradient(to right, #f4a000, #e08700);
-        }
-        
-        .menu i {
-            font-size: 20px;
-        }
-        
+        .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
+        .menu i { font-size: 20px; width: 24px; }
         .logout {
             position: absolute;
             bottom: 30px;
             width: calc(100% - 40px);
             left: 20px;
         }
-        
         .logout a {
             display: flex;
             align-items: center;
             gap: 15px;
             text-decoration: none;
             color: white;
-            padding: 12px 20px;
+            padding: 14px 20px;
             border-radius: 14px;
             transition: 0.3s;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.1);
+            font-size: 15px;
+            background: rgba(255,255,255,0.1);
         }
+        .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
         
-        .logout a:hover {
-            background: linear-gradient(to right, #f4a000, #e08700);
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            padding: 30px;
-            transition: margin-left 0.3s ease;
-        }
-        
-        .main-content.expanded {
-            margin-left: 0;
-        }
-        
-        /* Topbar */
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -120,32 +82,12 @@
             background: white;
             padding: 15px 25px;
             border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
         
-        .toggle-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #333;
-            cursor: pointer;
-        }
-        
-        .profile-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-        }
-        
-        .profile-box img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        /* Hero */
         .hero {
             background: #f7f2ee;
             border-radius: 25px;
@@ -153,34 +95,19 @@
             margin-bottom: 35px;
             border: 1px solid #eee;
         }
+        .hero h1 { font-size: 34px; font-weight: 700; color: #670019; }
+        .hero p { color: #666; margin-top: 8px; font-size: 15px; }
         
-        .hero h1 {
-            font-size: 34px;
-            font-weight: 700;
-            color: #670019;
-        }
-        
-        .hero p {
-            color: #666;
-            margin-top: 8px;
-            font-size: 15px;
-        }
-        
-        /* Dashboard Cards */
         .dashboard-card {
             border: none;
             border-radius: 25px;
             padding: 25px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
             transition: 0.3s;
             height: 100%;
             background: white;
         }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-        }
-        
+        .dashboard-card:hover { transform: translateY(-5px); }
         .card-icon {
             width: 60px;
             height: 60px;
@@ -191,34 +118,25 @@
             font-size: 28px;
             margin-bottom: 15px;
         }
-        
         .card-icon.yellow { background: #fff2cc; color: #d48a00; }
         .card-icon.red { background: #ffe0e0; color: #b00020; }
         .card-icon.green { background: #e4f7df; color: #2e7d32; }
         .card-icon.purple { background: #eee3ff; color: #7b1fa2; }
-        
-        .dashboard-card h2 {
-            font-size: 36px;
-            font-weight: 700;
-            color: #670019;
-            margin-bottom: 5px;
-        }
+        .dashboard-card h2 { font-size: 36px; font-weight: 700; color: #670019; margin-bottom: 5px; }
         
         .period-card {
             background: white;
             border-radius: 25px;
             padding: 20px;
             margin-top: 20px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
-        
         .quick-actions {
             background: white;
             border-radius: 25px;
             padding: 30px;
             margin-top: 35px;
         }
-        
         .action-btn {
             display: flex;
             justify-content: space-between;
@@ -231,11 +149,7 @@
             color: black;
             transition: 0.3s;
         }
-        
-        .action-btn:hover {
-            background: #fff7ef;
-            transform: translateX(5px);
-        }
+        .action-btn:hover { background: #fff7ef; transform: translateX(5px); }
         
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
@@ -257,7 +171,6 @@
         <a href="student_courses.html"><i class="bi bi-book-fill"></i> Courses</a>
         <a href="student_register.html"><i class="bi bi-journal-text"></i> Register</a>
         <a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
-        <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
     <div class="logout">
@@ -312,12 +225,10 @@
         }
     })();
 
-    // Count-up animation function
     function animateNumber(element, target, duration = 1000) {
         let start = 0;
         const increment = target / (duration / 16);
         let current = start;
-        
         const updateNumber = () => {
             current += increment;
             if (current < target) {
@@ -336,23 +247,18 @@
             document.getElementById('studentName').innerText = stats.student_name || 'Haris';
             const firstName = (stats.student_name || 'Haris').split(' ')[0];
             document.getElementById('heroGreeting').innerText = `Welcome back, ${firstName}!`;
-            
             animateNumber(document.getElementById('registeredCourses'), stats.registered_courses || 0);
             animateNumber(document.getElementById('pendingApprovals'), stats.pending_approvals || 0);
             animateNumber(document.getElementById('approvedCourses'), stats.approved_courses || 0);
-            
             document.getElementById('currentSession').innerText = stats.current_session || '2025/2026';
             document.getElementById('currentSemester').innerHTML = `Semester ${stats.current_semester || 2}`;
-
             const period = await apiGet('registrations/period.php');
             document.getElementById('periodStatus').innerText = period.is_open ? 'Open' : 'Closed';
             document.getElementById('periodStatus').className = `badge ${period.is_open ? 'bg-success' : 'bg-secondary'}`;
             document.getElementById('periodDates').innerText = `${period.start_date} – ${period.end_date}`;
             document.getElementById('semesterLabel').innerText = period.semester || 'Semester 2';
             document.getElementById('sessionLabel').innerText = period.session || '2025/2026';
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     }
     loadDashboard();
 </script>

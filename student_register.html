@@ -144,26 +144,46 @@
     }
     (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
-    // Check if coming from rejected registration
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromRejected = urlParams.get('from_rejected');
+    // Check for rejected registration data in localStorage
+    const pendingRejectedRegistration = localStorage.getItem('pendingRejectedRegistration');
+    if (pendingRejectedRegistration) {
+        // Clear it after reading
+        localStorage.removeItem('pendingRejectedRegistration');
+    }
 
     async function loadCart() {
         try {
-            const cart = await apiGet('cart/get.php');
+            let cart = await apiGet('cart/get.php');
+            
+            // If no items in cart and we have pending rejected registration, try to load it
+            if ((!cart.items || cart.items.length === 0) && pendingRejectedRegistration) {
+                try {
+                    const rejectedData = JSON.parse(pendingRejectedRegistration);
+                    // Load each course into cart
+                    for (const course of rejectedData.courses) {
+                        await apiPost('cart/add.php', { course_code: course.subject_code });
+                        if (course.section) {
+                            await apiPost('cart/update_section.php', { course_code: course.subject_code, section: course.section });
+                        }
+                    }
+                    // Reload cart after adding
+                    cart = await apiGet('cart/get.php');
+                    showAlert('Your previous rejected registration has been loaded. Please make necessary changes and resubmit.', 'success');
+                } catch(e) {
+                    console.error('Failed to load rejected registration:', e);
+                    showAlert('Unable to load previous registration. Please add courses manually.', 'error');
+                }
+            }
+            
             const container = document.getElementById('cartContainer');
             if (!cart.items || cart.items.length === 0) {
-                let emptyMessage = '<div class="empty-cart"><i class="bi bi-cart"></i><h4>No courses added yet</h4><p>Go to the Courses page to add courses to your registration cart.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>';
-                if (fromRejected) {
-                    emptyMessage = '<div class="empty-cart"><i class="bi bi-exclamation-triangle-fill"></i><h4>Unable to load previous registration</h4><p>Please go back and try again, or add courses manually.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>';
-                }
-                container.innerHTML = emptyMessage;
+                container.innerHTML = `<div class="empty-cart"><i class="bi bi-cart"></i><h4>No courses added yet</h4><p>Go to the Courses page to add courses to your registration cart.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>`;
                 document.getElementById('submitBtnContainer').style.display = 'none';
                 document.getElementById('studentName').innerText = cart.student_name || 'Haris';
                 return;
             }
             document.getElementById('studentName').innerText = cart.student_name || 'Haris';
-            let html = `</table><thead><tr><th>No.</th><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Section *</th><th>Action</th></tr></thead><tbody>`;
+            let html = `<table><thead><tr><th>No.</th><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Section *</th><th>Action</th></tr></thead><tbody>`;
             cart.items.forEach((item, idx) => {
                 html += `<tr>
                     <td>${idx+1}</td>
@@ -180,15 +200,10 @@
                     <td><button class="remove-btn" data-code="${escapeHtml(item.code)}"><i class="bi bi-trash3"></i></button></td>
                 </tr>`;
             });
-            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></tr>`;
+            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></table>`;
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
             attachEvents();
-            
-            // Show a notification if coming from rejected registration
-            if (fromRejected) {
-                showAlert('Your rejected registration has been loaded. Please make the necessary changes and resubmit.', 'success');
-            }
         } catch(err) {
             console.error(err);
             document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger">Failed to load cart. Please refresh.</div>';
