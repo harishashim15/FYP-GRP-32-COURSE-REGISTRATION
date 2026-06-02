@@ -24,37 +24,22 @@
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-        /* FIX 9: Improved sidebar spacing */
         .menu a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
-            color: white;
-            padding: 14px 20px;
-            border-radius: 14px;
-            margin-bottom: 8px;
-            transition: 0.3s;
-            font-size: 15px;
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 14px 20px;
+            border-radius: 14px; margin-bottom: 8px;
+            transition: 0.3s; font-size: 15px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; width: 24px; }
         .logout {
-            position: absolute;
-            bottom: 30px;
-            width: calc(100% - 40px);
-            left: 20px;
+            position: absolute; bottom: 30px;
+            width: calc(100% - 40px); left: 20px;
         }
         .logout a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
-            color: white;
-            padding: 14px 20px;
-            border-radius: 14px;
-            transition: 0.3s;
-            font-size: 15px;
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 14px 20px;
+            border-radius: 14px; transition: 0.3s; font-size: 15px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
@@ -121,7 +106,6 @@
         <a href="student_courses.html"><i class="bi bi-book-fill"></i> Courses</a>
         <a href="student_register.html"><i class="bi bi-journal-text"></i> Register</a>
         <a href="student_registration_history.html" class="active"><i class="bi bi-clock-history"></i> Registration History</a>
-        <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
     <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
@@ -158,7 +142,6 @@
     }
     (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
-    // FIX 4: Proper date and time formatting including seconds
     function formatDateTime(dateString) {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -176,7 +159,6 @@
     async function loadHistory() {
         try {
             const data = await apiGet('registrations/history.php');
-            console.log('API Response:', data);
             document.getElementById('studentName').innerText = data.student_name || 'Haris';
             const registrations = data.registrations || [];
             
@@ -200,27 +182,30 @@
                 return;
             }
             
-            let html = `<table><thead><tr><th>SESSION</th><th>SUBMITTED DATE & TIME</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>`;
+            let html = `</table><thead><tr><th>SESSION</th><th>SUBMITTED DATE & TIME</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>`;
             registrations.forEach(reg => {
-                const canView = reg.status === 'approved';
-                const regId = reg.registration_id || reg.id;
-                html += `<tr>
+                // Enable View for both Approved AND Rejected status
+                const canView = reg.status === 'approved' || reg.status === 'rejected';
+                const regId = reg.registration_id;
+                html += `<tr data-id="${regId}">
                     <td>${escapeHtml(reg.session || '2025/2026 - Semester 2')}</td>
                     <td>${formatDateTime(reg.submission_date)}</strong></td>
                     <td><span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span></td>
-                    <td><button class="view-btn ${!canView ? 'disabled' : ''}" data-id="${regId}" ${!canView ? 'disabled' : ''}>View</button></td>
+                    <td><button class="view-btn" data-id="${regId}" data-status="${reg.status}">View</button></td>
                 </tr>`;
             });
             html += `</tbody></table>`;
             container.innerHTML = html;
             
-            document.querySelectorAll('.view-btn:not(.disabled)').forEach(btn => {
+            // Handle View button clicks based on status
+            document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
-                    if (id && id !== 'undefined' && id !== 'null') {
+                    const status = this.getAttribute('data-status');
+                    if (status === 'rejected') {
+                        window.location.href = `student_registration_rejected.html?id=${id}`;
+                    } else if (status === 'approved') {
                         window.location.href = `student_registration_slip.php?id=${id}`;
-                    } else {
-                        alert('Error: Registration ID not found.');
                     }
                 });
             });

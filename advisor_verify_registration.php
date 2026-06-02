@@ -3,7 +3,7 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID for name display
+// Get advisor ID from session
 $advisor_id = 1; // Miss Asyikin
 
 // Get student matrix from URL
@@ -14,7 +14,7 @@ if (empty($student_matrix)) {
     exit;
 }
 
-// Get student information (JOIN with users table)
+// Get student information
 $sql = "SELECT s.*, u.matrix_number, u.user_name, u.utm_email 
         FROM students s
         JOIN users u ON s.user_id = u.user_id
@@ -30,8 +30,7 @@ if (!$student) {
     exit;
 }
 
-// Get student's registered courses using correct table structure
-// course_registrations -> registration_courses -> subjects
+// Get student's registered courses
 $sql = "SELECT sub.*, cr.status as reg_status, cr.id as reg_id 
         FROM course_registrations cr 
         JOIN registration_courses rc ON cr.id = rc.registration_id
@@ -55,14 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $action = $_POST['action'];
     $remarks = $_POST['remarks'] ?? '';
     $new_status = ($action == 'approve') ? 'approved' : 'rejected';
-    $message = ($action == 'approve') ? "Registration approved successfully!" : "Registration rejected!";
+    $current_time = date('Y-m-d H:i:s');
     
-    // Update all registrations for this student
-    $sql = "UPDATE course_registrations SET status = ?, advisor_remarks = ? WHERE student_id = ?";
+    // Update the registration
+    $sql = "UPDATE course_registrations SET status = ?, advisor_remarks = ?, reviewed_by = ?, reviewed_at = ? WHERE student_id = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "ssi", $new_status, $remarks, $student['user_id']);
+    mysqli_stmt_bind_param($stmt, "ssisi", $new_status, $remarks, $advisor_id, $current_time, $student['user_id']);
     
     if (mysqli_stmt_execute($stmt)) {
+        $message = ($action == 'approve') ? "Registration approved successfully!" : "Registration rejected!";
         echo "<script>alert('$message'); window.location.href='advisor_registrations.php';</script>";
     } else {
         echo "<script>alert('Error updating registration');</script>";
@@ -172,7 +172,7 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
             <div class="student-avatar"><?php echo strtoupper(substr($student['user_name'], 0, 2)); ?></div>
             <div class="student-info">
                 <h3><?php echo htmlspecialchars($student['user_name']); ?></h3>
-                <p><?php echo htmlspecialchars($student['matrix_number']); ?> · <?php echo htmlspecialchars($student['programme']); ?> · Year <?php echo $student['year']; ?> · Sem 3</p>
+                <p><?php echo htmlspecialchars($student['matrix_number']); ?> · <?php echo htmlspecialchars($student['programme']); ?> · Year <?php echo $student['year']; ?></p>
             </div>
         </div>
 
@@ -206,14 +206,14 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
         </div>
 
         <?php if ($reg_status == 'pending'): ?>
-            <form method="POST" class="action-card">
+            <form method="POST" class="action-card" id="verifyForm">
                 <div class="form-group">
-                    <label><i class="bi bi-chat"></i> Remarks (optional)</label>
-                    <textarea name="remarks" rows="3" placeholder="Add a note for the student..."></textarea>
+                    <label><i class="bi bi-chat"></i> Remarks (required for rejection, optional for approval)</label>
+                    <textarea name="remarks" id="remarksText" rows="4" placeholder="Enter your comments or rejection reason here..."></textarea>
                 </div>
                 <div style="display: flex; gap: 15px;">
-                    <button type="submit" name="action" value="approve" class="btn-approve"><i class="bi bi-check-circle"></i> Approve</button>
-                    <button type="submit" name="action" value="reject" class="btn-reject"><i class="bi bi-x-circle"></i> Reject</button>
+                    <button type="button" name="action" value="approve" class="btn-approve" onclick="submitAction('approve')"><i class="bi bi-check-circle"></i> Approve</button>
+                    <button type="button" name="action" value="reject" class="btn-reject" onclick="submitAction('reject')"><i class="bi bi-x-circle"></i> Reject</button>
                 </div>
             </form>
         <?php else: ?>
@@ -236,8 +236,29 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
     </div>
 
     <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const main = document.querySelector('.main-content');
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
         (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
-        function toggleSidebar() { const sidebar = document.querySelector('.sidebar'); const main = document.querySelector('.main-content'); sidebar.classList.toggle('collapsed'); main.classList.toggle('expanded'); localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed')); }
+
+        function submitAction(action) {
+            const remarks = document.getElementById('remarksText').value;
+            if (action === 'reject' && !remarks.trim()) {
+                alert('Please provide a reason for rejecting this registration.');
+                return;
+            }
+            const form = document.getElementById('verifyForm');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'action';
+            input.value = action;
+            form.appendChild(input);
+            form.submit();
+        }
     </script>
 </body>
 </html>

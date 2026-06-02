@@ -4,13 +4,14 @@ require_once __DIR__ . '/../config/database.php';
 $student = requireRole('student');
 $pdo = getDBConnection();
 
-// Get unique registrations with their details
+// Get unique registrations with their details including advisor remarks
 $stmt = $pdo->prepare("
     SELECT DISTINCT 
         cr.id as registration_id,
         cr.session,
         cr.submission_date,
-        cr.status
+        cr.status,
+        cr.advisor_remarks
     FROM course_registrations cr
     WHERE cr.student_id = ?
     ORDER BY cr.submission_date DESC

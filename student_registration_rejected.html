@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Rejected - UTM Student</title>
+    <link rel="icon" type="image/png" href="images/logoWebsite.png"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #f8f6f4; overflow-x: hidden; }
+        
+        .sidebar {
+            width: 280px; height: 100vh;
+            background: linear-gradient(to bottom, #670019, #8b0022);
+            position: fixed; padding: 30px 20px; color: white;
+            transition: transform 0.3s ease; z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar.collapsed { transform: translateX(-280px); }
+        .logo { text-align: center; margin-bottom: 50px; }
+        .logo img { width: 130px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .menu a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 14px 20px;
+            border-radius: 14px; margin-bottom: 8px;
+            transition: 0.3s; font-size: 15px;
+        }
+        .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
+        .menu i { font-size: 20px; width: 24px; }
+        .logout {
+            position: absolute; bottom: 30px;
+            width: calc(100% - 40px); left: 20px;
+        }
+        .logout a {
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 14px 20px;
+            border-radius: 14px; transition: 0.3s; font-size: 15px;
+            background: rgba(255,255,255,0.1);
+        }
+        .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
+        
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content.expanded { margin-left: 0; }
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; background: white; padding: 15px 25px;
+            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        
+        .page-header { margin-bottom: 30px; }
+        .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
+        
+        /* Rejected Registration Slip Styles */
+        .rejected-container {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .warning-banner {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .warning-banner i {
+            font-size: 28px;
+            color: #dc3545;
+        }
+        .warning-banner h4 {
+            color: #721c24;
+            margin: 0 0 5px 0;
+        }
+        .warning-banner p {
+            color: #721c24;
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        .advisor-comment {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        .advisor-comment h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .advisor-comment p {
+            color: #856404;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .slip-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #670019;
+        }
+        .slip-header img { width: 60px; margin-bottom: 10px; }
+        .slip-header h3 { color: #670019; font-size: 18px; font-weight: 700; }
+        .slip-header p { color: #666; font-size: 12px; }
+        
+        .section-title {
+            color: #670019;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 15px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-row {
+            margin-bottom: 8px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .info-label {
+            width: 130px;
+            font-size: 12px;
+            color: #888;
+        }
+        .info-value {
+            flex: 1;
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .courses-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .courses-table th {
+            background: #f8f6f4;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+            color: #670019;
+        }
+        .courses-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .total-credits {
+            text-align: right;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+            font-weight: 600;
+            color: #670019;
+        }
+        
+        .edit-btn {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .edit-btn:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo"><img src="images/utmlogo.png" alt="UTM"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+    <div class="menu">
+        <a href="student_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="student_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
+        <a href="student_courses.html"><i class="bi bi-book-fill"></i> Courses</a>
+        <a href="student_register.html"><i class="bi bi-journal-text"></i> Register</a>
+        <a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
+        <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
+    </div>
+    <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box" onclick="location.href='student_profile.html'">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div><h6 class="mb-0" id="studentName">Haris</h6><small>Student</small></div>
+        </div>
+    </div>
+
+    <div class="page-header"><h2>Registration Status: Rejected</h2></div>
+
+    <div id="contentContainer" class="rejected-container">
+        <div class="text-center py-5">Loading registration details...</div>
+    </div>
+
+    <div class="d-flex gap-3 mt-3" id="actionButtons" style="display: none;">
+        <button class="edit-btn" id="editBtn"><i class="bi bi-pencil-square"></i> Edit Registration Slip</button>
+        <a href="student_registration_history.html" class="back-btn"><i class="bi bi-arrow-left"></i> Back to History</a>
+    </div>
+</div>
+
+<script src="js/common.js"></script>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const main = document.querySelector('.main-content');
+        sidebar.classList.toggle('collapsed');
+        main.classList.toggle('expanded');
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const registrationId = urlParams.get('id');
+
+    async function loadRejectedDetails() {
+        if (!registrationId) {
+            document.getElementById('contentContainer').innerHTML = '<div class="text-center text-danger">No registration ID provided.</div>';
+            return;
+        }
+        
+        try {
+            const data = await apiGet(`registrations/rejected_details.php?id=${registrationId}`);
+            document.getElementById('studentName').innerText = data.student.user_name || 'Haris';
+            
+            let coursesHtml = '';
+            let totalCredits = 0;
+            if (data.courses && data.courses.length > 0) {
+                data.courses.forEach((course, idx) => {
+                    coursesHtml += `<tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${escapeHtml(course.subject_code)}</strong></td>
+                        <td>${escapeHtml(course.subject_name)}</td>
+                        <td>${course.credits}</td>
+                        <td>${escapeHtml(course.section || 'TBD')}</td>
+                    </tr>`;
+                    totalCredits += course.credits;
+                });
+            } else {
+                coursesHtml = `<tr><td colspan="5" class="text-center">No courses found</td></tr>`;
+            }
+            
+            const advisorRemark = data.registration.advisor_remarks || 'No specific reason provided. Please contact your academic advisor.';
+            
+            const containerHtml = `
+                <div class="warning-banner">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <h4>Registration Rejected</h4>
+                        <p>Your course registration has been rejected by your academic advisor. Please review the advisor's comment below and edit your registration.</p>
+                    </div>
+                </div>
+                
+                <div class="advisor-comment">
+                    <h4><i class="bi bi-chat-left-text-fill me-2"></i>Academic Advisor Comment</h4>
+                    <p>${escapeHtml(advisorRemark)}</p>
+                </div>
+                
+                <div class="slip-header">
+                    <img src="images/utmlogo.png" alt="UTM Logo">
+                    <h3>COURSE REGISTRATION SLIP</h3>
+                    <p>Universiti Teknologi Malaysia</p>
+                </div>
+                
+                <div class="section-title">STUDENT INFORMATION</div>
+                <div class="info-row"><div class="info-label">Name</div><div class="info-value">${escapeHtml(data.student.user_name)}</div></div>
+                <div class="info-row"><div class="info-label">Matric No.</div><div class="info-value">${escapeHtml(data.student.matrix_number)}</div></div>
+                <div class="info-row"><div class="info-label">IC/Passport</div><div class="info-value">${escapeHtml(data.student.ic_number || 'Not provided')}</div></div>
+                <div class="info-row"><div class="info-label">Programme</div><div class="info-value">${escapeHtml(data.student.programme)}</div></div>
+                <div class="info-row"><div class="info-label">Year</div><div class="info-value">${escapeHtml(data.student.year)}</div></div>
+                <div class="info-row"><div class="info-label">Email</div><div class="info-value">${escapeHtml(data.student.utm_email)}</div></div>
+                <div class="info-row"><div class="info-label">Phone</div><div class="info-value">${escapeHtml(data.student.phone || '-')}</div></div>
+                <div class="info-row"><div class="info-label">Address</div><div class="info-value">${escapeHtml(data.student.address || '-')}</div></div>
+                
+                <div class="section-title">REGISTRATION DETAILS</div>
+                <div class="info-row"><div class="info-label">Session</div><div class="info-value">${escapeHtml(data.registration.session || '2025/2026 - Semester 2')}</div></div>
+                <div class="info-row"><div class="info-label">Submitted Date</div><div class="info-value">${new Date(data.registration.submission_date).toLocaleString()}</div></div>
+                <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span style="background:#f8d7da; color:#721c24; padding:2px 10px; border-radius:12px;">REJECTED</span></div></div>
+                
+                <div class="section-title">REGISTERED COURSES</div>
+                <table class="courses-table">
+                    <thead><tr><th>#</th><th>Code</th><th>Course Title</th><th>Cr</th><th>Section</th></tr></thead>
+                    <tbody>${coursesHtml}</tbody>
+                </table>
+                <div class="total-credits">TOTAL CREDIT: ${String(totalCredits).padStart(3, '0')}</div>
+            `;
+            
+            document.getElementById('contentContainer').innerHTML = containerHtml;
+            document.getElementById('actionButtons').style.display = 'flex';
+            
+            // Set up edit button
+            document.getElementById('editBtn').addEventListener('click', async () => {
+                try {
+                    // Save the rejected registration courses to cart for editing
+                    await apiPost('cart/load_from_rejected.php', { registration_id: registrationId });
+                    window.location.href = 'student_register.html?from_rejected=1';
+                } catch(err) {
+                    console.error(err);
+                    alert('Failed to load registration for editing: ' + err.message);
+                }
+            });
+            
+        } catch (err) {
+            console.error(err);
+            document.getElementById('contentContainer').innerHTML = '<div class="text-center text-danger">Failed to load registration details. Please try again.</div>';
+        }
+    }
+    
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+    loadRejectedDetails();
+</script>
+</body>
+</html>

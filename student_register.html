@@ -23,39 +23,23 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        /* FIX 3: Changed from #ffc107 to white */
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-        /* FIX 9: Improved sidebar spacing */
         .menu a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
-            color: white;
-            padding: 14px 20px;
-            border-radius: 14px;
-            margin-bottom: 8px;
-            transition: 0.3s;
-            font-size: 15px;
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 14px 20px;
+            border-radius: 14px; margin-bottom: 8px;
+            transition: 0.3s; font-size: 15px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; width: 24px; }
         .logout {
-            position: absolute;
-            bottom: 30px;
-            width: calc(100% - 40px);
-            left: 20px;
+            position: absolute; bottom: 30px;
+            width: calc(100% - 40px); left: 20px;
         }
         .logout a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
-            color: white;
-            padding: 14px 20px;
-            border-radius: 14px;
-            transition: 0.3s;
-            font-size: 15px;
+            display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: white; padding: 14px 20px;
+            border-radius: 14px; transition: 0.3s; font-size: 15px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
@@ -121,7 +105,6 @@
         <a href="student_courses.html"><i class="bi bi-book-fill"></i> Courses</a>
         <a href="student_register.html" class="active"><i class="bi bi-journal-text"></i> Register</a>
         <a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
-        <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
     <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
@@ -161,18 +144,26 @@
     }
     (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
+    // Check if coming from rejected registration
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromRejected = urlParams.get('from_rejected');
+
     async function loadCart() {
         try {
             const cart = await apiGet('cart/get.php');
             const container = document.getElementById('cartContainer');
             if (!cart.items || cart.items.length === 0) {
-                container.innerHTML = `<div class="empty-cart"><i class="bi bi-cart"></i><h4>No courses added yet</h4><p>Go to the Courses page to add courses to your registration cart.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>`;
+                let emptyMessage = '<div class="empty-cart"><i class="bi bi-cart"></i><h4>No courses added yet</h4><p>Go to the Courses page to add courses to your registration cart.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>';
+                if (fromRejected) {
+                    emptyMessage = '<div class="empty-cart"><i class="bi bi-exclamation-triangle-fill"></i><h4>Unable to load previous registration</h4><p>Please go back and try again, or add courses manually.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>';
+                }
+                container.innerHTML = emptyMessage;
                 document.getElementById('submitBtnContainer').style.display = 'none';
                 document.getElementById('studentName').innerText = cart.student_name || 'Haris';
                 return;
             }
             document.getElementById('studentName').innerText = cart.student_name || 'Haris';
-            let html = `<table><thead><tr><th>No.</th><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Section *</th><th>Action</th></tr></thead><tbody>`;
+            let html = `</table><thead><tr><th>No.</th><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Section *</th><th>Action</th></tr></thead><tbody>`;
             cart.items.forEach((item, idx) => {
                 html += `<tr>
                     <td>${idx+1}</td>
@@ -189,10 +180,15 @@
                     <td><button class="remove-btn" data-code="${escapeHtml(item.code)}"><i class="bi bi-trash3"></i></button></td>
                 </tr>`;
             });
-            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></table>`;
+            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></tr>`;
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
             attachEvents();
+            
+            // Show a notification if coming from rejected registration
+            if (fromRejected) {
+                showAlert('Your rejected registration has been loaded. Please make the necessary changes and resubmit.', 'success');
+            }
         } catch(err) {
             console.error(err);
             document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger">Failed to load cart. Please refresh.</div>';
