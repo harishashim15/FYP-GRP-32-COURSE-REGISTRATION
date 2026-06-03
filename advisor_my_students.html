@@ -26,7 +26,7 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
@@ -58,47 +58,93 @@
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
 
-        /* PAGE HEADER */
+        /* PAGE HEADER - NO IMAGE */
         .page-header {
-            background: #f7f2ee; border-radius: 25px; padding: 35px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; border: 1px solid #eee;
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 35px 40px;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
         }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
-        .page-header img { width: 180px; }
 
         /* SEARCH BAR */
-        .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
         .search-bar input {
-            flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6;
-            border-radius: 25px; font-size: 14px; outline: none; transition: 0.3s;
+            flex: 1;
+            padding: 12px 20px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            background: white;
+            transition: 0.3s;
         }
-        .search-bar input:focus { border-color: #670019; box-shadow: 0 0 0 4px rgba(103,0,25,0.08); }
+        .search-bar input:focus {
+            border-color: #670019;
+            box-shadow: 0 0 0 4px rgba(103,0,25,0.08);
+        }
         .search-bar button {
-            padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022);
-            color: white; border: none; border-radius: 25px; cursor: pointer;
-            font-size: 14px; font-weight: 500; transition: 0.3s;
+            padding: 12px 25px;
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
         }
-        .search-bar button:hover { background: linear-gradient(to right, #8b0022, #a80028); }
+        .search-bar button:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+        }
 
         /* STUDENTS TABLE */
         .students-table {
-            background: white; border-radius: 25px; padding: 25px;
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
-        .students-table h3 { color: #670019; font-weight: 700; font-size: 20px; margin-bottom: 20px; }
-        .students-table table { width: 100%; border-collapse: collapse; }
-        .students-table th {
-            text-align: left; padding: 12px 12px; background: #f8f6f4;
-            color: #670019; font-weight: 600; font-size: 13px;
+        .students-table h3 {
+            color: #670019;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 20px;
         }
-        .students-table td { padding: 13px 12px; border-bottom: 1px solid #eee; font-size: 13px; }
-        .students-table tbody tr:hover td { background: #fdf9f7; }
+        .students-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .students-table th {
+            text-align: left;
+            padding: 12px 12px;
+            background: #f8f6f4;
+            color: #670019;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .students-table td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        .students-table tbody tr:hover td {
+            background: #fdf9f7;
+        }
 
         /* STATUS BADGES */
         .status-badge {
-            padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
         }
         .status-active { background: #d4edda; color: #155724; }
         .status-pending { background: #fff3cd; color: #856404; }
@@ -106,23 +152,49 @@
 
         /* VIEW BUTTON */
         .view-btn {
-            background: none; border: 1.5px solid #670019; color: #670019;
-            padding: 5px 15px; border-radius: 20px; cursor: pointer;
-            font-size: 12px; font-weight: 500; transition: 0.3s;
+            background: none;
+            border: 1.5px solid #670019;
+            color: #670019;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: 0.3s;
         }
-        .view-btn:hover { background: #670019; color: white; }
+        .view-btn:hover {
+            background: #670019;
+            color: white;
+        }
 
         /* SUMMARY STRIP */
         .summary-strip {
-            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .strip-item {
-            background: white; border-radius: 14px; padding: 10px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 13px;
-            display: flex; align-items: center; gap: 8px;
+            background: white;
+            border-radius: 14px;
+            padding: 10px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .strip-item strong { color: #670019; font-size: 16px; font-weight: 700; }
-        .strip-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .strip-item strong {
+            color: #670019;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .strip-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -135,7 +207,7 @@
     </div>
     <div class="menu">
         <a href="advisor_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
-        <a href="advisor_my_students.html" class="active"><i class="bi bi-people-fill"></i> My Students</a>
+        <a href="#" class="active"><i class="bi bi-people-fill"></i> My Students</a>
         <a href="advisor_registrations.html"><i class="bi bi-file-earmark-text-fill"></i> Registrations</a>
         <a href="advisor_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
         <a href="advisor_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
@@ -152,13 +224,19 @@
         <div class="profile-box" onclick="location.href='advisor_profile.html'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-            <div><h6 class="mb-0" id="advisorName">Miss Nurul Asyikin</h6><small class="text-muted">Academic Advisor</small></div>
+            <div>
+                <h6 class="mb-0" id="advisorName">Miss Nurul Asyikin</h6>
+                <small class="text-muted">Academic Advisor</small>
+            </div>
         </div>
     </div>
 
-    <!-- PAGE HEADER -->
+    <!-- PAGE HEADER - REMOVED IMAGE -->
     <div class="page-header">
-        <div><h2>My Students 👩‍🎓</h2><p>View and manage all students under your guidance</p></div>
+        <div>
+            <h2>My Students 👩‍🎓</h2>
+            <p>View and manage all students under your guidance</p>
+        </div>
     </div>
 
     <!-- SUMMARY STRIP -->
@@ -179,21 +257,28 @@
     <div class="students-table">
         <h3><i class="bi bi-people-fill me-2"></i>Student List</h3>
         <div style="overflow-x: auto;">
-            <table class="table">
+            <table class="table" id="studentsTable">
                 <thead>
-                    <tr><th>Student Name</th><th>Student ID</th><th>Programme</th><th>Year</th><th>Status</th><th>Action</th></tr>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student ID</th>
+                        <th>Programme</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
                 </thead>
                 <tbody id="studentTableBody">
                     <tr><td colspan="6" class="text-center">Loading...</td></tr>
                 </tbody>
-             </table>
+            </table>
         </div>
     </div>
 </div>
 
 <script src="js/common.js"></script>
 <script>
-    let studentsData = []; // store loaded students for filtering
+    let studentsData = [];
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -202,6 +287,7 @@
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
+    
     (function() {
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.querySelector('.sidebar').classList.add('collapsed');
@@ -209,13 +295,32 @@
         }
     })();
 
+    function animateNumber(element, target, duration = 1000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        let current = start;
+        
+        const updateNumber = () => {
+            current += increment;
+            if (current < target) {
+                element.innerText = Math.floor(current);
+                requestAnimationFrame(updateNumber);
+            } else {
+                element.innerText = target;
+            }
+        };
+        updateNumber();
+    }
+
     async function loadStudents() {
         try {
-            const students = await apiGet('students/list.php'); // returns array for current advisor
+            const students = await apiGet('students/list.php');
             studentsData = students;
             renderStudentTable(students);
             updateSummary(students);
-            document.getElementById('advisorName').innerText = students[0]?.advisor_name || 'Miss Nurul Asyikin';
+            if (students.length > 0 && students[0].advisor_name) {
+                document.getElementById('advisorName').innerText = students[0].advisor_name;
+            }
         } catch (err) {
             console.error(err);
             document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load students</td></tr>';
@@ -224,46 +329,48 @@
 
     function renderStudentTable(students) {
         const tbody = document.getElementById('studentTableBody');
-        if (students.length === 0) {
+        if (!students || students.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center">No students found</td></tr>';
             return;
         }
-        tbody.innerHTML = '';
-        students.forEach(s => {
-            const row = `
-                <tr>
-                    <td><strong>${escapeHtml(s.name)}</strong>${s.name_suffix ? '<br><small>' + escapeHtml(s.name_suffix) + '</small>' : ''}</td>
-                    <td>${escapeHtml(s.matrix)}</td>
-                    <td>${escapeHtml(s.programme)}</td>
-                    <td>Year ${s.year}</td>
-                    <td><span class="status-badge status-${s.status_class}">${escapeHtml(s.status_text)}</span></td>
-                    <td><button class="view-btn" onclick="location.href='advisor_student_details.html?id=${s.id}'">View Details</button></td>
-                </tr>
-            `;
-            tbody.insertAdjacentHTML('beforeend', row);
-        });
+        
+        let html = '';
+        for (let i = 0; i < students.length; i++) {
+            const s = students[i];
+            html += '<tr>';
+            html += '<td><strong>' + escapeHtml(s.name) + '</strong></td>';
+            html += '<td>' + escapeHtml(s.matrix) + '</td>';
+            html += '<td>' + escapeHtml(s.programme) + '</td>';
+            html += '<td>Year ' + s.year + '</td>';
+            html += '<td><span class="status-badge status-' + s.status_class + '">' + escapeHtml(s.status_text) + '</span></td>';
+            html += '<td><button class="view-btn" onclick="location.href=\'advisor_student_details.html?id=' + s.id + '\'">View Details</button></td>';
+            html += '</tr>';
+        }
+        tbody.innerHTML = html;
     }
 
     function updateSummary(students) {
         let total = students.length;
         let completed = 0, pendingReg = 0, pendingApproval = 0;
-        students.forEach(s => {
+        
+        for (let i = 0; i < students.length; i++) {
+            const s = students[i];
             if (s.status_class === 'active') completed++;
             else if (s.status_class === 'pending') pendingReg++;
             else if (s.status_class === 'approval') pendingApproval++;
-        });
-        document.getElementById('totalCount').innerText = total;
-        document.getElementById('completedCount').innerText = completed;
-        document.getElementById('pendingRegCount').innerText = pendingReg;
-        document.getElementById('pendingApprovalCount').innerText = pendingApproval;
+        }
+        
+        animateNumber(document.getElementById('totalCount'), total);
+        animateNumber(document.getElementById('completedCount'), completed);
+        animateNumber(document.getElementById('pendingRegCount'), pendingReg);
+        animateNumber(document.getElementById('pendingApprovalCount'), pendingApproval);
     }
 
     window.filterTable = function() {
         const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = studentsData.filter(s => 
-            s.name.toLowerCase().includes(query) || 
-            s.matrix.toLowerCase().includes(query)
-        );
+        const filtered = studentsData.filter(function(s) {
+            return s.name.toLowerCase().includes(query) || s.matrix.toLowerCase().includes(query);
+        });
         renderStudentTable(filtered);
         updateSummary(filtered);
     };

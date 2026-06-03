@@ -3,8 +3,8 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID (from session or hardcoded for now)
-$advisor_id = 1; // Miss Asyikin (user_id = 1)
+// Get advisor ID
+$advisor_id = $_SESSION['user_id'] ?? 1;
 
 // Get advisor information from users table
 $sql = "SELECT * FROM users WHERE user_id = ? AND role = 'advisor'";
@@ -85,7 +85,7 @@ $profile_data = [
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;

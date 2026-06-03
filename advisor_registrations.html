@@ -24,7 +24,7 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
@@ -73,21 +73,34 @@
 
         /* TABLE */
         .registrations-table {
-            background: white; border-radius: 25px; padding: 25px;
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
         .registrations-table table { width: 100%; border-collapse: collapse; }
         .registrations-table th {
-            text-align: left; padding: 12px 12px; background: #f8f6f4;
-            color: #670019; font-weight: 600; font-size: 13px;
+            text-align: left;
+            padding: 12px 12px;
+            background: #f8f6f4;
+            color: #670019;
+            font-weight: 600;
+            font-size: 13px;
         }
-        .registrations-table td { padding: 13px 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .registrations-table td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
         .registrations-table tbody tr:hover td { background: #fdf9f7; }
 
         /* STATUS BADGES */
         .status-badge {
-            padding: 5px 12px; border-radius: 20px; font-size: 12px;
-            font-weight: 500; display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
         }
         .status-approved { background: #d4edda; color: #155724; }
         .status-pending  { background: #fff3cd; color: #856404; }
@@ -95,16 +108,29 @@
 
         /* BUTTONS */
         .review-btn {
-            background: #670019; color: white; border: none;
-            padding: 5px 20px; border-radius: 20px; cursor: pointer;
-            font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 500;
+            background: #670019;
+            color: white;
+            border: none;
+            padding: 5px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
             transition: 0.3s;
         }
         .review-btn:hover { background: #8b0022; }
+        
         .view-btn {
-            background: none; border: 1.5px solid #670019; color: #670019;
-            padding: 5px 20px; border-radius: 20px; cursor: pointer;
-            font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 500;
+            background: none;
+            border: 1.5px solid #670019;
+            color: #670019;
+            padding: 5px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
             transition: 0.3s;
         }
         .view-btn:hover { background: #670019; color: white; }
@@ -154,7 +180,7 @@
     </div>
 
     <div class="registrations-table">
-        <table class="table">
+        <table class="table" id="registrationsTable">
             <thead>
                 <tr>
                     <th>Student Name</th>
@@ -174,16 +200,17 @@
 
 <script src="js/common.js"></script>
 <script>
-    let currentFilter = 'all';
-    let allRegistrations = [];
+    var currentFilter = 'all';
+    var allRegistrations = [];
 
     function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const main = document.querySelector('.main-content');
+        var sidebar = document.querySelector('.sidebar');
+        var main = document.querySelector('.main-content');
         sidebar.classList.toggle('collapsed');
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
+    
     (function() {
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.querySelector('.sidebar').classList.add('collapsed');
@@ -193,7 +220,7 @@
 
     async function loadRegistrations() {
         try {
-            const data = await apiGet('registrations/list.php?status=all');
+            var data = await apiGet('registrations/list.php?status=all');
             allRegistrations = data;
             updatePendingCount();
             renderTable(currentFilter);
@@ -204,31 +231,56 @@
     }
 
     function updatePendingCount() {
-        const pendingCount = allRegistrations.filter(r => r.status === 'pending').length;
-        document.getElementById('pendingCountText').innerHTML = `Review and manage student course registrations (Pending: ${pendingCount})`;
+        var pendingCount = 0;
+        for (var i = 0; i < allRegistrations.length; i++) {
+            if (allRegistrations[i].status === 'pending') {
+                pendingCount++;
+            }
+        }
+        document.getElementById('pendingCountText').innerHTML = 'Review and manage student course registrations (Pending: ' + pendingCount + ')';
     }
 
     function renderTable(filter) {
-        const filtered = filter === 'all' ? allRegistrations : allRegistrations.filter(r => r.status === filter);
-        const tbody = document.getElementById('regTableBody');
+        var filtered = [];
+        if (filter === 'all') {
+            filtered = allRegistrations;
+        } else {
+            for (var i = 0; i < allRegistrations.length; i++) {
+                if (allRegistrations[i].status === filter) {
+                    filtered.push(allRegistrations[i]);
+                }
+            }
+        }
+        
+        var tbody = document.getElementById('regTableBody');
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center">No ${filter !== 'all' ? filter : ''} registrations found</td></tr>`;
+            var msg = 'No ' + (filter !== 'all' ? filter : '') + ' registrations found';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">' + msg + '</td></tr>';
             return;
         }
-        tbody.innerHTML = '';
-        filtered.forEach(reg => {
-            const row = `
-                <tr data-status="${reg.status}">
-                    <td>${escapeHtml(reg.student_name)}</td>
-                    <td>${escapeHtml(reg.student_id)}</td>
-                    <td>${reg.course_count} courses</td>
-                    <td>${reg.submission_date}</td>
-                    <td><span class="status-badge status-${reg.status}">${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}</span></td>
-                    <td><button class="${reg.status === 'pending' ? 'review-btn' : 'view-btn'}" onclick="location.href='advisor_verify_registration.html?id=${reg.id}'">${reg.status === 'pending' ? 'Review' : 'View'}</button></td>
-                </tr>
-            `;
-            tbody.insertAdjacentHTML('beforeend', row);
-        });
+        
+        var html = '';
+        for (var i = 0; i < filtered.length; i++) {
+            var reg = filtered[i];
+            var statusClass = 'status-' + reg.status;
+            var statusText = reg.status.charAt(0).toUpperCase() + reg.status.slice(1);
+            
+            html += '<tr data-status="' + reg.status + '">';
+            html += '<td>' + escapeHtml(reg.student_name) + '</td>';
+            html += '<td>' + escapeHtml(reg.student_id) + '</td>';
+            html += '<td>' + reg.course_count + ' courses</td>';
+            html += '<td>' + reg.submission_date + '</td>';
+            html += '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>';
+            html += '<td>';
+            if (reg.status === 'pending') {
+                html += '<button class="review-btn" onclick="location.href=\'advisor_verify_registration.html?id=' + reg.id + '\'">Review</button>';
+            } else {
+                html += '<button class="view-btn" onclick="location.href=\'advisor_verify_registration.html?id=' + reg.id + '\'">View</button>';
+            }
+            html += '</td>';
+            html += '</tr>';
+        }
+        tbody.innerHTML = html;
     }
 
     function escapeHtml(str) {
@@ -242,14 +294,18 @@
     }
 
     // Attach filter tab events
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    var tabs = document.querySelectorAll('.filter-tab');
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].addEventListener('click', function() {
+            var allTabs = document.querySelectorAll('.filter-tab');
+            for (var j = 0; j < allTabs.length; j++) {
+                allTabs[j].classList.remove('active');
+            }
             this.classList.add('active');
-            currentFilter = this.dataset.filter;
+            currentFilter = this.getAttribute('data-filter');
             renderTable(currentFilter);
         });
-    });
+    }
 
     loadRegistrations();
 </script>

@@ -3,8 +3,8 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID (from session or hardcoded for now)
-$advisor_id = 1; // Miss Asyikin (user_id = 1)
+// Get advisor ID
+$advisor_id = $_SESSION['user_id'] ?? 1;
 
 // Get advisor password from users table using user_id
 $sql = "SELECT password, user_name FROM users WHERE user_id = ? AND role = 'advisor'";
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; padding: 12px 20px; border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px; }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }

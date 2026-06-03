@@ -3,18 +3,22 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID (from session or hardcoded for now)
-$advisor_id = 1; // Miss Asyikin
+// Get advisor ID from session
+$advisor_id = $_SESSION['user_id'] ?? 1;
 
 // Get all registrations for students under this advisor
-// Using correct table structure: course_registrations, students, users
+// This groups by student and shows ONE row per student
 $sql = "SELECT 
             u.user_id as student_id,
             u.matrix_number as student_matrix,
             u.user_name as student_name,
             COUNT(DISTINCT rc.id) as course_count,
             MIN(cr.submission_date) as submitted_date,
-            cr.status
+            cr.status,
+            -- Get the latest registration_id for this student (to use for view link)
+            (SELECT id FROM course_registrations 
+             WHERE student_id = s.user_id 
+             ORDER BY submission_date DESC LIMIT 1) as registration_id
         FROM course_registrations cr
         JOIN students s ON cr.student_id = s.user_id
         JOIN users u ON s.user_id = u.user_id
@@ -59,7 +63,7 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; padding: 12px 20px; border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px; }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
@@ -146,22 +150,22 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
                     <?php if (!empty($registrations)): ?>
                         <?php foreach ($registrations as $reg): ?>
                             <tr data-status="<?php echo $reg['status']; ?>">
-                                <td><?php echo htmlspecialchars($reg['student_name']); ?></td>
-                                <td><?php echo htmlspecialchars($reg['student_matrix']); ?></td>
-                                <td><?php echo $reg['course_count']; ?> courses</small></td>
-                                <td><?php echo date('d M Y', strtotime($reg['submitted_date'])); ?></small></td>
-                                <td><span class="status-badge status-<?php echo $reg['status']; ?>"><?php echo ucfirst($reg['status']); ?></span></small></td>
+                                <td><?php echo htmlspecialchars($reg['student_name']); ?></small>
+                                <td><?php echo htmlspecialchars($reg['student_matrix']); ?></small>
+                                <td><?php echo $reg['course_count']; ?> courses</small></small>
+                                <td><?php echo date('d M Y', strtotime($reg['submitted_date'])); ?></small></small>
+                                <td><span class="status-badge status-<?php echo $reg['status']; ?>"><?php echo ucfirst($reg['status']); ?></span></small></small>
                                 <td>
                                     <?php if ($reg['status'] == 'pending'): ?>
-                                        <button class="review-btn" onclick="location.href='advisor_verify_registration.php?matrix=<?php echo $reg['student_matrix']; ?>'">Review</button>
+                                        <button class="review-btn" onclick="location.href='advisor_verify_registration.php?student_id=<?php echo $reg['student_id']; ?>'">Review</button>
                                     <?php else: ?>
-                                        <button class="view-btn" onclick="location.href='advisor_verify_registration.php?matrix=<?php echo $reg['student_matrix']; ?>'">View</button>
+                                        <button class="view-btn" onclick="location.href='advisor_verify_registration.php?student_id=<?php echo $reg['student_id']; ?>'">View</button>
                                     <?php endif; ?>
                                  </small>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="6" class="text-center">No registrations found</small></td>
+                        <tr><td colspan="6" class="text-center">No registrations found</small></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

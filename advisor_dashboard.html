@@ -26,7 +26,7 @@
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
@@ -60,12 +60,17 @@
 
         /* HERO */
         .hero {
-            background: #f7f2ee; border-radius: 25px; padding: 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 35px; border: 1px solid #eee;
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            border: 1px solid #eee;
         }
-        .hero h1 { font-size: 40px; font-weight: 700; color: #670019; }
-        .hero p { color: #666; margin-top: 10px; font-size: 16px; }
+        .hero h1 { font-size: 34px; font-weight: 700; color: #670019; }
+        .hero p { color: #666; margin-top: 10px; font-size: 15px; }
         .hero img { width: 200px; }
 
         /* DASHBOARD CARDS */
@@ -92,7 +97,7 @@
             background: white; border-radius: 25px; padding: 20px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
-        .period-card h4 { color: #670019; font-weight: 600; margin-bottom: 15px; font-size: 18px; }
+        .period-card h4 { color: #670019; font-weight: 700; margin-bottom: 20px; font-size: 20px; }
         .period-status {
             display: inline-block; padding: 5px 12px; background: #d4edda;
             color: #155724; border-radius: 20px; font-size: 12px; margin-bottom: 15px;
@@ -268,7 +273,7 @@
 
 <script src="js/common.js"></script>
 <script>
-    // Sidebar toggle function (also uses localStorage)
+    // Sidebar toggle function
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const main = document.querySelector('.main-content');
@@ -283,16 +288,38 @@
         }
     })();
 
+    // Count-up animation function
+    function animateNumber(element, target, duration = 1000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        let current = start;
+        
+        const updateNumber = () => {
+            current += increment;
+            if (current < target) {
+                element.innerText = Math.floor(current);
+                requestAnimationFrame(updateNumber);
+            } else {
+                element.innerText = target;
+            }
+        };
+        updateNumber();
+    }
+
     // Load dashboard data
     async function loadDashboard() {
         try {
             // Load advisor stats
             const stats = await apiGet('dashboard/advisor_stats.php');
-            document.getElementById('totalStudents').innerText = stats.totalStudents;
-            document.getElementById('pendingApprovals').innerText = stats.pendingApprovals;
-            document.getElementById('approvedThisWeek').innerText = stats.approvedThisWeek;
+            
+            // Animate numbers
+            animateNumber(document.getElementById('totalStudents'), stats.totalStudents || 0);
+            animateNumber(document.getElementById('pendingApprovals'), stats.pendingApprovals || 0);
+            animateNumber(document.getElementById('approvedThisWeek'), stats.approvedThisWeek || 0);
+            
             document.getElementById('advisorName').innerText = stats.advisorName || 'Miss Nurul Asyikin';
-            document.getElementById('heroGreeting').innerHTML = `Welcome back, ${stats.advisorName?.split(' ')[0] || 'Advisor'} 👩‍🏫`;
+            const firstName = (stats.advisorName || 'Miss Nurul Asyikin').split(' ')[0];
+            document.getElementById('heroGreeting').innerHTML = `Welcome back, ${firstName}!`;
 
             // Load registration period
             const period = await apiGet('registrations/period.php');
@@ -310,27 +337,27 @@
             const requests = await apiGet('registrations/list.php?status=pending&limit=5');
             const tbody = document.getElementById('pendingRequestsTableBody');
             if (requests.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No pending requests</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No pending requests<\/td><\/tr>';
                 return;
             }
             tbody.innerHTML = '';
             requests.forEach(req => {
                 const row = `
                     <tr>
-                        <td><strong>${escapeHtml(req.student_name)}</strong><br><small>${req.student_id}</small></td>
-                        <td>${req.course_count} courses</td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
+                        <td><strong>${escapeHtml(req.student_name)}</strong><br><small>${req.student_id}</small><\/td>
+                        <td>${req.course_count} courses<\/td>
+                        <td><span class="status-badge status-pending">Pending<\/span><\/td>
                         <td>
                             <button class="btn-approve" onclick="location.href='advisor_verify_registration.html?id=${req.id}'">Approve</button>
                             <button class="btn-reject" onclick="location.href='advisor_verify_registration.html?id=${req.id}'">Reject</button>
-                        </td>
-                    </tr>
+                        <\/td>
+                    <\/tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
         } catch (err) {
             console.error(err);
-            document.getElementById('pendingRequestsTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-danger">Failed to load data</td></tr>';
+            document.getElementById('pendingRequestsTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-danger">Failed to load data<\/td><\/tr>';
         }
     }
 
