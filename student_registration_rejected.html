@@ -61,57 +61,102 @@
         .rejected-container {
             background: white;
             border-radius: 25px;
-            padding: 30px;
+            padding: 35px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
             margin-bottom: 30px;
         }
         
-        .warning-banner {
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .warning-banner i { font-size: 28px; color: #dc3545; }
-        .warning-banner h4 { color: #721c24; margin: 0 0 5px 0; }
-        .warning-banner p { color: #721c24; margin: 0; font-size: 14px; }
-        
-        .advisor-comment {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-        .advisor-comment h4 { color: #856404; margin-bottom: 10px; font-size: 16px; }
-        .advisor-comment p { color: #856404; margin: 0; font-size: 14px; line-height: 1.6; }
-        
-        .slip-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #670019; }
+        /* Registration Slip Styles - At the top */
+        .slip-header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #670019; }
         .slip-header img { width: 60px; margin-bottom: 10px; }
-        .slip-header h3 { color: #670019; font-size: 18px; font-weight: 700; }
+        .slip-header h3 { color: #670019; font-size: 20px; font-weight: 700; }
         .slip-header p { color: #666; font-size: 12px; }
         
-        .section-title { color: #670019; font-size: 14px; font-weight: 600; margin: 15px 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+        .section-title { color: #670019; font-size: 15px; font-weight: 600; margin: 20px 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid #eee; }
         
-        .info-row { margin-bottom: 8px; display: flex; flex-wrap: wrap; }
-        .info-label { width: 130px; font-size: 12px; color: #888; }
-        .info-value { flex: 1; font-size: 12px; color: #333; font-weight: 500; }
+        .info-row { margin-bottom: 10px; display: flex; flex-wrap: wrap; }
+        .info-label { width: 140px; font-size: 13px; color: #888; }
+        .info-value { flex: 1; font-size: 13px; color: #333; font-weight: 500; }
         
-        .courses-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .courses-table th { background: #f8f6f4; padding: 10px; text-align: left; border: 1px solid #ddd; color: #670019; }
-        .courses-table td { padding: 8px; border: 1px solid #ddd; }
+        .courses-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        .courses-table th { background: #f8f6f4; padding: 12px; text-align: left; border: 1px solid #ddd; color: #670019; font-weight: 600; }
+        .courses-table td { padding: 10px; border: 1px solid #ddd; }
         
-        .total-credits { text-align: right; margin-top: 10px; padding-top: 8px; border-top: 1px solid #ddd; font-weight: 600; color: #670019; }
+        .total-credits { text-align: right; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-weight: 600; color: #670019; font-size: 14px; }
         
+        /* Rejection Message - Below Slip */
+        .warning-banner {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .warning-banner i { font-size: 32px; color: #dc3545; }
+        .warning-banner h4 { color: #721c24; margin: 0 0 8px 0; font-size: 18px; font-weight: 700; }
+        .warning-banner p { color: #721c24; margin: 0; font-size: 14px; line-height: 1.5; }
+        
+        /* Advisor Comment - Highly Visible */
+        .advisor-comment {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin: 25px 0;
+        }
+        .advisor-comment h4 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .advisor-comment h4 i { font-size: 24px; }
+        .advisor-comment p {
+            color: #856404;
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.7;
+            font-weight: 500;
+            background: rgba(255,255,255,0.5);
+            padding: 15px;
+            border-radius: 12px;
+        }
+        
+        /* Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+        }
         .edit-btn {
             background: linear-gradient(to right, #670019, #8b0022);
             color: white;
             border: none;
-            padding: 12px 35px;
+            padding: 14px 40px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .edit-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); color: white; }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 14px 35px;
             border-radius: 14px;
             font-size: 15px;
             font-weight: 600;
@@ -122,25 +167,14 @@
             align-items: center;
             gap: 8px;
         }
-        .edit-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); color: white; }
+        .back-btn:hover { background: #5a6268; transform: translateY(-2px); color: white; }
         
-        .back-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; }
+            .action-buttons { flex-direction: column; align-items: center; }
+            .edit-btn, .back-btn { width: 100%; justify-content: center; }
         }
-        
-        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
     </style>
 </head>
 <body>
@@ -174,10 +208,7 @@
         <div class="text-center py-5">Loading registration details...</div>
     </div>
 
-    <div class="d-flex gap-3 mt-3" id="actionButtons" style="display: none;">
-        <button class="edit-btn" id="editBtn"><i class="bi bi-pencil-square"></i> Edit Registration Slip</button>
-        <a href="student_registration_history.html" class="back-btn"><i class="bi bi-arrow-left"></i> Back to History</a>
-    </div>
+    <div id="actionButtons" style="display: none;"></div>
 </div>
 
 <script src="js/common.js"></script>
@@ -223,20 +254,14 @@
             
             const advisorRemark = data.registration.advisor_remarks || 'No specific reason provided. Please contact your academic advisor.';
             
+            // NEW PAGE STRUCTURE:
+            // 1. Registration Slip (TOP)
+            // 2. Registration Rejected Message (Red)
+            // 3. Academic Advisor Comment (Yellow - LARGER)
+            // 4. Buttons (Bottom)
+            
             const containerHtml = `
-                <div class="warning-banner">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    <div>
-                        <h4>Registration Rejected</h4>
-                        <p>Your course registration has been rejected by your academic advisor. Please review the advisor's comment below and edit your registration.</p>
-                    </div>
-                </div>
-                
-                <div class="advisor-comment">
-                    <h4><i class="bi bi-chat-left-text-fill me-2"></i>Academic Advisor Comment</h4>
-                    <p>${escapeHtml(advisorRemark)}</p>
-                </div>
-                
+                <!-- SECTION 1: REGISTRATION SLIP (TOP) -->
                 <div class="slip-header">
                     <img src="images/utmlogo.png" alt="UTM Logo">
                     <h3>COURSE REGISTRATION SLIP</h3>
@@ -256,7 +281,7 @@
                 <div class="section-title">REGISTRATION DETAILS</div>
                 <div class="info-row"><div class="info-label">Session</div><div class="info-value">${escapeHtml(data.registration.session || '2025/2026 - Semester 2')}</div></div>
                 <div class="info-row"><div class="info-label">Submitted Date</div><div class="info-value">${new Date(data.registration.submission_date).toLocaleString()}</div></div>
-                <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span style="background:#f8d7da; color:#721c24; padding:2px 10px; border-radius:12px;">REJECTED</span></div></div>
+                <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span style="background:#f8d7da; color:#721c24; padding:4px 14px; border-radius:20px; font-weight:600;">REJECTED</span></div></div>
                 
                 <div class="section-title">REGISTERED COURSES</div>
                 <table class="courses-table">
@@ -264,16 +289,39 @@
                     <tbody>${coursesHtml}</tbody>
                 </table>
                 <div class="total-credits">TOTAL CREDIT: ${String(totalCredits).padStart(3, '0')}</div>
+                
+                <!-- SECTION 2: REJECTION MESSAGE (RED) -->
+                <div class="warning-banner">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <h4>Registration Rejected</h4>
+                        <p>Your course registration has been rejected by your academic advisor. Please review the advisor's comment below and edit your registration.</p>
+                    </div>
+                </div>
+                
+                <!-- SECTION 3: ADVISOR COMMENT (YELLOW - HIGHLY VISIBLE) -->
+                <div class="advisor-comment">
+                    <h4><i class="bi bi-chat-left-text-fill"></i> Academic Advisor Comment</h4>
+                    <p>${escapeHtml(advisorRemark)}</p>
+                </div>
             `;
             
             document.getElementById('contentContainer').innerHTML = containerHtml;
-            document.getElementById('actionButtons').style.display = 'flex';
             
             // Store rejected registration data in localStorage for the register page to load
             localStorage.setItem('pendingRejectedRegistration', JSON.stringify({
                 registration_id: registrationId,
                 courses: data.courses
             }));
+            
+            // SECTION 4: BUTTONS (BOTTOM)
+            document.getElementById('actionButtons').innerHTML = `
+                <div class="action-buttons">
+                    <button class="edit-btn" id="editBtn"><i class="bi bi-pencil-square"></i> Edit Registration Slip</button>
+                    <a href="student_registration_history.html" class="back-btn"><i class="bi bi-arrow-left"></i> Back to History</a>
+                </div>
+            `;
+            document.getElementById('actionButtons').style.display = 'block';
             
             // Set up edit button
             document.getElementById('editBtn').addEventListener('click', async () => {

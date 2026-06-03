@@ -100,8 +100,12 @@
         .cart-btn.add:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
         .cart-btn.added { background: #2e7d32; color: white; cursor: default; }
         .cart-btn.added:hover { transform: none; }
-        .cart-btn.pending { background: #ffc107; color: #333; cursor: default; }
-        .cart-btn.pending:hover { transform: none; }
+        /* FIX: Pending button - GREY background, clock icon */
+        .cart-btn.pending { background: #6c757d; color: white; cursor: default; }
+        .cart-btn.pending:hover { transform: none; background: #6c757d; }
+        /* FIX: Approved button - YELLOW background, check icon */
+        .cart-btn.approved { background: #ffc107; color: #333; cursor: default; }
+        .cart-btn.approved:hover { transform: none; background: #ffc107; }
         .cart-btn.disabled-btn { background: #6c757d; color: white; cursor: not-allowed; opacity: 0.7; }
         
         .modal-overlay {
@@ -229,10 +233,13 @@
     function getButtonConfig(course) {
         const status = courseStatus[course.code];
         const isInCart = cartCourses.includes(course.code);
-        if (isInCart) return { text: 'Added', class: 'added', disabled: true, action: null };
-        if (status === 'approved') return { text: 'Approved', class: 'disabled-btn', disabled: true, action: null };
-        if (status === 'pending') return { text: 'Pending', class: 'pending', disabled: true, action: null };
-        return { text: 'Add Courses', class: 'add', disabled: false, action: 'add' };
+        
+        if (isInCart) return { text: 'Added', class: 'added', disabled: true, icon: 'check-circle' };
+        // FIX: Approved - Yellow button with check icon
+        if (status === 'approved') return { text: 'Approved', class: 'approved', disabled: true, icon: 'check-circle-fill' };
+        // FIX: Pending - Grey button with clock icon
+        if (status === 'pending') return { text: 'Pending', class: 'pending', disabled: true, icon: 'clock-history' };
+        return { text: 'Add Courses', class: 'add', disabled: false, icon: 'plus-circle' };
     }
 
     function showModal(course, callback) {
@@ -280,7 +287,7 @@
                 <h4>${escapeHtml(course.name)}</h4>
                 <div class="course-info"><div><i class="bi bi-clock"></i> ${course.credits} Credit Hours</div><div><i class="bi bi-people"></i> ${course.enrolled || 0} Students</div></div>
                 <button class="cart-btn ${config.class}" data-code="${course.code}" ${config.disabled ? 'disabled' : ''}>
-                    <i class="bi bi-${config.text === 'Add Courses' ? 'plus-circle' : (config.text === 'Added' ? 'check-circle' : 'clock-history')} me-1"></i> ${config.text}
+                    <i class="bi bi-${config.icon} me-1"></i> ${config.text}
                 </button>
             `;
             grid.appendChild(card);
