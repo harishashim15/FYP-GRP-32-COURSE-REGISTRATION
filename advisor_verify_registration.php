@@ -556,13 +556,58 @@ if (empty($initials)) $initials = 'ST';
     }
     
 function printPDF() {
-    // Get the registration_id from the URL or from the data
+    // Create a hidden iframe to load the slip and print directly
     var registrationId = <?php 
-        // Get the registration ID from the first course
         $reg_id = !empty($courses) ? $courses[0]['registration_id'] : 0;
         echo $reg_id; 
     ?>;
-    window.open('student_registration_slip.php?id=' + registrationId, '_blank');
+    
+    if (registrationId > 0) {
+        // Show loading indicator
+        Swal.fire({
+            title: 'Preparing PDF...',
+            text: 'Please wait while we prepare your registration slip.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Create hidden iframe
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'advisor_print_slip.php?registration_id=' + registrationId;
+        document.body.appendChild(iframe);
+        
+        iframe.onload = function() {
+            // Close the loading alert
+            Swal.close();
+            
+            // Print the iframe content
+            iframe.contentWindow.print();
+            
+            // Remove iframe after print (optional)
+            setTimeout(function() {
+                document.body.removeChild(iframe);
+            }, 1000);
+        };
+        
+        iframe.onerror = function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Unable to generate registration slip. Please try again.',
+                confirmButtonColor: '#670019'
+            });
+        };
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Unable to generate registration slip. Registration ID not found.',
+            confirmButtonColor: '#670019'
+        });
+    }
 }
 </script>
 </body>
