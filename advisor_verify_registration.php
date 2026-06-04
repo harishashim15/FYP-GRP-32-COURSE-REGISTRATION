@@ -1,6 +1,8 @@
 <?php
 require_once 'db_connect.php';
 
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
 session_start();
 
 // Get advisor ID from session - FIX: Remove default 1
