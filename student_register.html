@@ -106,6 +106,7 @@
             font-family: 'Poppins', sans-serif;
         }
         .section-select:focus { outline: none; border-color: #670019; }
+        .section-select:disabled { background: #f5f5f5; cursor: not-allowed; }
         
         .remove-btn {
             background: none;
@@ -117,6 +118,7 @@
             padding: 5px;
         }
         .remove-btn:hover { color: #c82333; transform: scale(1.1); }
+        .remove-btn:disabled { color: #ccc; cursor: not-allowed; transform: none; }
         
         .total-row td {
             font-weight: 600;
@@ -151,6 +153,14 @@
         .alert-success { background: #d4edda; color: #155724; }
         .alert-error { background: #f8d7da; color: #721c24; }
         .alert-warning { background: #fff3cd; color: #856404; }
+        
+        .pending-banner {
+            background: #fff3cd; border: 1px solid #ffecb5; border-radius: 15px;
+            padding: 15px 20px; margin-bottom: 25px; display: flex;
+            align-items: center; gap: 12px; color: #856404;
+        }
+        .pending-banner i { font-size: 24px; }
+        .pending-banner p { margin: 0; font-size: 14px; }
         
         .approved-banner {
             background: #d4edda; border: 1px solid #c3e6cb; border-radius: 15px;
@@ -230,11 +240,19 @@
     <div class="page-header"><h1>Register</h1><p>Review your added courses and select sections before submitting</p></div>
     <div id="alertContainer"></div>
     
-    <div id="approvedBanner" class="approved-banner" style="display: none;">
-        <i class="bi bi-check-circle-fill"></i>
-        <p><strong>Approved Registration Exists</strong><br>You already have an approved registration for this academic session.</p>
+    <!-- PENDING BANNER -->
+    <div id="pendingBanner" class="pending-banner" style="display: none;">
+        <i class="bi bi-clock-history"></i>
+        <p><strong>Registration Pending Approval</strong><br>Your registration is waiting for advisor approval. You cannot modify or submit changes until a decision is made.</p>
     </div>
     
+    <!-- APPROVED BANNER -->
+    <div id="approvedBanner" class="approved-banner" style="display: none;">
+        <i class="bi bi-check-circle-fill"></i>
+        <p><strong>Registration Approved</strong><br>You already have an approved registration for this academic session.</p>
+    </div>
+    
+    <!-- REJECTED BANNER -->
     <div id="rejectedBanner" class="rejected-banner" style="display: none;">
         <i class="bi bi-exclamation-triangle-fill"></i>
         <p><strong>Editing Rejected Registration</strong><br>You are editing a previously rejected registration. Please make the necessary changes and resubmit.</p>
@@ -281,6 +299,8 @@
 <script>
     let pendingRemoveCourseCode = null;
     let hasApprovedRegistration = false;
+    let hasPendingRegistration = false;
+    let isEditingRejected = false;
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -297,11 +317,34 @@
         }
     })();
 
-    async function checkExistingApprovedRegistration() {
+    // Check for PENDING registration
+    async function checkPendingRegistration() {
+        try {
+            const result = await apiGet('registrations/check_pending.php');
+            hasPendingRegistration = result.has_pending || false;
+            
+            if (hasPendingRegistration) {
+                document.getElementById('pendingBanner').style.display = 'flex';
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('disabled');
+                }
+            }
+            return hasPendingRegistration;
+        } catch(e) {
+            console.error('Failed to check pending registration:', e);
+            return false;
+        }
+    }
+
+    // Check for APPROVED registration
+    async function checkApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
             hasApprovedRegistration = result.has_approved || false;
-            if (hasApprovedRegistration) {
+            
+            if (hasApprovedRegistration && !hasPendingRegistration) {
                 document.getElementById('approvedBanner').style.display = 'flex';
                 const submitBtn = document.getElementById('submitBtn');
                 if (submitBtn) {
@@ -323,6 +366,7 @@
         if (pendingData && isEditing === 'true') {
             try {
                 const rejectedData = JSON.parse(pendingData);
+                isEditingRejected = true;
                 document.getElementById('rejectedBanner').style.display = 'flex';
                 
                 // Clear existing cart
@@ -399,14 +443,16 @@
                     <tbody>
             `;
             
+            const disableActions = hasPendingRegistration || hasApprovedRegistration;
+            
             cart.items.forEach((item, idx) => {
                 html += `<tr>
                     <td>${idx+1}</td>
                     <td><strong>${escapeHtml(item.code)}</strong></td>
-                    <td>${escapeHtml(item.name)}</td>
+                    <td>${escapeHtml(item.name)}</strong></td>
                     <td>${item.credits}</td>
                     <td>
-                        <select class="section-select" data-code="${escapeHtml(item.code)}">
+                        <select class="section-select" data-code="${escapeHtml(item.code)}" ${disableActions ? 'disabled' : ''}>
                             <option value="">Select Section</option>
                             <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
                             <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
@@ -414,14 +460,23 @@
                             <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
                         </select>
                     </td>
-                    <td><button class="remove-btn" data-code="${escapeHtml(item.code)}" data-name="${escapeHtml(item.name)}"><i class="bi bi-trash3"></i></button></td>
+                    <td><button class="remove-btn" data-code="${escapeHtml(item.code)}" data-name="${escapeHtml(item.name)}" ${disableActions ? 'disabled' : ''}><i class="bi bi-trash3"></i></button></td>
                 </tr>`;
             });
             
-            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></table>`;
+            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></table></tbody></table>`;
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
-            attachEvents();
+            
+            if (!disableActions) {
+                attachEvents();
+            } else {
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('disabled');
+                }
+            }
         } catch(err) {
             console.error(err);
             document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger py-4">Failed to load cart. Please refresh.</div>';
@@ -473,6 +528,14 @@
     }
 
     function showSubmitModal() {
+        if (hasPendingRegistration) {
+            showAlert('You have a pending registration. Cannot submit until advisor decision.', 'warning');
+            return;
+        }
+        if (hasApprovedRegistration) {
+            showAlert('You already have an approved registration for this session.', 'warning');
+            return;
+        }
         document.getElementById('submitModal').classList.add('active');
     }
 
@@ -482,6 +545,16 @@
 
     async function confirmSubmitRegistration() {
         closeSubmitModal();
+        
+        if (hasPendingRegistration) {
+            showAlert('You have a pending registration. Cannot submit.', 'warning');
+            return;
+        }
+        if (hasApprovedRegistration) {
+            showAlert('You already have an approved registration.', 'warning');
+            return;
+        }
+        
         try {
             await apiPost('cart/submit.php', {});
             clearRejectedStorage();
@@ -505,6 +578,16 @@
 
     async function confirmRemoveCourse() {
         if (!pendingRemoveCourseCode) return;
+        if (hasPendingRegistration) {
+            showAlert('You have a pending registration. Cannot remove courses.', 'warning');
+            closeRemoveModal();
+            return;
+        }
+        if (hasApprovedRegistration) {
+            showAlert('You already have an approved registration.', 'warning');
+            closeRemoveModal();
+            return;
+        }
         try {
             await apiPost('cart/remove.php', { course_code: pendingRemoveCourseCode });
             showAlert('Course removed from cart', 'success');
@@ -541,7 +624,8 @@
 
     async function init() {
         await loadStudentName();
-        await checkExistingApprovedRegistration();
+        await checkPendingRegistration();  // CHECK PENDING FIRST
+        await checkApprovedRegistration(); // THEN CHECK APPROVED
         
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('load_rejected') === '1') {

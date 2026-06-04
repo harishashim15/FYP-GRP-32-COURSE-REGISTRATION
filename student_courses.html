@@ -62,19 +62,45 @@
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
         
+        /* PENDING BANNER - NEW */
+        .pending-banner {
+            background: #fff3cd;
+            border: 1px solid #ffecb5;
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .pending-banner i { font-size: 42px; color: #856404; }
+        .pending-banner-content h4 { color: #856404; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+        .pending-banner-content p { color: #856404; margin: 0; font-size: 14px; }
+        
         .approved-banner {
-            background: #d4edda; border: 1px solid #c3e6cb; border-radius: 20px;
-            padding: 20px 25px; margin-bottom: 25px; display: flex;
-            align-items: center; gap: 18px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
         }
         .approved-banner i { font-size: 42px; color: #2e7d32; }
         .approved-banner-content h4 { color: #155724; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
         .approved-banner-content p { color: #155724; margin: 0; font-size: 14px; }
         
         .closed-banner {
-            background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 20px;
-            padding: 20px 25px; margin-bottom: 25px; display: flex;
-            align-items: center; gap: 18px;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
         }
         .closed-banner i { font-size: 42px; color: #721c24; }
         .closed-banner-content h4 { color: #721c24; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
@@ -95,10 +121,12 @@
             text-decoration: none; font-size: 14px; font-weight: 500;
         }
         .view-cart-btn:hover { color: white; }
+        .view-cart-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; opacity: 0.6; }
         
         .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
         .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; }
+        .search-bar button:hover { opacity: 0.9; }
         
         .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
         .course-card {
@@ -121,7 +149,11 @@
         .cart-btn.remove { background: #dc3545; color: white; }
         .cart-btn.remove:hover { background: #c82333; transform: translateY(-2px); }
         .cart-btn.disabled { background: #6c757d; color: white; cursor: not-allowed; }
+        .cart-btn.disabled:hover { transform: none; background: #6c757d; }
         .cart-btn.approved { background: #2e7d32; color: white; cursor: default; }
+        .cart-btn.approved:hover { transform: none; background: #2e7d32; }
+        .cart-btn.pending { background: #ffc107; color: #333; cursor: default; }
+        .cart-btn.pending:hover { transform: none; background: #ffc107; }
         
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -181,14 +213,25 @@
         <p>Browse and add courses to your registration cart</p>
     </div>
 
+    <!-- PENDING BANNER - NEW -->
+    <div id="pendingBanner" class="pending-banner" style="display: none;">
+        <i class="bi bi-clock-history"></i>
+        <div class="pending-banner-content">
+            <h4>Registration Pending Approval</h4>
+            <p>Your registration is currently waiting for Academic Advisor approval. You cannot add or modify courses until a decision is made.</p>
+        </div>
+    </div>
+
+    <!-- APPROVED BANNER -->
     <div id="approvedBanner" class="approved-banner" style="display: none;">
         <i class="bi bi-check-circle-fill"></i>
         <div class="approved-banner-content">
             <h4>Registration Approved</h4>
-            <p>Your registration for this session has already been approved. You cannot add or modify courses.</p>
+            <p>Your registration has been approved. You cannot add or modify courses for this session.</p>
         </div>
     </div>
 
+    <!-- CLOSED BANNER -->
     <div id="closedBanner" class="closed-banner" style="display: none;">
         <i class="bi bi-calendar-x-fill"></i>
         <div class="closed-banner-content">
@@ -240,6 +283,7 @@
     let rejectedCourseCodes = [];
     let isRegistrationOpen = true;
     let hasApprovedRegistration = false;
+    let hasPendingRegistration = false;
     let pendingAddCourse = null;
 
     function toggleSidebar() {
@@ -283,13 +327,40 @@
         await callback(course);
     }
 
+    // Check for PENDING registration
+    async function checkPendingRegistration() {
+        try {
+            const result = await apiGet('registrations/check_pending.php');
+            hasPendingRegistration = result.has_pending || false;
+            
+            if (hasPendingRegistration) {
+                document.getElementById('pendingBanner').style.display = 'flex';
+                document.getElementById('cartSummary').style.display = 'none';
+                const proceedBtn = document.getElementById('proceedBtn');
+                if (proceedBtn) {
+                    proceedBtn.classList.add('disabled');
+                }
+            }
+            return hasPendingRegistration;
+        } catch(e) {
+            console.error('Failed to check pending registration:', e);
+            return false;
+        }
+    }
+
+    // Check for APPROVED registration
     async function checkApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
             hasApprovedRegistration = result.has_approved || false;
+            
             if (hasApprovedRegistration) {
                 document.getElementById('approvedBanner').style.display = 'flex';
                 document.getElementById('cartSummary').style.display = 'none';
+                const proceedBtn = document.getElementById('proceedBtn');
+                if (proceedBtn) {
+                    proceedBtn.classList.add('disabled');
+                }
             }
             return hasApprovedRegistration;
         } catch(e) {
@@ -317,7 +388,8 @@
             const cart = await apiGet('cart/get.php');
             const count = cart.count || 0;
             document.getElementById('cartCount').innerText = count;
-            if (!hasApprovedRegistration && count > 0 && isRegistrationOpen) {
+            // Only show cart summary if no pending, no approved, and registration is open
+            if (!hasApprovedRegistration && !hasPendingRegistration && count > 0 && isRegistrationOpen) {
                 document.getElementById('cartSummary').style.display = 'flex';
             } else {
                 document.getElementById('cartSummary').style.display = 'none';
@@ -330,7 +402,7 @@
         try {
             const period = await apiGet('registrations/period.php');
             isRegistrationOpen = period.is_open;
-            if (!isRegistrationOpen && !hasApprovedRegistration) {
+            if (!isRegistrationOpen && !hasApprovedRegistration && !hasPendingRegistration) {
                 document.getElementById('closedBanner').style.display = 'flex';
             } else {
                 document.getElementById('closedBanner').style.display = 'none';
@@ -344,7 +416,8 @@
 
     async function loadCourses() {
         try {
-            await checkApprovedRegistration();
+            await checkPendingRegistration();  // CHECK PENDING FIRST
+            await checkApprovedRegistration(); // THEN CHECK APPROVED
             await checkRegistrationPeriod();
             await loadRejectedCourses();
             const data = await apiGet('courses/list.php');
@@ -360,23 +433,34 @@
 
     function getButtonConfig(course) {
         const isInCart = cartCourses.includes(course.code);
-        const wasRejected = rejectedCourseCodes.includes(course.code);
         
+        // PRIORITY 1: If has PENDING registration - DISABLE EVERYTHING
+        if (hasPendingRegistration) {
+            return { text: 'Pending Approval', class: 'pending', disabled: true, icon: 'clock-history' };
+        }
+        // PRIORITY 2: If has APPROVED registration - DISABLE EVERYTHING
         if (hasApprovedRegistration) {
             return { text: 'Registration Completed', class: 'approved', disabled: true, icon: 'check-circle-fill' };
         }
+        // PRIORITY 3: If registration period closed
         if (!isRegistrationOpen) {
             return { text: 'Registration Closed', class: 'disabled', disabled: true, icon: 'ban' };
         }
+        // PRIORITY 4: If already in cart
         if (isInCart) {
             return { text: 'Remove', class: 'remove', disabled: false, icon: 'dash-circle' };
         }
+        // Default: Show "Add to Cart" button
         return { text: 'Add to Cart', class: 'add', disabled: false, icon: 'plus-circle' };
     }
 
     async function addToCart(course, btnElement) {
+        if (hasPendingRegistration) {
+            showAlert('You have a pending registration. Cannot add courses until advisor decision.', 'warning');
+            return;
+        }
         if (hasApprovedRegistration) {
-            showAlert('You already have an approved registration.', 'error');
+            showAlert('You already have an approved registration. Cannot add more courses.', 'error');
             return;
         }
         if (!isRegistrationOpen) {
@@ -401,8 +485,12 @@
     }
 
     async function removeFromCart(course, btnElement) {
+        if (hasPendingRegistration) {
+            showAlert('You have a pending registration. Cannot modify courses until advisor decision.', 'warning');
+            return;
+        }
         if (hasApprovedRegistration) {
-            showAlert('You already have an approved registration.', 'error');
+            showAlert('You already have an approved registration. Cannot modify courses.', 'error');
             return;
         }
         if (!isRegistrationOpen) {
@@ -448,29 +536,32 @@
             grid.appendChild(card);
         });
 
-        document.querySelectorAll('.cart-btn.add').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const code = btn.dataset.code;
-                const course = allCourses.find(c => c.code === code);
-                if (course) {
-                    showAddCourseModal(course, async (selectedCourse) => {
-                        await addToCart(selectedCourse, btn);
-                    });
-                }
+        // Only attach event listeners if not pending and not approved
+        if (!hasPendingRegistration && !hasApprovedRegistration) {
+            document.querySelectorAll('.cart-btn.add').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const code = btn.dataset.code;
+                    const course = allCourses.find(c => c.code === code);
+                    if (course) {
+                        showAddCourseModal(course, async (selectedCourse) => {
+                            await addToCart(selectedCourse, btn);
+                        });
+                    }
+                });
             });
-        });
 
-        document.querySelectorAll('.cart-btn.remove').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const code = btn.dataset.code;
-                const course = allCourses.find(c => c.code === code);
-                if (course && confirm(`Remove "${course.name}" from your cart?`)) {
-                    await removeFromCart(course, btn);
-                }
+            document.querySelectorAll('.cart-btn.remove').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const code = btn.dataset.code;
+                    const course = allCourses.find(c => c.code === code);
+                    if (course && confirm(`Remove "${course.name}" from your cart?`)) {
+                        await removeFromCart(course, btn);
+                    }
+                });
             });
-        });
+        }
     }
 
     function filterCourses() {
