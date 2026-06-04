@@ -66,69 +66,65 @@
             margin-bottom: 30px;
         }
         
-        /* Registration Slip Styles - At the top */
         .slip-header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #670019; }
-        .slip-header img { width: 60px; margin-bottom: 10px; }
-        .slip-header h3 { color: #670019; font-size: 20px; font-weight: 700; }
-        .slip-header p { color: #666; font-size: 12px; }
+        .slip-header img { width: 55px; margin-bottom: 8px; }
+        .slip-header h3 { color: #670019; font-size: 18px; font-weight: 700; }
+        .slip-header p { color: #666; font-size: 11px; }
         
-        .section-title { color: #670019; font-size: 15px; font-weight: 600; margin: 20px 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+        .section-title { color: #670019; font-size: 14px; font-weight: 600; margin: 18px 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid #eee; }
         
-        .info-row { margin-bottom: 10px; display: flex; flex-wrap: wrap; }
-        .info-label { width: 140px; font-size: 13px; color: #888; }
-        .info-value { flex: 1; font-size: 13px; color: #333; font-weight: 500; }
+        .info-row { margin-bottom: 8px; display: flex; flex-wrap: wrap; }
+        .info-label { width: 130px; font-size: 12px; color: #888; }
+        .info-value { flex: 1; font-size: 12px; color: #333; font-weight: 500; }
         
-        .courses-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-        .courses-table th { background: #f8f6f4; padding: 12px; text-align: left; border: 1px solid #ddd; color: #670019; font-weight: 600; }
-        .courses-table td { padding: 10px; border: 1px solid #ddd; }
+        .courses-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        .courses-table th { background: #f8f6f4; padding: 10px; text-align: left; border: 1px solid #ddd; color: #670019; font-weight: 600; }
+        .courses-table td { padding: 8px 10px; border: 1px solid #ddd; }
         
-        .total-credits { text-align: right; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-weight: 600; color: #670019; font-size: 14px; }
+        .total-credits { text-align: right; margin-top: 12px; padding-top: 8px; border-top: 1px solid #ddd; font-weight: 600; color: #670019; font-size: 13px; }
         
-        /* Rejection Message - Below Slip */
         .warning-banner {
             background: #f8d7da;
             border-left: 5px solid #dc3545;
-            padding: 20px 25px;
+            padding: 18px 22px;
             border-radius: 12px;
             margin: 25px 0;
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 15px;
         }
-        .warning-banner i { font-size: 32px; color: #dc3545; }
-        .warning-banner h4 { color: #721c24; margin: 0 0 8px 0; font-size: 18px; font-weight: 700; }
-        .warning-banner p { color: #721c24; margin: 0; font-size: 14px; line-height: 1.5; }
+        .warning-banner i { font-size: 28px; color: #dc3545; }
+        .warning-banner h4 { color: #721c24; margin: 0 0 5px 0; font-size: 16px; font-weight: 700; }
+        .warning-banner p { color: #721c24; margin: 0; font-size: 13px; }
         
-        /* Advisor Comment - Highly Visible */
         .advisor-comment {
             background: #fff3cd;
             border-left: 5px solid #ffc107;
-            padding: 25px 30px;
+            padding: 22px 25px;
             border-radius: 16px;
             margin: 25px 0;
         }
         .advisor-comment h4 {
             color: #856404;
-            margin-bottom: 15px;
-            font-size: 18px;
+            margin-bottom: 12px;
+            font-size: 16px;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .advisor-comment h4 i { font-size: 24px; }
+        .advisor-comment h4 i { font-size: 20px; }
         .advisor-comment p {
             color: #856404;
             margin: 0;
-            font-size: 16px;
-            line-height: 1.7;
+            font-size: 14px;
+            line-height: 1.6;
             font-weight: 500;
             background: rgba(255,255,255,0.5);
-            padding: 15px;
-            border-radius: 12px;
+            padding: 12px;
+            border-radius: 10px;
         }
         
-        /* Buttons */
         .action-buttons {
             display: flex;
             gap: 20px;
@@ -139,16 +135,16 @@
             background: linear-gradient(to right, #670019, #8b0022);
             color: white;
             border: none;
-            padding: 14px 40px;
+            padding: 12px 35px;
             border-radius: 14px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         .edit-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); color: white; }
         
@@ -156,9 +152,9 @@
             background: #6c757d;
             color: white;
             border: none;
-            padding: 14px 35px;
+            padding: 12px 30px;
             border-radius: 14px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
@@ -237,8 +233,16 @@
             
             let coursesHtml = '';
             let totalCredits = 0;
+            const coursesList = [];
+            
             if (data.courses && data.courses.length > 0) {
                 data.courses.forEach((course, idx) => {
+                    coursesList.push({
+                        subject_code: course.subject_code,
+                        subject_name: course.subject_name,
+                        credits: course.credits,
+                        section: course.section || '1'
+                    });
                     coursesHtml += `<tr>
                         <td>${idx + 1}</td>
                         <td><strong>${escapeHtml(course.subject_code)}</strong></td>
@@ -254,14 +258,28 @@
             
             const advisorRemark = data.registration.advisor_remarks || 'No specific reason provided. Please contact your academic advisor.';
             
-            // NEW PAGE STRUCTURE:
-            // 1. Registration Slip (TOP)
-            // 2. Registration Rejected Message (Red)
-            // 3. Academic Advisor Comment (Yellow - LARGER)
-            // 4. Buttons (Bottom)
+            // Store the rejected registration data in localStorage for the register page to load
+            // This is the key fix - properly structure the data
+            const rejectedData = {
+                registration_id: registrationId,
+                courses: data.courses.map(course => ({
+                    subject_code: course.subject_code,
+                    subject_name: course.subject_name,
+                    credits: course.credits,
+                    section: course.section || '1'
+                })),
+                session: data.registration.session || '2025/2026 - Semester 2'
+            };
+            
+            // Clear any existing pending data first
+            localStorage.removeItem('pendingRejectedRegistration');
+            // Store new rejected registration data
+            localStorage.setItem('pendingRejectedRegistration', JSON.stringify(rejectedData));
+            
+            // Also store a flag that this is an edit of a rejected registration
+            localStorage.setItem('isEditingRejectedRegistration', 'true');
             
             const containerHtml = `
-                <!-- SECTION 1: REGISTRATION SLIP (TOP) -->
                 <div class="slip-header">
                     <img src="images/utmlogo.png" alt="UTM Logo">
                     <h3>COURSE REGISTRATION SLIP</h3>
@@ -290,7 +308,6 @@
                 </table>
                 <div class="total-credits">TOTAL CREDIT: ${String(totalCredits).padStart(3, '0')}</div>
                 
-                <!-- SECTION 2: REJECTION MESSAGE (RED) -->
                 <div class="warning-banner">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                     <div>
@@ -299,7 +316,6 @@
                     </div>
                 </div>
                 
-                <!-- SECTION 3: ADVISOR COMMENT (YELLOW - HIGHLY VISIBLE) -->
                 <div class="advisor-comment">
                     <h4><i class="bi bi-chat-left-text-fill"></i> Academic Advisor Comment</h4>
                     <p>${escapeHtml(advisorRemark)}</p>
@@ -308,24 +324,16 @@
             
             document.getElementById('contentContainer').innerHTML = containerHtml;
             
-            // Store rejected registration data in localStorage for the register page to load
-            localStorage.setItem('pendingRejectedRegistration', JSON.stringify({
-                registration_id: registrationId,
-                courses: data.courses
-            }));
-            
-            // SECTION 4: BUTTONS (BOTTOM)
             document.getElementById('actionButtons').innerHTML = `
                 <div class="action-buttons">
-                    <button class="edit-btn" id="editBtn"><i class="bi bi-pencil-square"></i> Edit Registration Slip</button>
+                    <button class="edit-btn" id="editBtn"><i class="bi bi-pencil-square"></i> Edit Registration</button>
                     <a href="student_registration_history.html" class="back-btn"><i class="bi bi-arrow-left"></i> Back to History</a>
                 </div>
             `;
             document.getElementById('actionButtons').style.display = 'block';
             
-            // Set up edit button
             document.getElementById('editBtn').addEventListener('click', async () => {
-                window.location.href = 'student_register.html?from_rejected=1';
+                window.location.href = 'student_register.html';
             });
             
         } catch (err) {

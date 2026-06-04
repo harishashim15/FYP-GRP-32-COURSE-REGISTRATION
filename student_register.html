@@ -169,7 +169,6 @@
         .alert-error { background: #f8d7da; color: #721c24; }
         .alert-warning { background: #fff3cd; color: #856404; }
         
-        /* Approved Registration Banner */
         .approved-banner {
             background: #d4edda; border: 1px solid #c3e6cb; border-radius: 15px;
             padding: 15px 20px; margin-bottom: 25px; display: flex;
@@ -178,7 +177,14 @@
         .approved-banner i { font-size: 24px; }
         .approved-banner p { margin: 0; font-size: 14px; }
         
-        /* MODAL STYLES */
+        .rejected-banner {
+            background: #fff3cd; border: 1px solid #ffecb5; border-radius: 15px;
+            padding: 15px 20px; margin-bottom: 25px; display: flex;
+            align-items: center; gap: 12px; color: #856404;
+        }
+        .rejected-banner i { font-size: 24px; }
+        .rejected-banner p { margin: 0; font-size: 14px; }
+        
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
@@ -241,10 +247,14 @@
     <div class="page-header"><h1>Register</h1><p>Review your added courses and select sections before submitting</p></div>
     <div id="alertContainer"></div>
     
-    <!-- Approved Registration Banner -->
     <div id="approvedBanner" class="approved-banner" style="display: none;">
         <i class="bi bi-check-circle-fill"></i>
         <p><strong>Approved Registration Exists</strong><br>You already have an approved registration for this academic session. Only one approved registration is allowed per session.</p>
+    </div>
+    
+    <div id="rejectedBanner" class="rejected-banner" style="display: none;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <p><strong>Editing Rejected Registration</strong><br>You are editing a previously rejected registration. Please make the necessary changes and resubmit.</p>
     </div>
     
     <div class="info-card"><p><i class="bi bi-info-circle-fill me-2"></i> Please select a section for each course before submitting. Your registration will be sent to your academic advisor for approval.</p></div>
@@ -260,7 +270,6 @@
     </div>
 </div>
 
-<!-- Modal for Submit Registration -->
 <div id="submitModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon" style="color: #2e7d32;"><i class="bi bi-question-circle-fill"></i></div>
@@ -273,7 +282,6 @@
     </div>
 </div>
 
-<!-- Modal for Remove Course -->
 <div id="removeModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon" style="color: #dc3545;"><i class="bi bi-exclamation-triangle-fill"></i></div>
@@ -291,6 +299,8 @@
     let pendingRemoveCourseCode = null;
     let pendingRemoveCourseName = null;
     let hasApprovedRegistration = false;
+    let isEditingRejected = false;
+    let rejectedRegistrationId = null;
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -307,7 +317,6 @@
         }
     })();
 
-    // Check if student already has approved registration
     async function checkExistingApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
@@ -320,8 +329,6 @@
                     submitBtn.disabled = true;
                     submitBtn.classList.add('disabled');
                 }
-            } else {
-                document.getElementById('approvedBanner').style.display = 'none';
             }
             return hasApprovedRegistration;
         } catch(e) {
@@ -330,7 +337,54 @@
         }
     }
 
-    // Load student name from session
+    // Load rejected registration data from localStorage and restore to cart
+    async function loadRejectedRegistrationIfExists() {
+        const pendingData = localStorage.getItem('pendingRejectedRegistration');
+        const isEditing = localStorage.getItem('isEditingRejectedRegistration');
+        
+        if (pendingData && isEditing === 'true') {
+            try {
+                const rejectedData = JSON.parse(pendingData);
+                isEditingRejected = true;
+                rejectedRegistrationId = rejectedData.registration_id;
+                
+                // Show the rejected banner
+                document.getElementById('rejectedBanner').style.display = 'flex';
+                
+                // Clear existing cart first
+                const currentCart = await apiGet('cart/get.php');
+                if (currentCart.items && currentCart.items.length > 0) {
+                    for (const item of currentCart.items) {
+                        await apiPost('cart/remove.php', { course_code: item.code });
+                    }
+                }
+                
+                // Add each course from rejected registration to cart
+                for (const course of rejectedData.courses) {
+                    await apiPost('cart/add.php', { course_code: course.subject_code });
+                    if (course.section) {
+                        await apiPost('cart/update_section.php', { 
+                            course_code: course.subject_code, 
+                            section: course.section 
+                        });
+                    }
+                }
+                
+                // Clear the localStorage after loading to prevent duplicate loads
+                localStorage.removeItem('pendingRejectedRegistration');
+                localStorage.removeItem('isEditingRejectedRegistration');
+                
+                showAlert('Your previous rejected registration has been loaded. Please make necessary changes and resubmit.', 'success');
+                return true;
+            } catch(e) {
+                console.error('Failed to load rejected registration:', e);
+                showAlert('Unable to load previous registration. Please add courses manually.', 'error');
+                return false;
+            }
+        }
+        return false;
+    }
+
     async function loadStudentName() {
         try {
             const user = await getCurrentUser();
@@ -345,7 +399,6 @@
         }
     }
 
-    // Load cart items
     async function loadCart() {
         try {
             const cart = await apiGet('cart/get.php');
@@ -364,7 +417,6 @@
                 return;
             }
             
-            // Build table HTML
             let html = `
                 <table class="cart-table">
                     <thead>
@@ -432,9 +484,7 @@
         }
     }
 
-    // Attach event listeners to dynamic elements
     function attachEvents() {
-        // Section select change
         document.querySelectorAll('.section-select').forEach(select => {
             select.addEventListener('change', async (e) => {
                 const courseCode = select.dataset.code;
@@ -449,7 +499,6 @@
             });
         });
         
-        // Remove button click - show modal
         document.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const courseCode = btn.dataset.code;
@@ -458,11 +507,9 @@
             });
         });
         
-        // Submit button
         const submitBtn = document.getElementById('submitBtn');
         if (submitBtn) {
             submitBtn.onclick = () => {
-                // Validate all sections are selected
                 const selects = document.querySelectorAll('.section-select');
                 const missingSections = [];
                 
@@ -484,7 +531,6 @@
         }
     }
 
-    // Submit Modal functions
     function showSubmitModal() {
         if (hasApprovedRegistration) {
             showAlert('You already have an approved registration for this session.', 'warning');
@@ -517,7 +563,6 @@
         }
     }
 
-    // Remove Modal functions
     function showRemoveModal(courseCode, courseName) {
         pendingRemoveCourseCode = courseCode;
         pendingRemoveCourseName = courseName;
@@ -537,7 +582,7 @@
             await apiPost('cart/remove.php', { course_code: pendingRemoveCourseCode });
             showAlert('Course removed from cart', 'success');
             closeRemoveModal();
-            await loadCart(); // Reload cart to refresh the list
+            await loadCart();
         } catch(err) {
             showAlert('Failed to remove course: ' + err.message, 'error');
             closeRemoveModal();
@@ -558,13 +603,11 @@
         return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    // Modal event listeners
     document.getElementById('submitModalCancelBtn')?.addEventListener('click', closeSubmitModal);
     document.getElementById('submitModalConfirmBtn')?.addEventListener('click', confirmSubmitRegistration);
     document.getElementById('removeModalCancelBtn')?.addEventListener('click', closeRemoveModal);
     document.getElementById('removeModalConfirmBtn')?.addEventListener('click', confirmRemoveCourse);
     
-    // Close modals when clicking outside
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -573,10 +616,10 @@
         });
     });
 
-    // Initialize page
     async function init() {
         await loadStudentName();
         await checkExistingApprovedRegistration();
+        await loadRejectedRegistrationIfExists();
         await loadCart();
     }
     

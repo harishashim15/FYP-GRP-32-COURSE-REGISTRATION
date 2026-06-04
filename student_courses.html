@@ -62,7 +62,6 @@
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
         
-        /* Approved Registration Banner - Similar to Registration Closed design */
         .approved-banner {
             background: #d4edda;
             border: 1px solid #c3e6cb;
@@ -74,23 +73,10 @@
             gap: 18px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .approved-banner i {
-            font-size: 42px;
-            color: #2e7d32;
-        }
-        .approved-banner-content h4 {
-            color: #155724;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .approved-banner-content p {
-            color: #155724;
-            margin: 0;
-            font-size: 14px;
-        }
+        .approved-banner i { font-size: 42px; color: #2e7d32; }
+        .approved-banner-content h4 { color: #155724; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+        .approved-banner-content p { color: #155724; margin: 0; font-size: 14px; }
         
-        /* Registration Closed Banner */
         .closed-banner {
             background: #f8d7da;
             border: 1px solid #f5c6cb;
@@ -101,21 +87,9 @@
             align-items: center;
             gap: 18px;
         }
-        .closed-banner i {
-            font-size: 42px;
-            color: #721c24;
-        }
-        .closed-banner-content h4 {
-            color: #721c24;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .closed-banner-content p {
-            color: #721c24;
-            margin: 0;
-            font-size: 14px;
-        }
+        .closed-banner i { font-size: 42px; color: #721c24; }
+        .closed-banner-content h4 { color: #721c24; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+        .closed-banner-content p { color: #721c24; margin: 0; font-size: 14px; }
         
         .cart-summary {
             background: #fff7ef; border: 1px solid #f4a000; border-radius: 25px;
@@ -164,8 +138,9 @@
         .cart-btn.approved:hover { transform: none; background: #2e7d32; }
         .cart-btn.pending { background: #ffc107; color: #333; cursor: default; }
         .cart-btn.pending:hover { transform: none; background: #ffc107; }
+        .cart-btn.rejected { background: #fd7e14; color: white; cursor: pointer; }
+        .cart-btn.rejected:hover { background: #e66a0d; transform: translateY(-2px); }
         
-        /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
@@ -224,7 +199,6 @@
         <p>Browse and add courses to your registration cart</p>
     </div>
 
-    <!-- Approved Registration Banner (Green) - Shown when student already has approved registration -->
     <div id="approvedBanner" class="approved-banner" style="display: none;">
         <i class="bi bi-check-circle-fill"></i>
         <div class="approved-banner-content">
@@ -233,7 +207,6 @@
         </div>
     </div>
 
-    <!-- Registration Period Closed Banner (Red) - Shown when registration period is closed -->
     <div id="closedBanner" class="closed-banner" style="display: none;">
         <i class="bi bi-calendar-x-fill"></i>
         <div class="closed-banner-content">
@@ -257,7 +230,6 @@
     </div>
 </div>
 
-<!-- Modal for Registration Period Closed -->
 <div id="periodClosedModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon"><i class="bi bi-calendar-x-fill" style="color: #dc3545;"></i></div>
@@ -267,7 +239,6 @@
     </div>
 </div>
 
-<!-- Modal for Add Course Confirmation -->
 <div id="addCourseModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon"><i class="bi bi-question-circle-fill" style="color: #f4a000;"></i></div>
@@ -330,18 +301,14 @@
         await callback(course);
     }
 
-    // Check if student already has an approved registration for current session
     async function checkApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
             hasApprovedRegistration = result.has_approved || false;
             
             if (hasApprovedRegistration) {
-                // Show the green approved banner
                 document.getElementById('approvedBanner').style.display = 'flex';
-                // Hide cart summary since they can't add more courses
                 document.getElementById('cartSummary').style.display = 'none';
-                // Disable proceed button if visible
                 const proceedBtn = document.getElementById('proceedBtn');
                 if (proceedBtn) {
                     proceedBtn.classList.add('disabled');
@@ -369,7 +336,6 @@
             const cart = await apiGet('cart/get.php');
             const count = cart.count || 0;
             document.getElementById('cartCount').innerText = count;
-            // Only show cart summary if registration is open AND no approved registration
             if (!hasApprovedRegistration && count > 0 && isRegistrationOpen) {
                 document.getElementById('cartSummary').style.display = 'flex';
             } else {
@@ -421,23 +387,27 @@
         const status = courseStatus[course.code];
         const isInCart = cartCourses.includes(course.code);
         
-        // PRIORITY 1: If registration already approved, show "Approved" button (disabled)
+        // PRIORITY 1: If registration already approved
         if (hasApprovedRegistration) {
             return { text: 'Registration Completed', class: 'approved', disabled: true, icon: 'check-circle-fill' };
         }
-        // PRIORITY 2: If registration period closed, show "Registration Closed" button (disabled)
+        // PRIORITY 2: If registration period closed
         if (!isRegistrationOpen) {
             return { text: 'Registration Closed', class: 'disabled', disabled: true, icon: 'ban' };
         }
-        // PRIORITY 3: If already in cart, show "Remove" button
+        // PRIORITY 3: If already in cart
         if (isInCart) {
             return { text: 'Remove', class: 'remove', disabled: false, icon: 'dash-circle' };
         }
-        // PRIORITY 4: If already approved in a previous registration, show "Approved" button (disabled)
+        // PRIORITY 4: If course was in a rejected registration - can be added again
+        if (status === 'rejected') {
+            return { text: 'Add to Cart', class: 'add', disabled: false, icon: 'plus-circle' };
+        }
+        // PRIORITY 5: If already approved in a previous registration
         if (status === 'approved') {
             return { text: 'Approved', class: 'approved', disabled: true, icon: 'check-circle-fill' };
         }
-        // PRIORITY 5: If pending approval from previous registration, show "Pending" button (disabled)
+        // PRIORITY 6: If pending approval from previous registration
         if (status === 'pending') {
             return { text: 'Pending', class: 'pending', disabled: true, icon: 'clock-history' };
         }
@@ -452,6 +422,11 @@
         }
         if (!isRegistrationOpen) {
             showPeriodClosedModal();
+            return;
+        }
+        // Check if already in cart to prevent duplicates
+        if (cartCourses.includes(course.code)) {
+            showAlert('This course is already in your cart.', 'warning');
             return;
         }
         try {
@@ -517,7 +492,6 @@
             grid.appendChild(card);
         });
 
-        // Add event listeners for add buttons
         document.querySelectorAll('.cart-btn.add').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -532,6 +506,11 @@
                 const code = btn.dataset.code;
                 const course = allCourses.find(c => c.code === code);
                 if (course) {
+                    // Double check not already in cart
+                    if (cartCourses.includes(code)) {
+                        showAlert('This course is already in your cart.', 'warning');
+                        return;
+                    }
                     showAddCourseModal(course, async (selectedCourse) => {
                         await addToCart(selectedCourse, btn);
                     });
@@ -539,7 +518,6 @@
             });
         });
 
-        // Add event listeners for remove buttons
         document.querySelectorAll('.cart-btn.remove').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -575,13 +553,13 @@
         alertDiv.style.top = '20px';
         alertDiv.style.right = '20px';
         alertDiv.style.zIndex = '9999';
-        alertDiv.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
-        alertDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+        alertDiv.style.backgroundColor = type === 'success' ? '#d4edda' : type === 'warning' ? '#fff3cd' : '#f8d7da';
+        alertDiv.style.color = type === 'success' ? '#155724' : type === 'warning' ? '#856404' : '#721c24';
         alertDiv.style.padding = '12px 20px';
         alertDiv.style.borderRadius = '12px';
         alertDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        alertDiv.style.borderLeft = `4px solid ${type === 'success' ? '#2e7d32' : '#dc3545'}`;
-        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-2"></i>${msg}`;
+        alertDiv.style.borderLeft = `4px solid ${type === 'success' ? '#2e7d32' : type === 'warning' ? '#ffc107' : '#dc3545'}`;
+        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'warning' ? 'exclamation-triangle-fill' : 'exclamation-triangle-fill'} me-2"></i>${msg}`;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
     }
@@ -591,7 +569,6 @@
         return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    // Modal event listeners
     document.getElementById('modalYesBtn')?.addEventListener('click', confirmAddCourse);
     document.getElementById('modalNoBtn')?.addEventListener('click', closeAddCourseModal);
 
