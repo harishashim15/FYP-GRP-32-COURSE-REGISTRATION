@@ -75,10 +75,13 @@
             color: white; border: none; padding: 10px 25px; border-radius: 25px;
             text-decoration: none; font-size: 14px; font-weight: 500;
         }
+        .view-cart-btn:hover { color: white; }
+        .view-cart-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
         
         .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
         .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; }
+        .search-bar button:hover { opacity: 0.9; }
         
         .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
         .course-card {
@@ -98,39 +101,48 @@
         }
         .cart-btn.add { background: linear-gradient(to right, #670019, #8b0022); color: white; }
         .cart-btn.add:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
-        .cart-btn.added { background: #2e7d32; color: white; cursor: default; }
-        .cart-btn.added:hover { transform: none; }
-        /* FIX: Pending button - GREY background, clock icon */
+        .cart-btn.remove { background: #dc3545; color: white; }
+        .cart-btn.remove:hover { background: #c82333; transform: translateY(-2px); }
+        .cart-btn.disabled { background: #6c757d; color: white; cursor: not-allowed; }
+        .cart-btn.disabled:hover { transform: none; background: #6c757d; }
         .cart-btn.pending { background: #6c757d; color: white; cursor: default; }
-        .cart-btn.pending:hover { transform: none; background: #6c757d; }
-        /* FIX: Approved button - YELLOW background, check icon */
         .cart-btn.approved { background: #ffc107; color: #333; cursor: default; }
-        .cart-btn.approved:hover { transform: none; background: #ffc107; }
-        .cart-btn.disabled-btn { background: #6c757d; color: white; cursor: not-allowed; opacity: 0.7; }
         
+        /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
             z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-container {
-            background: white; border-radius: 25px; width: 400px; max-width: 90%;
-            padding: 30px; text-align: center; transform: scale(0.9); transition: 0.3s;
+            background: white; border-radius: 25px; width: 450px; max-width: 90%;
+            padding: 35px; text-align: center; transform: scale(0.9); transition: 0.3s;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         .modal-overlay.active .modal-container { transform: scale(1); }
-        .modal-icon { font-size: 50px; color: #f4a000; margin-bottom: 15px; }
+        .modal-icon { font-size: 60px; color: #dc3545; margin-bottom: 15px; }
         .modal-container h3 { color: #670019; font-weight: 700; margin-bottom: 10px; }
         .modal-container p { color: #666; margin-bottom: 25px; }
-        .modal-buttons { display: flex; gap: 15px; justify-content: center; }
-        .modal-btn { padding: 10px 25px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: 0.3s; border: none; }
-        .modal-btn.yes { background: #2e7d32; color: white; }
-        .modal-btn.yes:hover { background: #1b5e20; transform: translateY(-2px); }
-        .modal-btn.no { background: #dc3545; color: white; }
-        .modal-btn.no:hover { background: #c82333; transform: translateY(-2px); }
+        .modal-btn {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white; border: none; padding: 10px 30px; border-radius: 25px;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .modal-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
         
-        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
+        .period-banner-closed {
+            background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 15px;
+            padding: 15px 20px; margin-bottom: 25px; display: flex;
+            align-items: center; gap: 12px; color: #721c24;
+        }
+        .period-banner-closed i { font-size: 24px; }
+        .period-banner-closed p { margin: 0; font-size: 14px; }
+        
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; }
+        }
     </style>
 </head>
 <body>
@@ -158,25 +170,51 @@
         </div>
     </div>
 
-    <div class="page-header"><h2>Available Courses</h2><p>Browse and add courses to your registration cart</p></div>
+    <div class="page-header">
+        <h2>Available Courses</h2>
+        <p>Browse and add courses to your registration cart</p>
+    </div>
+
+    <!-- Period Closed Banner -->
+    <div id="periodClosedBanner" class="period-banner-closed" style="display: none;">
+        <i class="bi bi-calendar-x-fill"></i>
+        <p><strong>Registration Period Closed</strong><br>You cannot add or remove courses at this time. Please contact your academic advisor for assistance.</p>
+    </div>
 
     <div id="cartSummary" class="cart-summary" style="display: none;">
         <div class="cart-info"><i class="bi bi-bag-check"></i> You have <strong id="cartCount" class="count">0</strong> course(s) in your cart</div>
-        <a href="student_register.html" class="view-cart-btn">Proceed to Register</a>
+        <a href="student_register.html" id="proceedBtn" class="view-cart-btn">Proceed to Register</a>
     </div>
 
-    <div class="search-bar"><input type="text" id="searchInput" placeholder="Search by course name or code..."><button onclick="filterCourses()">Search</button></div>
-    <div class="courses-grid" id="coursesGrid"><div class="text-center">Loading courses...</div></div>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by course name or code...">
+        <button onclick="filterCourses()">Search</button>
+    </div>
+    
+    <div class="courses-grid" id="coursesGrid">
+        <div class="text-center">Loading courses...</div>
+    </div>
 </div>
 
+<!-- Modal for Registration Period Closed -->
+<div id="periodClosedModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-icon"><i class="bi bi-calendar-x-fill"></i></div>
+        <h3>Registration Period Closed</h3>
+        <p>The registration period is currently closed. You cannot add or remove courses at this time. Please contact your academic advisor for assistance.</p>
+        <button class="modal-btn" onclick="closePeriodModal()">OK</button>
+    </div>
+</div>
+
+<!-- Add Course Confirmation Modal -->
 <div id="addCourseModal" class="modal-overlay">
     <div class="modal-container">
-        <div class="modal-icon"><i class="bi bi-question-circle-fill"></i></div>
+        <div class="modal-icon"><i class="bi bi-question-circle-fill" style="color: #f4a000;"></i></div>
         <h3>Add Course</h3>
         <p id="modalCourseName">Do you want to add this subject?</p>
-        <div class="modal-buttons">
-            <button class="modal-btn yes" id="modalYesBtn">Yes</button>
-            <button class="modal-btn no" id="modalNoBtn">No</button>
+        <div class="d-flex gap-3 justify-content-center">
+            <button class="modal-btn" id="modalYesBtn" style="background: #2e7d32;">Yes</button>
+            <button class="modal-btn" id="modalNoBtn" style="background: #6c757d;">No</button>
         </div>
     </div>
 </div>
@@ -186,6 +224,7 @@
     let allCourses = [];
     let cartCourses = [];
     let courseStatus = {};
+    let isRegistrationOpen = true;
     let pendingAddCourse = null;
 
     function toggleSidebar() {
@@ -195,7 +234,39 @@
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
+    
+    (function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('expanded');
+        }
+    })();
+
+    function closePeriodModal() {
+        document.getElementById('periodClosedModal').classList.remove('active');
+    }
+
+    function showPeriodClosedModal() {
+        document.getElementById('periodClosedModal').classList.add('active');
+    }
+
+    function showAddCourseModal(course, callback) {
+        pendingAddCourse = { course, callback };
+        document.getElementById('modalCourseName').innerHTML = `Do you want to add <strong>${escapeHtml(course.name)}</strong>?`;
+        document.getElementById('addCourseModal').classList.add('active');
+    }
+
+    function closeAddCourseModal() {
+        document.getElementById('addCourseModal').classList.remove('active');
+        pendingAddCourse = null;
+    }
+
+    async function confirmAddCourse() {
+        if (!pendingAddCourse) return;
+        const { course, callback } = pendingAddCourse;
+        closeAddCourseModal();
+        await callback(course);
+    }
 
     async function loadCourseStatus() {
         try {
@@ -216,8 +287,32 @@
         } catch(e) { console.error(e); }
     }
 
+    async function checkRegistrationPeriod() {
+        try {
+            const period = await apiGet('registrations/period.php');
+            isRegistrationOpen = period.is_open;
+            
+            if (!isRegistrationOpen) {
+                document.getElementById('periodClosedBanner').style.display = 'flex';
+                const proceedBtn = document.getElementById('proceedBtn');
+                if (proceedBtn) {
+                    proceedBtn.classList.add('disabled');
+                    proceedBtn.style.pointerEvents = 'none';
+                    proceedBtn.style.opacity = '0.6';
+                }
+            } else {
+                document.getElementById('periodClosedBanner').style.display = 'none';
+            }
+            return isRegistrationOpen;
+        } catch(e) {
+            console.error('Failed to check registration period:', e);
+            return true;
+        }
+    }
+
     async function loadCourses() {
         try {
+            await checkRegistrationPeriod();
             await loadCourseStatus();
             const data = await apiGet('courses/list.php');
             allCourses = data.courses || [];
@@ -234,85 +329,155 @@
         const status = courseStatus[course.code];
         const isInCart = cartCourses.includes(course.code);
         
-        if (isInCart) return { text: 'Added', class: 'added', disabled: true, icon: 'check-circle' };
-        // FIX: Approved - Yellow button with check icon
-        if (status === 'approved') return { text: 'Approved', class: 'approved', disabled: true, icon: 'check-circle-fill' };
-        // FIX: Pending - Grey button with clock icon
-        if (status === 'pending') return { text: 'Pending', class: 'pending', disabled: true, icon: 'clock-history' };
-        return { text: 'Add Courses', class: 'add', disabled: false, icon: 'plus-circle' };
+        if (!isRegistrationOpen) {
+            return { text: 'Registration Closed', class: 'disabled', disabled: true, icon: 'ban' };
+        }
+        if (isInCart) {
+            return { text: 'Remove', class: 'remove', disabled: false, icon: 'dash-circle' };
+        }
+        if (status === 'approved') {
+            return { text: 'Approved', class: 'approved', disabled: true, icon: 'check-circle-fill' };
+        }
+        if (status === 'pending') {
+            return { text: 'Pending', class: 'pending', disabled: true, icon: 'clock-history' };
+        }
+        return { text: 'Add to Cart', class: 'add', disabled: false, icon: 'plus-circle' };
     }
-
-    function showModal(course, callback) {
-        pendingAddCourse = { course, callback };
-        document.getElementById('modalCourseName').innerHTML = `Do you want to add <strong>${escapeHtml(course.name)}</strong>?`;
-        document.getElementById('addCourseModal').classList.add('active');
-    }
-
-    function closeModal() { document.getElementById('addCourseModal').classList.remove('active'); pendingAddCourse = null; }
-    async function confirmAddCourse() { if (!pendingAddCourse) return; const { course, callback } = pendingAddCourse; closeModal(); await callback(course); }
-    document.getElementById('modalYesBtn').addEventListener('click', confirmAddCourse);
-    document.getElementById('modalNoBtn').addEventListener('click', closeModal);
 
     async function addToCart(course, btnElement) {
+        if (!isRegistrationOpen) {
+            showPeriodClosedModal();
+            return;
+        }
         try {
             await apiPost('cart/add.php', { course_code: course.code });
-            btnElement.innerHTML = '<i class="bi bi-check-circle me-1"></i> Added';
-            btnElement.classList.remove('add'); btnElement.classList.add('added');
-            btnElement.disabled = true;
+            btnElement.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Remove';
+            btnElement.classList.remove('add');
+            btnElement.classList.add('remove');
             cartCourses.push(course.code);
             await loadCartCount();
-        } catch(err) { console.error(err); alert('Failed to add course: ' + err.message); }
+            showAlert('Course added to cart successfully!', 'success');
+        } catch(err) {
+            console.error(err);
+            showAlert(err.message || 'Failed to add course', 'error');
+        }
     }
 
     async function removeFromCart(course, btnElement) {
+        if (!isRegistrationOpen) {
+            showPeriodClosedModal();
+            return;
+        }
         try {
             await apiPost('cart/remove.php', { course_code: course.code });
-            btnElement.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add Courses';
-            btnElement.classList.remove('added'); btnElement.classList.add('add');
-            btnElement.disabled = false;
+            btnElement.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add to Cart';
+            btnElement.classList.remove('remove');
+            btnElement.classList.add('add');
             cartCourses = cartCourses.filter(c => c !== course.code);
             await loadCartCount();
-        } catch(err) { console.error(err); alert('Failed to remove course: ' + err.message); }
+            showAlert('Course removed from cart', 'success');
+        } catch(err) {
+            console.error(err);
+            showAlert(err.message || 'Failed to remove course', 'error');
+        }
     }
 
     function renderCourses(courses) {
         const grid = document.getElementById('coursesGrid');
-        if (!courses.length) { grid.innerHTML = '<div class="text-center">No courses available.</div>'; return; }
+        if (!courses.length) {
+            grid.innerHTML = '<div class="text-center">No courses available.</div>';
+            return;
+        }
+        
         grid.innerHTML = '';
         courses.forEach(course => {
             const config = getButtonConfig(course);
-            const card = document.createElement('div'); card.className = 'course-card';
+            const card = document.createElement('div');
+            card.className = 'course-card';
             card.innerHTML = `
                 <span class="course-code">${escapeHtml(course.code)}</span>
                 <h4>${escapeHtml(course.name)}</h4>
-                <div class="course-info"><div><i class="bi bi-clock"></i> ${course.credits} Credit Hours</div><div><i class="bi bi-people"></i> ${course.enrolled || 0} Students</div></div>
-                <button class="cart-btn ${config.class}" data-code="${course.code}" ${config.disabled ? 'disabled' : ''}>
+                <div class="course-info">
+                    <div><i class="bi bi-clock"></i> ${course.credits} Credit Hours</div>
+                    <div><i class="bi bi-people"></i> ${course.enrolled || 0} Students</div>
+                </div>
+                <button class="cart-btn ${config.class}" data-code="${escapeHtml(course.code)}" ${config.disabled ? 'disabled' : ''}>
                     <i class="bi bi-${config.icon} me-1"></i> ${config.text}
                 </button>
             `;
             grid.appendChild(card);
         });
+
+        // Add event listeners
         document.querySelectorAll('.cart-btn.add').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                e.stopPropagation(); const code = btn.dataset.code; const course = allCourses.find(c => c.code === code);
-                if (course) showModal(course, async (selectedCourse) => await addToCart(selectedCourse, btn));
+                e.stopPropagation();
+                if (!isRegistrationOpen) {
+                    showPeriodClosedModal();
+                    return;
+                }
+                const code = btn.dataset.code;
+                const course = allCourses.find(c => c.code === code);
+                if (course) {
+                    showAddCourseModal(course, async (selectedCourse) => {
+                        await addToCart(selectedCourse, btn);
+                    });
+                }
             });
         });
-        document.querySelectorAll('.cart-btn.added').forEach(btn => {
+
+        document.querySelectorAll('.cart-btn.remove').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                e.stopPropagation(); const code = btn.dataset.code; const course = allCourses.find(c => c.code === code);
-                if (course && confirm(`Remove "${course.name}" from your cart?`)) await removeFromCart(course, btn);
+                e.stopPropagation();
+                if (!isRegistrationOpen) {
+                    showPeriodClosedModal();
+                    return;
+                }
+                const code = btn.dataset.code;
+                const course = allCourses.find(c => c.code === code);
+                if (course && confirm(`Remove "${course.name}" from your cart?`)) {
+                    await removeFromCart(course, btn);
+                }
             });
         });
     }
 
     function filterCourses() {
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allCourses.filter(c => c.name.toLowerCase().includes(term) || c.code.toLowerCase().includes(term));
+        const filtered = allCourses.filter(c => 
+            c.name.toLowerCase().includes(term) || 
+            c.code.toLowerCase().includes(term)
+        );
         renderCourses(filtered);
     }
 
-    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+    function showAlert(msg, type) {
+        // Create temporary alert
+        const alertDiv = document.createElement('div');
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+        alertDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+        alertDiv.style.padding = '12px 20px';
+        alertDiv.style.borderRadius = '12px';
+        alertDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        alertDiv.style.borderLeft = `4px solid ${type === 'success' ? '#2e7d32' : '#dc3545'}`;
+        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-2"></i>${msg}`;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    // Modal event listeners
+    document.getElementById('modalYesBtn')?.addEventListener('click', confirmAddCourse);
+    document.getElementById('modalNoBtn')?.addEventListener('click', closeAddCourseModal);
+
     loadCourses();
 </script>
 </body>
