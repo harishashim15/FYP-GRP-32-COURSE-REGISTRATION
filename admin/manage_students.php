@@ -195,7 +195,6 @@ if ($result) {
                             <td>
                                 <a href="edit_student.php?id=<?php echo $s['user_id']; ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
                                 <a href="manage_students.php?delete_id=<?php echo $s['user_id']; ?>" class="action-btn btn-delete" onclick="return confirm('Delete this student?')"><i class="bi bi-trash"></i> Delete</a>
-                                <a href="student_registrations.php?id=<?php echo $s['user_id']; ?>" class="action-btn btn-view" style="background:#28a745; color:white;"><i class="bi bi-list"></i> Registrations</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

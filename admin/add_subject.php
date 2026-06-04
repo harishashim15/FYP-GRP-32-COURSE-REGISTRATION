@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
-        .menu i { font-size: 20px; width: 24px;}
+        .menu i { font-size: 20px; }
         .logout {
             position: absolute; bottom: 30px;
             width: calc(100% - 40px); left: 20px;
