@@ -66,37 +66,119 @@
             background: #fff7ef; border-left: 4px solid #f4a000;
             border-radius: 15px; padding: 20px; margin-bottom: 25px;
         }
+        .info-card p { margin: 0; color: #856404; font-size: 14px; }
         
         .registration-table {
             background: white; border-radius: 25px; padding: 30px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
         .registration-table h3 { color: #670019; font-weight: 700; font-size: 20px; margin-bottom: 25px; border-bottom: 2px solid #f0e8e8; padding-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f6f4; padding: 12px 15px; color: #670019; text-align: left; font-weight: 600; }
-        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
-        .section-select { padding: 8px 12px; border: 1.5px solid #e0d6d6; border-radius: 10px; background: white; cursor: pointer; }
-        .remove-btn { background: none; border: none; color: #dc3545; font-size: 20px; cursor: pointer; transition: 0.3s; }
+        
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .cart-table th {
+            background: #f8f6f4;
+            padding: 12px 15px;
+            color: #670019;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .cart-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #333;
+            vertical-align: middle;
+        }
+        .cart-table tr:last-child td {
+            border-bottom: none;
+        }
+        .cart-table tbody tr:hover td {
+            background: #fdf9f7;
+        }
+        
+        .section-select {
+            padding: 8px 12px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .section-select:focus {
+            outline: none;
+            border-color: #670019;
+        }
+        .section-select:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            padding: 5px;
+        }
         .remove-btn:hover { color: #c82333; transform: scale(1.1); }
-        .total-row td { font-weight: 600; color: #670019; background: #f8f6f4; }
+        .remove-btn:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .total-row td {
+            font-weight: 600;
+            color: #670019;
+            background: #f8f6f4;
+        }
+        
         .submit-btn {
             background: linear-gradient(to right, #2e7d32, #1b5e20);
-            color: white; border: none; padding: 15px 40px;
-            border-radius: 14px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: 0.3s; margin-top: 20px;
-            display: inline-flex; align-items: center; gap: 10px;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
         .submit-btn:hover { background: linear-gradient(to right, #1b5e20, #0d3b0f); transform: translateY(-2px); }
         .submit-btn.disabled { background: #6c757d; cursor: not-allowed; transform: none; }
         .submit-btn.disabled:hover { transform: none; background: #6c757d; }
+        
         .empty-cart { text-align: center; padding: 60px 20px; }
         .empty-cart i { font-size: 64px; color: #ddd; margin-bottom: 20px; }
+        .empty-cart h4 { color: #666; margin-bottom: 15px; }
+        .empty-cart a { color: #670019; font-weight: 500; text-decoration: none; }
+        
         .alert-custom { border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .alert-success { background: #d4edda; color: #155724; }
         .alert-error { background: #f8d7da; color: #721c24; }
         .alert-warning { background: #fff3cd; color: #856404; }
         
-        /* MODAL STYLES - Same as Add Courses modal */
+        /* Approved Registration Banner */
+        .approved-banner {
+            background: #d4edda; border: 1px solid #c3e6cb; border-radius: 15px;
+            padding: 15px 20px; margin-bottom: 25px; display: flex;
+            align-items: center; gap: 12px; color: #155724;
+        }
+        .approved-banner i { font-size: 24px; }
+        .approved-banner p { margin: 0; font-size: 14px; }
+        
+        /* MODAL STYLES */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
@@ -117,10 +199,6 @@
             padding: 10px 25px; border-radius: 25px; font-weight: 600;
             cursor: pointer; transition: 0.3s; border: none; font-size: 14px;
         }
-        .modal-btn.yes { background: #2e7d32; color: white; }
-        .modal-btn.yes:hover { background: #1b5e20; transform: translateY(-2px); }
-        .modal-btn.no { background: #6c757d; color: white; }
-        .modal-btn.no:hover { background: #5a6268; transform: translateY(-2px); }
         .modal-btn.cancel { background: #6c757d; color: white; }
         .modal-btn.cancel:hover { background: #5a6268; transform: translateY(-2px); }
         .modal-btn.submit { background: #2e7d32; color: white; }
@@ -128,16 +206,11 @@
         .modal-btn.remove-confirm { background: #dc3545; color: white; }
         .modal-btn.remove-confirm:hover { background: #c82333; transform: translateY(-2px); }
         
-        /* Approved Registration Banner */
-        .approved-banner {
-            background: #d4edda; border: 1px solid #c3e6cb; border-radius: 15px;
-            padding: 15px 20px; margin-bottom: 25px; display: flex;
-            align-items: center; gap: 12px; color: #155724;
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; }
+            .cart-table th, .cart-table td { padding: 10px; font-size: 12px; }
         }
-        .approved-banner i { font-size: 24px; }
-        .approved-banner p { margin: 0; font-size: 14px; }
-        
-        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
     </style>
 </head>
 <body>
@@ -177,15 +250,17 @@
     <div class="info-card"><p><i class="bi bi-info-circle-fill me-2"></i> Please select a section for each course before submitting. Your registration will be sent to your academic advisor for approval.</p></div>
     
     <div class="registration-table">
-        <h3>Your Added Courses</h3>
-        <div id="cartContainer">Loading...</div>
+        <h3><i class="bi bi-cart-fill me-2"></i>Your Added Courses</h3>
+        <div id="cartContainer">
+            <div class="text-center py-4">Loading your cart...</div>
+        </div>
         <div class="text-center mt-4" id="submitBtnContainer" style="display: none;">
             <button id="submitBtn" class="submit-btn"><i class="bi bi-send-check"></i> Submit Registration</button>
         </div>
     </div>
 </div>
 
-<!-- Modal for Submit Registration Confirmation -->
+<!-- Modal for Submit Registration -->
 <div id="submitModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon" style="color: #2e7d32;"><i class="bi bi-question-circle-fill"></i></div>
@@ -198,12 +273,12 @@
     </div>
 </div>
 
-<!-- Modal for Remove Course Confirmation -->
+<!-- Modal for Remove Course -->
 <div id="removeModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon" style="color: #dc3545;"><i class="bi bi-exclamation-triangle-fill"></i></div>
         <h3>Remove Course</h3>
-        <p id="removeModalMessage">Are you sure you want to remove this course from your registration?<br><br>This action can be reversed by adding the course again later.</p>
+        <p id="removeModalMessage">Are you sure you want to remove this course from your registration?</p>
         <div class="modal-buttons">
             <button class="modal-btn cancel" id="removeModalCancelBtn">Cancel</button>
             <button class="modal-btn remove-confirm" id="removeModalConfirmBtn">Remove Course</button>
@@ -214,7 +289,7 @@
 <script src="js/common.js"></script>
 <script>
     let pendingRemoveCourseCode = null;
-    let pendingSubmitCallback = null;
+    let pendingRemoveCourseName = null;
     let hasApprovedRegistration = false;
 
     function toggleSidebar() {
@@ -232,7 +307,7 @@
         }
     })();
 
-    // Check if student already has an approved registration for current session
+    // Check if student already has approved registration
     async function checkExistingApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
@@ -255,63 +330,7 @@
         }
     }
 
-    // Show submit modal
-    function showSubmitModal() {
-        if (hasApprovedRegistration) {
-            showAlert('You already have an approved registration for this session. Only one approved registration is allowed.', 'warning');
-            return;
-        }
-        document.getElementById('submitModal').classList.add('active');
-    }
-
-    function closeSubmitModal() {
-        document.getElementById('submitModal').classList.remove('active');
-    }
-
-    // Show remove course modal
-    function showRemoveModal(courseCode, courseName) {
-        pendingRemoveCourseCode = courseCode;
-        document.getElementById('removeModalMessage').innerHTML = `Are you sure you want to remove <strong>${escapeHtml(courseName)}</strong> from your registration?<br><br>This action can be reversed by adding the course again later.`;
-        document.getElementById('removeModal').classList.add('active');
-    }
-
-    function closeRemoveModal() {
-        document.getElementById('removeModal').classList.remove('active');
-        pendingRemoveCourseCode = null;
-    }
-
-    async function confirmRemoveCourse() {
-        if (!pendingRemoveCourseCode) return;
-        try {
-            await apiPost('cart/remove.php', { course_code: pendingRemoveCourseCode });
-            showAlert('Course removed from cart', 'success');
-            closeRemoveModal();
-            loadCart(); // Reload cart
-        } catch(err) {
-            showAlert('Failed to remove course: ' + err.message, 'error');
-            closeRemoveModal();
-        }
-    }
-
-    async function confirmSubmitRegistration() {
-        closeSubmitModal();
-        
-        // Double check approved registration before submitting
-        const hasApproved = await checkExistingApprovedRegistration();
-        if (hasApproved) {
-            showAlert('You already have an approved registration for this session. Cannot submit another registration.', 'warning');
-            return;
-        }
-        
-        try {
-            await apiPost('cart/submit.php', {});
-            showAlert('Registration submitted successfully! Redirecting...', 'success');
-            setTimeout(() => { window.location.href = 'student_registration_history.html'; }, 2000);
-        } catch(err) {
-            showAlert('Submission failed: ' + err.message, 'error');
-        }
-    }
-
+    // Load student name from session
     async function loadStudentName() {
         try {
             const user = await getCurrentUser();
@@ -326,101 +345,202 @@
         }
     }
 
+    // Load cart items
     async function loadCart() {
         try {
-            let cart = await apiGet('cart/get.php');
-            
+            const cart = await apiGet('cart/get.php');
             const container = document.getElementById('cartContainer');
+            
             if (!cart.items || cart.items.length === 0) {
-                container.innerHTML = `<div class="empty-cart"><i class="bi bi-cart"></i><h4>No courses added yet</h4><p>Go to the Courses page to add courses to your registration cart.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none;">Browse Courses</a></div>`;
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="bi bi-cart"></i>
+                        <h4>No courses added yet</h4>
+                        <p>Go to the Courses page to add courses to your registration cart.</p>
+                        <a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none; border-radius:25px; padding:10px 25px;">Browse Courses</a>
+                    </div>
+                `;
                 document.getElementById('submitBtnContainer').style.display = 'none';
                 return;
             }
             
-            let html = `</td><thead></table><th>No.</th><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Section *</th><th>Action</th></tr></thead><tbody>`;
+            // Build table HTML
+            let html = `
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">No.</th>
+                            <th style="width: 15%;">Course Code</th>
+                            <th style="width: 40%;">Course Name</th>
+                            <th style="width: 10%;">Credits</th>
+                            <th style="width: 15%;">Section *</th>
+                            <th style="width: 15%;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
             cart.items.forEach((item, idx) => {
-                html += `<tr>
-                    <td>${idx+1}</td>
-                    <td><strong>${escapeHtml(item.code)}</strong></td>
-                    <td>${escapeHtml(item.name)}</td>
-                    <td>${item.credits}</td>
-                    <td>
-                        <select class="section-select" data-code="${escapeHtml(item.code)}" ${hasApprovedRegistration ? 'disabled' : ''}>
-                            <option value="">Select Section</option>
-                            <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
-                            <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
-                            <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
-                            <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
-                        </select>
-                    </td>
-                    <td><button class="remove-btn" data-code="${escapeHtml(item.code)}" data-name="${escapeHtml(item.name)}" ${hasApprovedRegistration ? 'disabled' : ''}><i class="bi bi-trash3"></i></button></td>
-                </tr>`;
+                html += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${escapeHtml(item.code)}</strong></td>
+                        <td>${escapeHtml(item.name)}</td>
+                        <td>${item.credits}</td>
+                        <td>
+                            <select class="section-select" data-code="${escapeHtml(item.code)}" ${hasApprovedRegistration ? 'disabled' : ''}>
+                                <option value="">Select Section</option>
+                                <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
+                                <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
+                                <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
+                                <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="remove-btn" data-code="${escapeHtml(item.code)}" data-name="${escapeHtml(item.name)}" ${hasApprovedRegistration ? 'disabled' : ''}>
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
             });
-            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></table>`;
+            
+            html += `
+                    <tr class="total-row">
+                        <td colspan="3"><strong>Total Credit Hours:</strong></td>
+                        <td colspan="3"><strong>${cart.total_credits}</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            `;
+            
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
             
-            if (hasApprovedRegistration) {
+            if (!hasApprovedRegistration) {
+                attachEvents();
+            } else {
                 const submitBtn = document.getElementById('submitBtn');
                 if (submitBtn) {
                     submitBtn.disabled = true;
                     submitBtn.classList.add('disabled');
                 }
-            } else {
-                attachEvents();
             }
         } catch(err) {
             console.error(err);
-            document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger">Failed to load cart. Please refresh.</div>';
+            document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger py-4">Failed to load cart. Please refresh.</div>';
         }
     }
 
+    // Attach event listeners to dynamic elements
     function attachEvents() {
-        // Section select change events
+        // Section select change
         document.querySelectorAll('.section-select').forEach(select => {
             select.addEventListener('change', async (e) => {
                 const courseCode = select.dataset.code;
                 const section = select.value;
+                if (!section) return;
                 try {
                     await apiPost('cart/update_section.php', { course_code: courseCode, section });
-                    showAlert('Section updated', 'success');
-                } catch(err) { showAlert('Failed to update section', 'error'); }
+                    showAlert('Section updated successfully', 'success');
+                } catch(err) {
+                    showAlert('Failed to update section', 'error');
+                }
             });
         });
         
-        // Remove button events - use modal instead of confirm
+        // Remove button click - show modal
         document.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                if (hasApprovedRegistration) {
-                    showAlert('You cannot modify courses because you already have an approved registration.', 'warning');
-                    return;
-                }
+            btn.addEventListener('click', (e) => {
                 const courseCode = btn.dataset.code;
                 const courseName = btn.dataset.name;
                 showRemoveModal(courseCode, courseName);
             });
         });
         
-        // Submit button - use modal
+        // Submit button
         const submitBtn = document.getElementById('submitBtn');
         if (submitBtn) {
             submitBtn.onclick = () => {
-                // Validate sections are selected
+                // Validate all sections are selected
                 const selects = document.querySelectorAll('.section-select');
-                let missing = [];
-                selects.forEach(select => { 
-                    if (!select.value) { 
-                        const row = select.closest('tr'); 
-                        const courseName = row.cells[2].innerText; 
-                        missing.push(courseName); 
-                    } 
+                const missingSections = [];
+                
+                selects.forEach(select => {
+                    if (!select.value) {
+                        const row = select.closest('tr');
+                        const courseName = row.querySelector('td:nth-child(3)').innerText;
+                        missingSections.push(courseName);
+                    }
                 });
-                if (missing.length) { 
-                    alert('Please select a section for:\n- ' + missing.join('\n- ')); 
-                    return; 
+                
+                if (missingSections.length > 0) {
+                    showAlert('Please select a section for all courses:\n- ' + missingSections.join('\n- '), 'warning');
+                    return;
                 }
+                
                 showSubmitModal();
             };
+        }
+    }
+
+    // Submit Modal functions
+    function showSubmitModal() {
+        if (hasApprovedRegistration) {
+            showAlert('You already have an approved registration for this session.', 'warning');
+            return;
+        }
+        document.getElementById('submitModal').classList.add('active');
+    }
+
+    function closeSubmitModal() {
+        document.getElementById('submitModal').classList.remove('active');
+    }
+
+    async function confirmSubmitRegistration() {
+        closeSubmitModal();
+        
+        const hasApproved = await checkExistingApprovedRegistration();
+        if (hasApproved) {
+            showAlert('You already have an approved registration for this session. Cannot submit another registration.', 'warning');
+            return;
+        }
+        
+        try {
+            await apiPost('cart/submit.php', {});
+            showAlert('Registration submitted successfully! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = 'student_registration_history.html';
+            }, 2000);
+        } catch(err) {
+            showAlert('Submission failed: ' + err.message, 'error');
+        }
+    }
+
+    // Remove Modal functions
+    function showRemoveModal(courseCode, courseName) {
+        pendingRemoveCourseCode = courseCode;
+        pendingRemoveCourseName = courseName;
+        document.getElementById('removeModalMessage').innerHTML = `Are you sure you want to remove <strong>${escapeHtml(courseName)}</strong> from your registration?<br><br>This action can be reversed by adding the course again later.`;
+        document.getElementById('removeModal').classList.add('active');
+    }
+
+    function closeRemoveModal() {
+        document.getElementById('removeModal').classList.remove('active');
+        pendingRemoveCourseCode = null;
+        pendingRemoveCourseName = null;
+    }
+
+    async function confirmRemoveCourse() {
+        if (!pendingRemoveCourseCode) return;
+        try {
+            await apiPost('cart/remove.php', { course_code: pendingRemoveCourseCode });
+            showAlert('Course removed from cart', 'success');
+            closeRemoveModal();
+            await loadCart(); // Reload cart to refresh the list
+        } catch(err) {
+            showAlert('Failed to remove course: ' + err.message, 'error');
+            closeRemoveModal();
         }
     }
 
@@ -428,12 +548,15 @@
         const container = document.getElementById('alertContainer');
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert-custom alert-${type}`;
-        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'warning' ? 'exclamation-triangle-fill' : 'exclamation-triangle-fill'} fs-5 me-2"></i><span>${msg}</span>`;
+        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'warning' ? 'exclamation-triangle-fill' : 'exclamation-triangle-fill'} fs-5 me-2"></i><span>${msg.replace(/\n/g, '<br>')}</span>`;
         container.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 4000);
     }
 
-    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
 
     // Modal event listeners
     document.getElementById('submitModalCancelBtn')?.addEventListener('click', closeSubmitModal);
