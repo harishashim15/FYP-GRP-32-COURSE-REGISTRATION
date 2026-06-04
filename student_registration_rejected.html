@@ -233,16 +233,9 @@
             
             let coursesHtml = '';
             let totalCredits = 0;
-            const coursesList = [];
             
             if (data.courses && data.courses.length > 0) {
                 data.courses.forEach((course, idx) => {
-                    coursesList.push({
-                        subject_code: course.subject_code,
-                        subject_name: course.subject_name,
-                        credits: course.credits,
-                        section: course.section || '1'
-                    });
                     coursesHtml += `<tr>
                         <td>${idx + 1}</td>
                         <td><strong>${escapeHtml(course.subject_code)}</strong></td>
@@ -258,8 +251,7 @@
             
             const advisorRemark = data.registration.advisor_remarks || 'No specific reason provided. Please contact your academic advisor.';
             
-            // Store the rejected registration data in localStorage for the register page to load
-            // This is the key fix - properly structure the data
+            // Store the rejected registration data in localStorage
             const rejectedData = {
                 registration_id: registrationId,
                 courses: data.courses.map(course => ({
@@ -271,12 +263,7 @@
                 session: data.registration.session || '2025/2026 - Semester 2'
             };
             
-            // Clear any existing pending data first
-            localStorage.removeItem('pendingRejectedRegistration');
-            // Store new rejected registration data
             localStorage.setItem('pendingRejectedRegistration', JSON.stringify(rejectedData));
-            
-            // Also store a flag that this is an edit of a rejected registration
             localStorage.setItem('isEditingRejectedRegistration', 'true');
             
             const containerHtml = `
@@ -332,8 +319,8 @@
             `;
             document.getElementById('actionButtons').style.display = 'block';
             
-            document.getElementById('editBtn').addEventListener('click', async () => {
-                window.location.href = 'student_register.html';
+            document.getElementById('editBtn').addEventListener('click', function() {
+                window.location.href = 'student_register.html?load_rejected=1';
             });
             
         } catch (err) {
@@ -342,7 +329,7 @@
         }
     }
     
-    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
     loadRejectedDetails();
 </script>
 </body>

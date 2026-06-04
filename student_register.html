@@ -93,12 +93,8 @@
             color: #333;
             vertical-align: middle;
         }
-        .cart-table tr:last-child td {
-            border-bottom: none;
-        }
-        .cart-table tbody tr:hover td {
-            background: #fdf9f7;
-        }
+        .cart-table tr:last-child td { border-bottom: none; }
+        .cart-table tbody tr:hover td { background: #fdf9f7; }
         
         .section-select {
             padding: 8px 12px;
@@ -109,14 +105,7 @@
             font-size: 13px;
             font-family: 'Poppins', sans-serif;
         }
-        .section-select:focus {
-            outline: none;
-            border-color: #670019;
-        }
-        .section-select:disabled {
-            background: #f5f5f5;
-            cursor: not-allowed;
-        }
+        .section-select:focus { outline: none; border-color: #670019; }
         
         .remove-btn {
             background: none;
@@ -128,11 +117,6 @@
             padding: 5px;
         }
         .remove-btn:hover { color: #c82333; transform: scale(1.1); }
-        .remove-btn:disabled {
-            color: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
         
         .total-row td {
             font-weight: 600;
@@ -157,7 +141,6 @@
         }
         .submit-btn:hover { background: linear-gradient(to right, #1b5e20, #0d3b0f); transform: translateY(-2px); }
         .submit-btn.disabled { background: #6c757d; cursor: not-allowed; transform: none; }
-        .submit-btn.disabled:hover { transform: none; background: #6c757d; }
         
         .empty-cart { text-align: center; padding: 60px 20px; }
         .empty-cart i { font-size: 64px; color: #ddd; margin-bottom: 20px; }
@@ -249,7 +232,7 @@
     
     <div id="approvedBanner" class="approved-banner" style="display: none;">
         <i class="bi bi-check-circle-fill"></i>
-        <p><strong>Approved Registration Exists</strong><br>You already have an approved registration for this academic session. Only one approved registration is allowed per session.</p>
+        <p><strong>Approved Registration Exists</strong><br>You already have an approved registration for this academic session.</p>
     </div>
     
     <div id="rejectedBanner" class="rejected-banner" style="display: none;">
@@ -297,10 +280,7 @@
 <script src="js/common.js"></script>
 <script>
     let pendingRemoveCourseCode = null;
-    let pendingRemoveCourseName = null;
     let hasApprovedRegistration = false;
-    let isEditingRejected = false;
-    let rejectedRegistrationId = null;
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -321,7 +301,6 @@
         try {
             const result = await apiGet('registrations/check_approved.php');
             hasApprovedRegistration = result.has_approved || false;
-            
             if (hasApprovedRegistration) {
                 document.getElementById('approvedBanner').style.display = 'flex';
                 const submitBtn = document.getElementById('submitBtn');
@@ -337,21 +316,16 @@
         }
     }
 
-    // Load rejected registration data from localStorage and restore to cart
-    async function loadRejectedRegistrationIfExists() {
+    async function loadRejectedRegistration() {
         const pendingData = localStorage.getItem('pendingRejectedRegistration');
         const isEditing = localStorage.getItem('isEditingRejectedRegistration');
         
         if (pendingData && isEditing === 'true') {
             try {
                 const rejectedData = JSON.parse(pendingData);
-                isEditingRejected = true;
-                rejectedRegistrationId = rejectedData.registration_id;
-                
-                // Show the rejected banner
                 document.getElementById('rejectedBanner').style.display = 'flex';
                 
-                // Clear existing cart first
+                // Clear existing cart
                 const currentCart = await apiGet('cart/get.php');
                 if (currentCart.items && currentCart.items.length > 0) {
                     for (const item of currentCart.items) {
@@ -359,7 +333,7 @@
                     }
                 }
                 
-                // Add each course from rejected registration to cart
+                // Add each rejected course back to cart
                 for (const course of rejectedData.courses) {
                     await apiPost('cart/add.php', { course_code: course.subject_code });
                     if (course.section) {
@@ -370,10 +344,6 @@
                     }
                 }
                 
-                // Clear the localStorage after loading to prevent duplicate loads
-                localStorage.removeItem('pendingRejectedRegistration');
-                localStorage.removeItem('isEditingRejectedRegistration');
-                
                 showAlert('Your previous rejected registration has been loaded. Please make necessary changes and resubmit.', 'success');
                 return true;
             } catch(e) {
@@ -383,6 +353,11 @@
             }
         }
         return false;
+    }
+
+    function clearRejectedStorage() {
+        localStorage.removeItem('pendingRejectedRegistration');
+        localStorage.removeItem('isEditingRejectedRegistration');
     }
 
     async function loadStudentName() {
@@ -420,64 +395,33 @@
             let html = `
                 <table class="cart-table">
                     <thead>
-                        <tr>
-                            <th style="width: 5%;">No.</th>
-                            <th style="width: 15%;">Course Code</th>
-                            <th style="width: 40%;">Course Name</th>
-                            <th style="width: 10%;">Credits</th>
-                            <th style="width: 15%;">Section *</th>
-                            <th style="width: 15%;">Action</th>
-                        </tr>
-                    </thead>
+                        <tr><th style="width:5%">No.</th><th style="width:15%">Code</th><th style="width:40%">Course Name</th><th style="width:10%">Credits</th><th style="width:15%">Section</th><th style="width:15%">Action</th></tr></thead>
                     <tbody>
             `;
             
             cart.items.forEach((item, idx) => {
-                html += `
-                    <tr>
-                        <td>${idx + 1}</td>
-                        <td><strong>${escapeHtml(item.code)}</strong></td>
-                        <td>${escapeHtml(item.name)}</td>
-                        <td>${item.credits}</td>
-                        <td>
-                            <select class="section-select" data-code="${escapeHtml(item.code)}" ${hasApprovedRegistration ? 'disabled' : ''}>
-                                <option value="">Select Section</option>
-                                <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
-                                <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
-                                <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
-                                <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="remove-btn" data-code="${escapeHtml(item.code)}" data-name="${escapeHtml(item.name)}" ${hasApprovedRegistration ? 'disabled' : ''}>
-                                <i class="bi bi-trash3"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+                html += `<tr>
+                    <td>${idx+1}</td>
+                    <td><strong>${escapeHtml(item.code)}</strong></td>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td>${item.credits}</td>
+                    <td>
+                        <select class="section-select" data-code="${escapeHtml(item.code)}">
+                            <option value="">Select Section</option>
+                            <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
+                            <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
+                            <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
+                            <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
+                        </select>
+                    </td>
+                    <td><button class="remove-btn" data-code="${escapeHtml(item.code)}" data-name="${escapeHtml(item.name)}"><i class="bi bi-trash3"></i></button></td>
+                </tr>`;
             });
             
-            html += `
-                    <tr class="total-row">
-                        <td colspan="3"><strong>Total Credit Hours:</strong></td>
-                        <td colspan="3"><strong>${cart.total_credits}</strong></td>
-                    </tr>
-                    </tbody>
-                </table>
-            `;
-            
+            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></table>`;
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
-            
-            if (!hasApprovedRegistration) {
-                attachEvents();
-            } else {
-                const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('disabled');
-                }
-            }
+            attachEvents();
         } catch(err) {
             console.error(err);
             document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger py-4">Failed to load cart. Please refresh.</div>';
@@ -512,7 +456,6 @@
             submitBtn.onclick = () => {
                 const selects = document.querySelectorAll('.section-select');
                 const missingSections = [];
-                
                 selects.forEach(select => {
                     if (!select.value) {
                         const row = select.closest('tr');
@@ -520,22 +463,16 @@
                         missingSections.push(courseName);
                     }
                 });
-                
                 if (missingSections.length > 0) {
                     showAlert('Please select a section for all courses:\n- ' + missingSections.join('\n- '), 'warning');
                     return;
                 }
-                
                 showSubmitModal();
             };
         }
     }
 
     function showSubmitModal() {
-        if (hasApprovedRegistration) {
-            showAlert('You already have an approved registration for this session.', 'warning');
-            return;
-        }
         document.getElementById('submitModal').classList.add('active');
     }
 
@@ -545,19 +482,11 @@
 
     async function confirmSubmitRegistration() {
         closeSubmitModal();
-        
-        const hasApproved = await checkExistingApprovedRegistration();
-        if (hasApproved) {
-            showAlert('You already have an approved registration for this session. Cannot submit another registration.', 'warning');
-            return;
-        }
-        
         try {
             await apiPost('cart/submit.php', {});
+            clearRejectedStorage();
             showAlert('Registration submitted successfully! Redirecting...', 'success');
-            setTimeout(() => {
-                window.location.href = 'student_registration_history.html';
-            }, 2000);
+            setTimeout(() => { window.location.href = 'student_registration_history.html'; }, 2000);
         } catch(err) {
             showAlert('Submission failed: ' + err.message, 'error');
         }
@@ -565,15 +494,13 @@
 
     function showRemoveModal(courseCode, courseName) {
         pendingRemoveCourseCode = courseCode;
-        pendingRemoveCourseName = courseName;
-        document.getElementById('removeModalMessage').innerHTML = `Are you sure you want to remove <strong>${escapeHtml(courseName)}</strong> from your registration?<br><br>This action can be reversed by adding the course again later.`;
+        document.getElementById('removeModalMessage').innerHTML = `Are you sure you want to remove <strong>${escapeHtml(courseName)}</strong> from your registration?`;
         document.getElementById('removeModal').classList.add('active');
     }
 
     function closeRemoveModal() {
         document.getElementById('removeModal').classList.remove('active');
         pendingRemoveCourseCode = null;
-        pendingRemoveCourseName = null;
     }
 
     async function confirmRemoveCourse() {
@@ -595,12 +522,12 @@
         alertDiv.className = `alert-custom alert-${type}`;
         alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'warning' ? 'exclamation-triangle-fill' : 'exclamation-triangle-fill'} fs-5 me-2"></i><span>${msg.replace(/\n/g, '<br>')}</span>`;
         container.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 4000);
+        setTimeout(() => alertDiv.remove(), 5000);
     }
 
     function escapeHtml(str) {
         if (!str) return '';
-        return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        return String(str).replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; });
     }
 
     document.getElementById('submitModalCancelBtn')?.addEventListener('click', closeSubmitModal);
@@ -609,17 +536,17 @@
     document.getElementById('removeModalConfirmBtn')?.addEventListener('click', confirmRemoveCourse);
     
     document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
     });
 
     async function init() {
         await loadStudentName();
         await checkExistingApprovedRegistration();
-        await loadRejectedRegistrationIfExists();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('load_rejected') === '1') {
+            await loadRejectedRegistration();
+        }
         await loadCart();
     }
     
