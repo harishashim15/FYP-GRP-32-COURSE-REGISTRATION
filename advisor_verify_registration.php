@@ -5,7 +5,7 @@ date_default_timezone_set('Asia/Kuala_Lumpur');
 
 session_start();
 
-// Get advisor ID from session - FIX: Remove default 1
+// Get advisor ID from session
 $advisor_id = $_SESSION['user_id'] ?? null;
 
 // If not logged in, redirect to login
@@ -28,15 +28,15 @@ if (!$user_check || $user_check['role'] != 'advisor') {
     exit;
 }
 
-// Get student_id from URL
-$student_id = isset($_GET['student_id']) ? (int)$_GET['student_id'] : 0;
+// Get registration_id from URL (CHANGED from student_id to registration_id)
+$registration_id = isset($_GET['registration_id']) ? (int)$_GET['registration_id'] : 0;
 
-if (empty($student_id)) {
+if (empty($registration_id)) {
     header("Location: advisor_registrations.php");
     exit;
 }
 
-// Get student info
+// Get student info from the specific registration
 $sql = "SELECT 
             s.user_id as student_id,
             s.matrix_number,
@@ -47,9 +47,10 @@ $sql = "SELECT
             s.year,
             s.semester as current_semester
         FROM students s
-        WHERE s.user_id = ?";
+        JOIN course_registrations cr ON cr.student_id = s.user_id
+        WHERE cr.id = ?";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "i", $student_id);
+mysqli_stmt_bind_param($stmt, "i", $registration_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $student = mysqli_fetch_assoc($result);
@@ -59,7 +60,7 @@ if (!$student) {
     exit;
 }
 
-// Get ALL courses from ALL registrations for this student
+// Get courses for this SPECIFIC registration (NOT the latest one)
 $sql = "SELECT 
             sub.subject_code as code,
             sub.subject_name as name,
@@ -72,15 +73,15 @@ $sql = "SELECT
         FROM course_registrations cr
         JOIN registration_courses rc ON cr.id = rc.registration_id
         JOIN subjects sub ON rc.subject_code = sub.subject_code
-        WHERE cr.student_id = ?
-        ORDER BY cr.submission_date DESC, sub.subject_code";
+        WHERE cr.id = ?
+        ORDER BY sub.subject_code";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "i", $student_id);
+mysqli_stmt_bind_param($stmt, "i", $registration_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $courses = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-// Get the status and remarks from the most recent registration
+// Get the status and remarks from this specific registration
 $reg_status = !empty($courses) ? $courses[0]['reg_status'] : 'pending';
 $advisor_remarks = !empty($courses) ? $courses[0]['advisor_remarks'] : '';
 $submission_date = !empty($courses) ? $courses[0]['submission_date'] : date('Y-m-d');
@@ -91,17 +92,17 @@ foreach ($courses as $course) {
     $total_credits += $course['credits']; 
 }
 
-// Handle approve/reject action via AJAX
+// Handle approve/reject action via AJAX - Update ONLY this specific registration
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $action = $_POST['action'];
     $remarks = $_POST['remarks'] ?? '';
     $new_status = ($action == 'approve') ? 'approved' : 'rejected';
     $current_time = date('Y-m-d H:i:s');
     
-    // Update ALL registrations for this student
-    $sql = "UPDATE course_registrations SET status = ?, advisor_remarks = ?, reviewed_by = ?, reviewed_at = ? WHERE student_id = ?";
+    // Update ONLY this specific registration
+    $sql = "UPDATE course_registrations SET status = ?, advisor_remarks = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "ssisi", $new_status, $remarks, $advisor_id, $current_time, $student_id);
+    mysqli_stmt_bind_param($stmt, "ssisi", $new_status, $remarks, $advisor_id, $current_time, $registration_id);
     
     if (mysqli_stmt_execute($stmt)) {
         echo json_encode(['success' => true, 'status' => $new_status, 'remarks' => $remarks]);
@@ -410,7 +411,7 @@ if (empty($initials)) $initials = 'ST';
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="4" class="text-center">No courses found</small>
+                        <td colspan="4" class="text-center">No courses found</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -557,60 +558,52 @@ if (empty($initials)) $initials = 'ST';
         });
     }
     
-function printPDF() {
-    // Create a hidden iframe to load the slip and print directly
-    var registrationId = <?php 
-        $reg_id = !empty($courses) ? $courses[0]['registration_id'] : 0;
-        echo $reg_id; 
-    ?>;
-    
-    if (registrationId > 0) {
-        // Show loading indicator
-        Swal.fire({
-            title: 'Preparing PDF...',
-            text: 'Please wait while we prepare your registration slip.',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
+    function printPDF() {
+        // Use the current registration_id
+        var registrationId = <?php echo $registration_id; ?>;
         
-        // Create hidden iframe
-        var iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = 'advisor_print_slip.php?registration_id=' + registrationId;
-        document.body.appendChild(iframe);
-        
-        iframe.onload = function() {
-            // Close the loading alert
-            Swal.close();
+        if (registrationId > 0) {
+            // Show loading indicator
+            Swal.fire({
+                title: 'Preparing PDF...',
+                text: 'Please wait while we prepare your registration slip.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
             
-            // Print the iframe content
-            iframe.contentWindow.print();
+            // Create hidden iframe
+            var iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'advisor_print_slip.php?registration_id=' + registrationId;
+            document.body.appendChild(iframe);
             
-            // Remove iframe after print (optional)
-            setTimeout(function() {
-                document.body.removeChild(iframe);
-            }, 1000);
-        };
-        
-        iframe.onerror = function() {
+            iframe.onload = function() {
+                Swal.close();
+                iframe.contentWindow.print();
+                setTimeout(function() {
+                    document.body.removeChild(iframe);
+                }, 1000);
+            };
+            
+            iframe.onerror = function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to generate registration slip. Please try again.',
+                    confirmButtonColor: '#670019'
+                });
+            };
+        } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Unable to generate registration slip. Please try again.',
+                text: 'Unable to generate registration slip. Registration ID not found.',
                 confirmButtonColor: '#670019'
             });
-        };
-    } else {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Unable to generate registration slip. Registration ID not found.',
-            confirmButtonColor: '#670019'
-        });
+        }
     }
-}
 </script>
 </body>
 </html>

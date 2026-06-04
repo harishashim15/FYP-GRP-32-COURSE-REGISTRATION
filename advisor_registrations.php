@@ -3,7 +3,7 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID from session - FIX: Remove default 1
+// Get advisor ID from session
 $advisor_id = $_SESSION['user_id'] ?? null;
 
 // If not logged in, redirect to login
@@ -26,25 +26,21 @@ if (!$user_check || $user_check['role'] != 'advisor') {
     exit;
 }
 
-// Get all registrations for students under this advisor
-// This groups by student and shows ONE row per student
+// Get ALL registrations (each registration as its own row, NOT grouped by student)
 $sql = "SELECT 
             u.user_id as student_id,
             u.matrix_number as student_matrix,
             u.user_name as student_name,
             COUNT(DISTINCT rc.id) as course_count,
-            MIN(cr.submission_date) as submitted_date,
+            cr.submission_date as submitted_date,
             cr.status,
-            -- Get the latest registration_id for this student
-            (SELECT id FROM course_registrations 
-             WHERE student_id = s.user_id 
-             ORDER BY submission_date DESC LIMIT 1) as registration_id
+            cr.id as registration_id
         FROM course_registrations cr
         JOIN students s ON cr.student_id = s.user_id
         JOIN users u ON s.user_id = u.user_id
         LEFT JOIN registration_courses rc ON cr.id = rc.registration_id
         WHERE s.advisor_id = ?
-        GROUP BY u.user_id, u.matrix_number, u.user_name, cr.status
+        GROUP BY cr.id, u.user_id, u.matrix_number, u.user_name, cr.submission_date, cr.status
         ORDER BY cr.submission_date DESC";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $advisor_id);
@@ -52,7 +48,7 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $registrations = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-// Calculate pending count
+// Calculate pending count (count registrations with pending status)
 $pending_count = 0;
 foreach ($registrations as $reg) {
     if ($reg['status'] == 'pending') $pending_count++;
@@ -67,6 +63,7 @@ $result_advisor = mysqli_stmt_get_result($stmt_advisor);
 $advisor = mysqli_fetch_assoc($result_advisor);
 $advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,10 +174,10 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
                                 <td><span class="status-badge status-<?php echo $reg['status']; ?>"><?php echo ucfirst($reg['status']); ?></span></small></td>
                                 <td>
                                     <?php if ($reg['status'] == 'pending'): ?>
-                                        <button class="review-btn" onclick="location.href='advisor_verify_registration.php?student_id=<?php echo $reg['student_id']; ?>'">Review</button>
-                                    <?php else: ?>
-                                        <button class="view-btn" onclick="location.href='advisor_verify_registration.php?student_id=<?php echo $reg['student_id']; ?>'">View</button>
-                                    <?php endif; ?>
+    <button class="review-btn" onclick="location.href='advisor_verify_registration.php?registration_id=<?php echo $reg['registration_id']; ?>'">Review</button>
+<?php else: ?>
+    <button class="view-btn" onclick="location.href='advisor_verify_registration.php?registration_id=<?php echo $reg['registration_id']; ?>'">View</button>
+<?php endif; ?>
                                  </small>
                             </tr>
                         <?php endforeach; ?>

@@ -50,8 +50,17 @@ if (!$student) {
     exit;
 }
 
-// Get student's registration status from course_registrations (most recent)
-$sql_status = "SELECT status FROM course_registrations WHERE student_id = ? ORDER BY id DESC LIMIT 1";
+// Get the latest registration_id for this student (for the button)
+$sql_latest_reg = "SELECT id FROM course_registrations WHERE student_id = ? ORDER BY submission_date DESC LIMIT 1";
+$stmt_latest_reg = mysqli_prepare($conn, $sql_latest_reg);
+mysqli_stmt_bind_param($stmt_latest_reg, "i", $student['user_id']);
+mysqli_stmt_execute($stmt_latest_reg);
+$result_latest_reg = mysqli_stmt_get_result($stmt_latest_reg);
+$latest_reg = mysqli_fetch_assoc($result_latest_reg);
+$latest_registration_id = $latest_reg ? $latest_reg['id'] : 0;
+
+// Get student's registration status from course_registrations (most recent by submission_date)
+$sql_status = "SELECT status FROM course_registrations WHERE student_id = ? ORDER BY submission_date DESC LIMIT 1";
 $stmt_status = mysqli_prepare($conn, $sql_status);
 mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
 mysqli_stmt_execute($stmt_status);
@@ -59,15 +68,21 @@ $result_status = mysqli_stmt_get_result($stmt_status);
 $reg = mysqli_fetch_assoc($result_status);
 $reg_status = $reg ? $reg['status'] : 'pending';
 
-// Get student's registered courses from registration_courses table
+// Get ONLY the LATEST registration courses for this student
 $sql_courses = "SELECT sub.subject_code, sub.subject_name, sub.credits, rc.section, cr.status as reg_status
                 FROM course_registrations cr 
                 JOIN registration_courses rc ON cr.id = rc.registration_id
                 JOIN subjects sub ON rc.subject_code = sub.subject_code
-                WHERE cr.student_id = ?
-                ORDER BY cr.id DESC";
+                WHERE cr.student_id = ? 
+                AND cr.id = (
+                    SELECT id FROM course_registrations 
+                    WHERE student_id = ? 
+                    ORDER BY submission_date DESC 
+                    LIMIT 1
+                )
+                ORDER BY sub.subject_code";
 $stmt_courses = mysqli_prepare($conn, $sql_courses);
-mysqli_stmt_bind_param($stmt_courses, "i", $student['user_id']);
+mysqli_stmt_bind_param($stmt_courses, "ii", $student['user_id'], $student['user_id']);
 mysqli_stmt_execute($stmt_courses);
 $result_courses = mysqli_stmt_get_result($stmt_courses);
 $courses = mysqli_fetch_all($result_courses, MYSQLI_ASSOC);
@@ -127,13 +142,13 @@ switch ($student['programme']) {
         $programme_code = 'DSPD';
         break;
     case 'Electrical Engineering':
-        $programme_code = 'DSEE';
+        $programme_code = 'DSPK';
         break;
     case 'Sport Science':
-        $programme_code = 'DSSS';
+        $programme_code = 'DSPU';
         break;
     case 'Pengajian Islam':
-        $programme_code = 'DSPI';
+        $programme_code = 'DDWI';
         break;
     default:
         $programme_code = 'DSPD';
@@ -442,7 +457,11 @@ $active_code = 'A - Active';
     <!-- Action Buttons - Side by Side -->
     <div class="action-buttons">
         <a href="advisor_my_students.php" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Students</a>
-        <a href="advisor_verify_registration.php?student_id=<?php echo $student['user_id']; ?>" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
+        <?php if ($latest_registration_id > 0): ?>
+            <a href="advisor_verify_registration.php?registration_id=<?php echo $latest_registration_id; ?>" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
+        <?php else: ?>
+            <a href="advisor_verify_registration.php?student_id=<?php echo $student['user_id']; ?>" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
+        <?php endif; ?>
     </div>
 </div>
 

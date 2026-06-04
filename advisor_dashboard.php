@@ -58,15 +58,15 @@ $result = mysqli_stmt_get_result($stmt);
 $approved_count = mysqli_fetch_assoc($result)['approved'];
 
 // Get recent pending registration requests
-$sql = "SELECT DISTINCT u.user_id, u.matrix_number, u.user_name,
-        (SELECT COUNT(*) FROM registration_courses rc 
-         JOIN course_registrations cr2 ON rc.registration_id = cr2.id 
-         WHERE cr2.student_id = u.user_id) as course_count,
-        cr.status, cr.submission_date
+$sql = "SELECT u.user_id, u.matrix_number, u.user_name,
+        COUNT(rc.id) as course_count,
+        cr.status, cr.submission_date, cr.id as registration_id
         FROM course_registrations cr
         JOIN users u ON cr.student_id = u.user_id
+        LEFT JOIN registration_courses rc ON cr.id = rc.registration_id
         WHERE cr.status = 'pending' 
         AND cr.student_id IN (SELECT user_id FROM students WHERE advisor_id = ?)
+        GROUP BY cr.id, u.user_id, u.matrix_number, u.user_name, cr.status, cr.submission_date
         ORDER BY cr.submission_date DESC LIMIT 5";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $advisor_id);
@@ -75,11 +75,15 @@ $result = mysqli_stmt_get_result($stmt);
 $pending_requests = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 // Get recent approved registrations
-$sql_approved = "SELECT DISTINCT u.user_id, u.matrix_number, u.user_name, cr.status
+$sql_approved = "SELECT u.user_id, u.matrix_number, u.user_name,
+        COUNT(rc.id) as course_count,
+        cr.status, cr.submission_date, cr.id as registration_id
         FROM course_registrations cr
         JOIN users u ON cr.student_id = u.user_id
+        LEFT JOIN registration_courses rc ON cr.id = rc.registration_id
         WHERE cr.status = 'approved' 
         AND cr.student_id IN (SELECT user_id FROM students WHERE advisor_id = ?)
+        GROUP BY cr.id, u.user_id, u.matrix_number, u.user_name, cr.status, cr.submission_date
         ORDER BY cr.submission_date DESC LIMIT 5";
 $stmt_approved = mysqli_prepare($conn, $sql_approved);
 mysqli_stmt_bind_param($stmt_approved, "i", $advisor_id);
@@ -282,6 +286,11 @@ if ($period) {
         }
         .action-left h5 { font-size: 15px; margin-bottom: 2px; }
         .action-left small { font-size: 11px; }
+        
+        /* Counter animation */
+        .counter {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -331,7 +340,7 @@ if ($period) {
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon yellow"><i class="bi bi-people-fill"></i></div>
-                <h2 id="totalStudents"><?php echo $total_students; ?></h2>
+                <h2><span class="counter" id="totalStudentsCounter">0</span></h2>
                 <h5>Total Students</h5>
                 <p>Students under your guidance</p>
             </div>
@@ -339,7 +348,7 @@ if ($period) {
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon red"><i class="bi bi-clock-history"></i></div>
-                <h2 id="pendingApprovals"><?php echo $pending_count; ?></h2>
+                <h2><span class="counter" id="pendingApprovalsCounter">0</span></h2>
                 <h5>Pending Approvals</h5>
                 <p>Waiting for your review</p>
             </div>
@@ -347,7 +356,7 @@ if ($period) {
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon green"><i class="bi bi-check-circle"></i></div>
-                <h2 id="approvedThisWeek"><?php echo $approved_count; ?></h2>
+                <h2><span class="counter" id="approvedThisWeekCounter">0</span></h2>
                 <h5>Approved</h5>
                 <p>Registrations approved this week</p>
             </div>
@@ -397,12 +406,21 @@ if ($period) {
                                 <td><?php echo isset($request['course_count']) ? $request['course_count'] : '0'; ?> courses</small></td>
                                 <td><span class="status-badge status-<?php echo $request['status']; ?>"><?php echo ucfirst($request['status']); ?></span></small></td>
                                 <td>
-                                    <a href="advisor_verify_registration.php?student_id=<?php echo $request['user_id']; ?>" class="btn-view">View Details</a>
+                                    <a href="advisor_verify_registration.php?registration_id=<?php 
+                                        // Get the latest registration_id for this student
+                                        $reg_id_query = "SELECT id FROM course_registrations WHERE student_id = ? ORDER BY submission_date DESC LIMIT 1";
+                                        $reg_id_stmt = mysqli_prepare($conn, $reg_id_query);
+                                        mysqli_stmt_bind_param($reg_id_stmt, "i", $request['user_id']);
+                                        mysqli_stmt_execute($reg_id_stmt);
+                                        $reg_id_result = mysqli_stmt_get_result($reg_id_stmt);
+                                        $reg_id_row = mysqli_fetch_assoc($reg_id_result);
+                                        echo $reg_id_row ? $reg_id_row['id'] : '';
+                                    ?>" class="btn-view">View Details</a>
                                  </small>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="5" class="text-center">No registration requests found</small></td>
+                        <tr><td colspan="5" class="text-center">No registration requests found</small></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -444,6 +462,36 @@ if ($period) {
             document.querySelector('.main-content').classList.add('expanded');
         }
     })();
+
+    // Counter animation function
+    function animateCounter(element, targetValue, duration = 1000) {
+        let startValue = 0;
+        let increment = targetValue / (duration / 16);
+        let current = startValue;
+        
+        const updateCounter = () => {
+            current += increment;
+            if (current < targetValue) {
+                element.innerText = Math.floor(current);
+                requestAnimationFrame(updateCounter);
+            } else {
+                element.innerText = targetValue;
+            }
+        };
+        
+        updateCounter();
+    }
+
+    // Run counters when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalStudents = <?php echo $total_students; ?>;
+        const pendingApprovals = <?php echo $pending_count; ?>;
+        const approvedThisWeek = <?php echo $approved_count; ?>;
+        
+        animateCounter(document.getElementById('totalStudentsCounter'), totalStudents, 1000);
+        animateCounter(document.getElementById('pendingApprovalsCounter'), pendingApprovals, 1000);
+        animateCounter(document.getElementById('approvedThisWeekCounter'), approvedThisWeek, 1000);
+    });
 </script>
 </body>
 </html>
