@@ -62,6 +62,61 @@
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
         
+        /* Approved Registration Banner - Similar to Registration Closed design */
+        .approved-banner {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .approved-banner i {
+            font-size: 42px;
+            color: #2e7d32;
+        }
+        .approved-banner-content h4 {
+            color: #155724;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .approved-banner-content p {
+            color: #155724;
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        /* Registration Closed Banner */
+        .closed-banner {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .closed-banner i {
+            font-size: 42px;
+            color: #721c24;
+        }
+        .closed-banner-content h4 {
+            color: #721c24;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .closed-banner-content p {
+            color: #721c24;
+            margin: 0;
+            font-size: 14px;
+        }
+        
         .cart-summary {
             background: #fff7ef; border: 1px solid #f4a000; border-radius: 25px;
             padding: 15px 25px; margin-bottom: 25px;
@@ -76,7 +131,7 @@
             text-decoration: none; font-size: 14px; font-weight: 500;
         }
         .view-cart-btn:hover { color: white; }
-        .view-cart-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
+        .view-cart-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; opacity: 0.6; }
         
         .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
@@ -105,8 +160,10 @@
         .cart-btn.remove:hover { background: #c82333; transform: translateY(-2px); }
         .cart-btn.disabled { background: #6c757d; color: white; cursor: not-allowed; }
         .cart-btn.disabled:hover { transform: none; background: #6c757d; }
-        .cart-btn.pending { background: #6c757d; color: white; cursor: default; }
-        .cart-btn.approved { background: #ffc107; color: #333; cursor: default; }
+        .cart-btn.approved { background: #2e7d32; color: white; cursor: default; }
+        .cart-btn.approved:hover { transform: none; background: #2e7d32; }
+        .cart-btn.pending { background: #ffc107; color: #333; cursor: default; }
+        .cart-btn.pending:hover { transform: none; background: #ffc107; }
         
         /* Modal Styles */
         .modal-overlay {
@@ -121,7 +178,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         .modal-overlay.active .modal-container { transform: scale(1); }
-        .modal-icon { font-size: 60px; color: #dc3545; margin-bottom: 15px; }
+        .modal-icon { font-size: 60px; margin-bottom: 15px; }
         .modal-container h3 { color: #670019; font-weight: 700; margin-bottom: 10px; }
         .modal-container p { color: #666; margin-bottom: 25px; }
         .modal-btn {
@@ -130,14 +187,6 @@
             font-weight: 600; cursor: pointer; transition: 0.3s;
         }
         .modal-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
-        
-        .period-banner-closed {
-            background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 15px;
-            padding: 15px 20px; margin-bottom: 25px; display: flex;
-            align-items: center; gap: 12px; color: #721c24;
-        }
-        .period-banner-closed i { font-size: 24px; }
-        .period-banner-closed p { margin: 0; font-size: 14px; }
         
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
@@ -175,10 +224,22 @@
         <p>Browse and add courses to your registration cart</p>
     </div>
 
-    <!-- Period Closed Banner -->
-    <div id="periodClosedBanner" class="period-banner-closed" style="display: none;">
+    <!-- Approved Registration Banner (Green) - Shown when student already has approved registration -->
+    <div id="approvedBanner" class="approved-banner" style="display: none;">
+        <i class="bi bi-check-circle-fill"></i>
+        <div class="approved-banner-content">
+            <h4>Registration Approved</h4>
+            <p>Your registration for Semester 2 2025/2026 has already been approved. You cannot add, modify or submit any additional courses for this academic session.</p>
+        </div>
+    </div>
+
+    <!-- Registration Period Closed Banner (Red) - Shown when registration period is closed -->
+    <div id="closedBanner" class="closed-banner" style="display: none;">
         <i class="bi bi-calendar-x-fill"></i>
-        <p><strong>Registration Period Closed</strong><br>You cannot add or remove courses at this time. Please contact your academic advisor for assistance.</p>
+        <div class="closed-banner-content">
+            <h4>Registration Period Closed</h4>
+            <p>The registration period is currently closed. You cannot add or remove courses at this time. Please contact your academic advisor for assistance.</p>
+        </div>
     </div>
 
     <div id="cartSummary" class="cart-summary" style="display: none;">
@@ -199,14 +260,14 @@
 <!-- Modal for Registration Period Closed -->
 <div id="periodClosedModal" class="modal-overlay">
     <div class="modal-container">
-        <div class="modal-icon"><i class="bi bi-calendar-x-fill"></i></div>
+        <div class="modal-icon"><i class="bi bi-calendar-x-fill" style="color: #dc3545;"></i></div>
         <h3>Registration Period Closed</h3>
         <p>The registration period is currently closed. You cannot add or remove courses at this time. Please contact your academic advisor for assistance.</p>
         <button class="modal-btn" onclick="closePeriodModal()">OK</button>
     </div>
 </div>
 
-<!-- Add Course Confirmation Modal -->
+<!-- Modal for Add Course Confirmation -->
 <div id="addCourseModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon"><i class="bi bi-question-circle-fill" style="color: #f4a000;"></i></div>
@@ -225,6 +286,7 @@
     let cartCourses = [];
     let courseStatus = {};
     let isRegistrationOpen = true;
+    let hasApprovedRegistration = false;
     let pendingAddCourse = null;
 
     function toggleSidebar() {
@@ -268,6 +330,31 @@
         await callback(course);
     }
 
+    // Check if student already has an approved registration for current session
+    async function checkApprovedRegistration() {
+        try {
+            const result = await apiGet('registrations/check_approved.php');
+            hasApprovedRegistration = result.has_approved || false;
+            
+            if (hasApprovedRegistration) {
+                // Show the green approved banner
+                document.getElementById('approvedBanner').style.display = 'flex';
+                // Hide cart summary since they can't add more courses
+                document.getElementById('cartSummary').style.display = 'none';
+                // Disable proceed button if visible
+                const proceedBtn = document.getElementById('proceedBtn');
+                if (proceedBtn) {
+                    proceedBtn.classList.add('disabled');
+                    proceedBtn.style.pointerEvents = 'none';
+                }
+            }
+            return hasApprovedRegistration;
+        } catch(e) {
+            console.error('Failed to check approved registration:', e);
+            return false;
+        }
+    }
+
     async function loadCourseStatus() {
         try {
             const data = await apiGet('registrations/student_course_status.php');
@@ -282,7 +369,12 @@
             const cart = await apiGet('cart/get.php');
             const count = cart.count || 0;
             document.getElementById('cartCount').innerText = count;
-            document.getElementById('cartSummary').style.display = count > 0 ? 'flex' : 'none';
+            // Only show cart summary if registration is open AND no approved registration
+            if (!hasApprovedRegistration && count > 0 && isRegistrationOpen) {
+                document.getElementById('cartSummary').style.display = 'flex';
+            } else {
+                document.getElementById('cartSummary').style.display = 'none';
+            }
             cartCourses = cart.items.map(item => item.code);
         } catch(e) { console.error(e); }
     }
@@ -292,16 +384,15 @@
             const period = await apiGet('registrations/period.php');
             isRegistrationOpen = period.is_open;
             
-            if (!isRegistrationOpen) {
-                document.getElementById('periodClosedBanner').style.display = 'flex';
+            if (!isRegistrationOpen && !hasApprovedRegistration) {
+                document.getElementById('closedBanner').style.display = 'flex';
                 const proceedBtn = document.getElementById('proceedBtn');
                 if (proceedBtn) {
                     proceedBtn.classList.add('disabled');
                     proceedBtn.style.pointerEvents = 'none';
-                    proceedBtn.style.opacity = '0.6';
                 }
             } else {
-                document.getElementById('periodClosedBanner').style.display = 'none';
+                document.getElementById('closedBanner').style.display = 'none';
             }
             return isRegistrationOpen;
         } catch(e) {
@@ -312,6 +403,7 @@
 
     async function loadCourses() {
         try {
+            await checkApprovedRegistration();
             await checkRegistrationPeriod();
             await loadCourseStatus();
             const data = await apiGet('courses/list.php');
@@ -329,22 +421,35 @@
         const status = courseStatus[course.code];
         const isInCart = cartCourses.includes(course.code);
         
+        // PRIORITY 1: If registration already approved, show "Approved" button (disabled)
+        if (hasApprovedRegistration) {
+            return { text: 'Registration Completed', class: 'approved', disabled: true, icon: 'check-circle-fill' };
+        }
+        // PRIORITY 2: If registration period closed, show "Registration Closed" button (disabled)
         if (!isRegistrationOpen) {
             return { text: 'Registration Closed', class: 'disabled', disabled: true, icon: 'ban' };
         }
+        // PRIORITY 3: If already in cart, show "Remove" button
         if (isInCart) {
             return { text: 'Remove', class: 'remove', disabled: false, icon: 'dash-circle' };
         }
+        // PRIORITY 4: If already approved in a previous registration, show "Approved" button (disabled)
         if (status === 'approved') {
             return { text: 'Approved', class: 'approved', disabled: true, icon: 'check-circle-fill' };
         }
+        // PRIORITY 5: If pending approval from previous registration, show "Pending" button (disabled)
         if (status === 'pending') {
             return { text: 'Pending', class: 'pending', disabled: true, icon: 'clock-history' };
         }
+        // Default: Show "Add to Cart" button
         return { text: 'Add to Cart', class: 'add', disabled: false, icon: 'plus-circle' };
     }
 
     async function addToCart(course, btnElement) {
+        if (hasApprovedRegistration) {
+            showAlert('You already have an approved registration. Cannot add more courses.', 'error');
+            return;
+        }
         if (!isRegistrationOpen) {
             showPeriodClosedModal();
             return;
@@ -364,6 +469,10 @@
     }
 
     async function removeFromCart(course, btnElement) {
+        if (hasApprovedRegistration) {
+            showAlert('You already have an approved registration. Cannot modify courses.', 'error');
+            return;
+        }
         if (!isRegistrationOpen) {
             showPeriodClosedModal();
             return;
@@ -408,10 +517,14 @@
             grid.appendChild(card);
         });
 
-        // Add event listeners
+        // Add event listeners for add buttons
         document.querySelectorAll('.cart-btn.add').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
+                if (hasApprovedRegistration) {
+                    showAlert('You already have an approved registration. Cannot add more courses.', 'error');
+                    return;
+                }
                 if (!isRegistrationOpen) {
                     showPeriodClosedModal();
                     return;
@@ -426,9 +539,14 @@
             });
         });
 
+        // Add event listeners for remove buttons
         document.querySelectorAll('.cart-btn.remove').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
+                if (hasApprovedRegistration) {
+                    showAlert('You already have an approved registration. Cannot modify courses.', 'error');
+                    return;
+                }
                 if (!isRegistrationOpen) {
                     showPeriodClosedModal();
                     return;
@@ -452,7 +570,6 @@
     }
 
     function showAlert(msg, type) {
-        // Create temporary alert
         const alertDiv = document.createElement('div');
         alertDiv.style.position = 'fixed';
         alertDiv.style.top = '20px';
