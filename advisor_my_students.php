@@ -3,8 +3,28 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID from session (after login)
-$advisor_id = $_SESSION['user_id'] ?? 1;
+// Get advisor ID from session - FIX: Remove default 1, check if logged in
+$advisor_id = $_SESSION['user_id'] ?? null;
+
+// If not logged in or not an advisor, redirect to login
+if (!$advisor_id) {
+    header("Location: ../index.html");
+    exit;
+}
+
+// Verify the user is actually an advisor
+$sql_check = "SELECT role FROM users WHERE user_id = ?";
+$stmt_check = mysqli_prepare($conn, $sql_check);
+mysqli_stmt_bind_param($stmt_check, "i", $advisor_id);
+mysqli_stmt_execute($stmt_check);
+$result_check = mysqli_stmt_get_result($stmt_check);
+$user_check = mysqli_fetch_assoc($result_check);
+
+if (!$user_check || $user_check['role'] != 'advisor') {
+    session_destroy();
+    header("Location: ../index.html");
+    exit;
+}
 
 // Get all students under this advisor
 $sql = "SELECT s.*, u.matrix_number, u.user_name, u.utm_email 
@@ -26,7 +46,7 @@ $pending_approval_count = 0;
 
 foreach ($students as $student) {
     // Get student's registration status from course_registrations
-    $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? LIMIT 1";
+    $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? ORDER BY id DESC LIMIT 1";
     $stmt_status = mysqli_prepare($conn, $sql_status);
     mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
     mysqli_stmt_execute($stmt_status);
@@ -53,7 +73,7 @@ mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
 mysqli_stmt_execute($stmt_advisor);
 $result_advisor = mysqli_stmt_get_result($stmt_advisor);
 $advisor = mysqli_fetch_assoc($result_advisor);
-$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
+$advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -329,7 +349,7 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
                     <?php if (!empty($students)): ?>
                         <?php foreach ($students as $student): ?>
                             <?php
-                            $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? LIMIT 1";
+                            $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? ORDER BY id DESC LIMIT 1";
                             $stmt_status = mysqli_prepare($conn, $sql_status);
                             mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
                             mysqli_stmt_execute($stmt_status);
@@ -354,15 +374,15 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
                             ?>
                             <tr>
                                 <td><strong><?php echo htmlspecialchars($student['user_name']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($student['matrix_number']); ?></td>
-                                <td><?php echo htmlspecialchars($student['programme']); ?></td>
-                                <td>Year <?php echo $student['year']; ?></td>
-                                <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
-                                <td><button class="view-btn" onclick="location.href='advisor_student_details.php?matrix=<?php echo $student['matrix_number']; ?>'">View Details</button></td>
+                                <td><?php echo htmlspecialchars($student['matrix_number']); ?></small></td>
+                                <td><?php echo htmlspecialchars($student['programme']); ?></small></td>
+                                <td>Year <?php echo $student['year']; ?></small></td>
+                                <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></small></td>
+                                <td><button class="view-btn" onclick="location.href='advisor_student_details.php?student_id=<?php echo $student['user_id']; ?>'">View Details</button></small>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="6" class="text-center">No students found</td></tr>
+                        <tr><td colspan="6" class="text-center">No students found</small></td>
                     <?php endif; ?>
                 </tbody>
             </table>

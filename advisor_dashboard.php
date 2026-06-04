@@ -3,8 +3,28 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID from session (after login)
-$advisor_id = $_SESSION['user_id'] ?? 1;
+// Get advisor ID from session - FIX: Remove default 1, check if logged in
+$advisor_id = $_SESSION['user_id'] ?? null;
+
+// If not logged in or not an advisor, redirect to login
+if (!$advisor_id) {
+    header("Location: ../index.html");
+    exit;
+}
+
+// Verify the user is actually an advisor
+$sql_check = "SELECT role FROM users WHERE user_id = ?";
+$stmt_check = mysqli_prepare($conn, $sql_check);
+mysqli_stmt_bind_param($stmt_check, "i", $advisor_id);
+mysqli_stmt_execute($stmt_check);
+$result_check = mysqli_stmt_get_result($stmt_check);
+$user_check = mysqli_fetch_assoc($result_check);
+
+if (!$user_check || $user_check['role'] != 'advisor') {
+    session_destroy();
+    header("Location: ../index.html");
+    exit;
+}
 
 // Get total students under this advisor
 $sql = "SELECT COUNT(*) as total FROM students WHERE advisor_id = ?";
@@ -74,9 +94,9 @@ mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
 mysqli_stmt_execute($stmt_advisor);
 $result_advisor = mysqli_stmt_get_result($stmt_advisor);
 $advisor = mysqli_fetch_assoc($result_advisor);
-$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
+$advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
 
-// Merge requests
+// Merge requests (pending first, then approved)
 $all_requests = array_merge($pending_requests, $approved_requests);
 $all_requests = array_slice($all_requests, 0, 6);
 
@@ -218,14 +238,24 @@ if ($period) {
         .status-pending  { background: #fff3cd; color: #856404; }
         .status-approved { background: #d4edda; color: #155724; }
         .status-rejected { background: #f8d7da; color: #721c24; }
-        .btn-approve {
-            background: #d4edda; color: #155724; border: none;
-            padding: 5px 12px; border-radius: 20px; font-size: 11px; margin-right: 5px; cursor: pointer;
+        
+        /* View Details Button */
+        .btn-view {
+            background: #670019;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
         }
-        .btn-reject {
-            background: #f8d7da; color: #721c24; border: none;
-            padding: 5px 12px; border-radius: 20px; font-size: 11px; cursor: pointer;
+        .btn-view:hover {
+            background: #8b0022;
+            color: white;
         }
+        
         .action-link { color: #670019; text-decoration: none; font-weight: 500; font-size: 13px; }
         .action-link:hover { text-decoration: underline; }
         .table-custom { width: 100%; border-collapse: collapse; }
@@ -367,12 +397,7 @@ if ($period) {
                                 <td><?php echo isset($request['course_count']) ? $request['course_count'] : '0'; ?> courses</small></td>
                                 <td><span class="status-badge status-<?php echo $request['status']; ?>"><?php echo ucfirst($request['status']); ?></span></small></td>
                                 <td>
-                                    <?php if ($request['status'] == 'pending'): ?>
-                                        <button class="btn-approve" onclick="location.href='advisor_verify_registration.php?matrix=<?php echo $request['matrix_number']; ?>'"><i class="bi bi-check"></i> Approve</button>
-                                        <button class="btn-reject" onclick="location.href='advisor_verify_registration.php?matrix=<?php echo $request['matrix_number']; ?>'"><i class="bi bi-x"></i> Reject</button>
-                                    <?php else: ?>
-                                        <a href="advisor_verify_registration.php?matrix=<?php echo $request['matrix_number']; ?>" class="action-link">View Details</a>
-                                    <?php endif; ?>
+                                    <a href="advisor_verify_registration.php?student_id=<?php echo $request['user_id']; ?>" class="btn-view">View Details</a>
                                  </small>
                             </tr>
                         <?php endforeach; ?>
