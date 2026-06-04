@@ -159,7 +159,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         /* ========== SLIP CONTAINER - FIXED FOR PDF ========== */
         .slip-container {
             background: white;
-            padding: 25px;
+            padding: 30px 35px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             max-width: 100%;
@@ -169,51 +169,54 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         
         .slip-header {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
             border-bottom: 2px solid #670019;
         }
         .slip-header img {
-            width: 50px;
-            margin-bottom: 5px;
+            width: 55px;
+            margin-bottom: 8px;
         }
         .slip-header h3 {
             color: #670019;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
+            margin-bottom: 4px;
         }
         .slip-header p {
             color: #666;
-            font-size: 10px;
+            font-size: 12px;
+            margin: 0;
         }
         
         .section-title {
             color: #670019;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 600;
-            margin: 12px 0 8px 0;
-            padding-bottom: 3px;
+            margin: 18px 0 10px 0;
+            padding-bottom: 5px;
             border-bottom: 1px solid #eee;
         }
         
         /* SIMPLE ROW LAYOUT - NO CUTOFF */
         .info-row {
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             overflow: hidden;
+            clear: both;
         }
         .info-label {
             float: left;
-            width: 120px;
-            font-size: 11px;
+            width: 130px;
+            font-size: 12px;
             color: #888;
-            padding: 3px 0;
+            padding: 4px 0;
         }
         .info-value {
-            margin-left: 120px;
-            font-size: 11px;
+            margin-left: 130px;
+            font-size: 12px;
             color: #333;
             font-weight: 500;
-            padding: 3px 0;
+            padding: 4px 0;
             word-wrap: break-word;
         }
         
@@ -221,18 +224,20 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         .courses-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px;
+            font-size: 12px;
             table-layout: fixed;
+            margin-top: 5px;
         }
         .courses-table th {
             background: #f8f6f4;
-            padding: 6px 4px;
+            padding: 8px 6px;
             text-align: left;
             border: 1px solid #ddd;
             color: #670019;
+            font-weight: 600;
         }
         .courses-table td {
-            padding: 5px 4px;
+            padding: 7px 6px;
             border: 1px solid #ddd;
             word-wrap: break-word;
         }
@@ -244,27 +249,28 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         
         .total-credits {
             text-align: right;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 600;
             color: #670019;
-            margin-top: 8px;
-            padding-top: 5px;
+            margin-top: 12px;
+            padding-top: 8px;
             border-top: 1px solid #eee;
         }
         
         .verification-row {
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             overflow: hidden;
+            clear: both;
         }
         .verification-label {
             float: left;
-            width: 120px;
-            font-size: 11px;
+            width: 130px;
+            font-size: 12px;
             color: #888;
         }
         .verification-value {
-            margin-left: 120px;
-            font-size: 11px;
+            margin-left: 130px;
+            font-size: 12px;
             color: #333;
             word-wrap: break-word;
         }
@@ -272,8 +278,8 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         .signature-row {
             display: flex;
             justify-content: space-between;
-            margin-top: 15px;
-            padding-top: 10px;
+            margin-top: 25px;
+            padding-top: 15px;
             border-top: 1px dashed #ccc;
         }
         .signature-box {
@@ -281,19 +287,19 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             width: 45%;
         }
         .signature-box span {
-            font-size: 9px;
+            font-size: 11px;
             color: #888;
         }
         .signature-line {
-            margin-top: 5px;
+            margin-top: 8px;
             border-top: 1px dashed #999;
-            padding-top: 15px;
+            padding-top: 18px;
         }
         
         .footer {
-            margin-top: 15px;
+            margin-top: 20px;
             text-align: center;
-            font-size: 8px;
+            font-size: 9px;
             color: #999;
         }
         
@@ -328,34 +334,63 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             .main-content { margin-left: 0; }
         }
         
-        /* PDF PRINT STYLES - NO CUTOFF */
+        /* PDF PRINT STYLES - COMPLETELY FIXED */
         @media print {
-            .sidebar, .topbar, .print-btn, .back-btn, .logout {
+            /* Hide sidebar and topbar completely */
+            .sidebar, .topbar, .print-btn, .back-btn, .logout, .page-header, .toggle-btn, .profile-box {
                 display: none !important;
             }
+            
+            /* Reset main content for print */
             .main-content {
                 margin-left: 0 !important;
                 padding: 0 !important;
+                width: 100% !important;
             }
+            
+            /* Slip container - remove all extra spacing */
             .slip-container {
                 box-shadow: none;
-                padding: 15px;
-                max-width: 100%;
-                width: 100%;
+                padding: 15px 20px !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                background: white;
             }
+            
             body {
                 background: white;
                 margin: 0;
                 padding: 0;
             }
-            .info-label {
-                width: 100px;
-            }
-            .info-value {
-                margin-left: 100px;
+            
+            /* Adjust font sizes for print */
+            .info-label, .info-value {
+                font-size: 11px;
             }
             .courses-table {
-                font-size: 9px;
+                font-size: 10px;
+            }
+            .courses-table th, .courses-table td {
+                padding: 5px 4px;
+            }
+            .signature-box span {
+                font-size: 10px;
+            }
+            .footer {
+                font-size: 8px;
+            }
+            
+            /* Ensure no page breaks inside the slip */
+            .slip-container {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Prevent orphaned content */
+            .signature-row, .footer {
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
         }
     </style>
@@ -370,7 +405,6 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         <a href="student_courses.html"><i class="bi bi-book-fill"></i> Courses</a>
         <a href="student_register.html"><i class="bi bi-journal-text"></i> Register</a>
         <a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
-        <a href="student_my_registration.html"><i class="bi bi-file-earmark-text-fill"></i> My Registration</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
     <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
@@ -475,15 +509,31 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         this.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating PDF...';
         this.disabled = true;
         
+        // FIXED PDF CONFIGURATION - Proper margins and scaling
         const opt = {
-            margin: [0.3, 0.3, 0.3, 0.3],
+            margin: [0.2, 0.2, 0.2, 0.2],  // [top, left, bottom, right] in inches - minimal margins
             filename: 'Registration_Slip_<?php echo $registration_id; ?>.pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, letterRendering: true, useCORS: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            html2canvas: { 
+                scale: 2, 
+                letterRendering: true, 
+                useCORS: true,
+                logging: false,
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight
+            },
+            jsPDF: { 
+                unit: 'in', 
+                format: 'a4', 
+                orientation: 'portrait'
+            }
         };
         
+        // Use promise to handle completion
         html2pdf().set(opt).from(element).save().then(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+        }).catch(() => {
             this.innerHTML = originalText;
             this.disabled = false;
         });
