@@ -2,16 +2,24 @@
 /**
  * API: Change user password
  * Method: POST
- * Role: any authenticated user (advisor or student)
+ * Role: any authenticated user (student/advisor)
  * Request body: { "current_password": "...", "new_password": "..." }
  * Response: JSON success or error
  */
 
-require_once __DIR__ . '/../config/database.php';
+session_start();
 
-// Require authentication (any role)
-$user = requireAuth();
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Not authenticated. Please login again.']);
+    exit();
+}
 
+// Include database connection
+require_once __DIR__ . '/../db_connect.php';
+
+// Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (!$input || !isset($input['current_password']) || !isset($input['new_password'])) {
@@ -22,36 +30,44 @@ if (!$input || !isset($input['current_password']) || !isset($input['new_password
 
 $currentPassword = $input['current_password'];
 $newPassword = $input['new_password'];
+$user_id = $_SESSION['user_id'];
 
-// Validate new password length (at least 6 characters for students, 8 for advisors? But keep consistent)
+// Validate new password length
 if (strlen($newPassword) < 6) {
     http_response_code(400);
     echo json_encode(['error' => 'New password must be at least 6 characters long']);
     exit();
 }
 
-$pdo = getDBConnection();
-
 // Fetch user's stored password
-$stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
-$stmt->execute([$user['id']]);
-$storedPassword = $stmt->fetchColumn();
+$query = "SELECT password FROM users WHERE user_id = '$user_id'";
+$result = mysqli_query($conn, $query);
+$user = mysqli_fetch_assoc($result);
 
-// Verify current password (assumes plain text storage; update to password_hash if needed)
-// Note: If your existing login uses hashed passwords, change this condition.
+if (!$user) {
+    http_response_code(401);
+    echo json_encode(['error' => 'User not found']);
+    exit();
+}
+
+$storedPassword = $user['password'];
+
+// Verify current password (plain text comparison - matches your login system)
 if ($currentPassword !== $storedPassword) {
     http_response_code(401);
     echo json_encode(['error' => 'Current password is incorrect']);
     exit();
 }
 
-// Update password (store as plain text or hash accordingly)
-// If you use hashed passwords, use password_hash($newPassword, PASSWORD_DEFAULT)
-$stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
-$stmt->execute([$newPassword, $user['id']]);
-
-echo json_encode([
-    'success' => true,
-    'message' => 'Password changed successfully'
-]);
+// Update password
+$updateQuery = "UPDATE users SET password = '$newPassword' WHERE user_id = '$user_id'";
+if (mysqli_query($conn, $updateQuery)) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Password changed successfully'
+    ]);
+} else {
+    http_response_code(500);
+    echo json_encode(['error' => 'Database error: ' . mysqli_error($conn)]);
+}
 ?>
