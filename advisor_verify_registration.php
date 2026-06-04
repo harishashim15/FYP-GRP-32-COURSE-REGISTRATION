@@ -3,10 +3,30 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID from session
-$advisor_id = $_SESSION['user_id'] ?? 1;
+// Get advisor ID from session - FIX: Remove default 1
+$advisor_id = $_SESSION['user_id'] ?? null;
 
-// Get student_id from URL (not registration_id)
+// If not logged in, redirect to login
+if (!$advisor_id) {
+    header("Location: ../index.html");
+    exit;
+}
+
+// Verify the user is actually an advisor
+$sql_check = "SELECT role FROM users WHERE user_id = ?";
+$stmt_check = mysqli_prepare($conn, $sql_check);
+mysqli_stmt_bind_param($stmt_check, "i", $advisor_id);
+mysqli_stmt_execute($stmt_check);
+$result_check = mysqli_stmt_get_result($stmt_check);
+$user_check = mysqli_fetch_assoc($result_check);
+
+if (!$user_check || $user_check['role'] != 'advisor') {
+    session_destroy();
+    header("Location: ../index.html");
+    exit;
+}
+
+// Get student_id from URL
 $student_id = isset($_GET['student_id']) ? (int)$_GET['student_id'] : 0;
 
 if (empty($student_id)) {
@@ -45,7 +65,8 @@ $sql = "SELECT
             rc.section,
             cr.id as registration_id,
             cr.status as reg_status,
-            cr.submission_date
+            cr.submission_date,
+            cr.advisor_remarks
         FROM course_registrations cr
         JOIN registration_courses rc ON cr.id = rc.registration_id
         JOIN subjects sub ON rc.subject_code = sub.subject_code
@@ -57,8 +78,9 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $courses = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-// Get the status from the most recent registration
+// Get the status and remarks from the most recent registration
 $reg_status = !empty($courses) ? $courses[0]['reg_status'] : 'pending';
+$advisor_remarks = !empty($courses) ? $courses[0]['advisor_remarks'] : '';
 $submission_date = !empty($courses) ? $courses[0]['submission_date'] : date('Y-m-d');
 
 // Calculate total credits
@@ -67,7 +89,7 @@ foreach ($courses as $course) {
     $total_credits += $course['credits']; 
 }
 
-// Handle approve/reject action - Update ALL registrations for this student
+// Handle approve/reject action via AJAX
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $action = $_POST['action'];
     $remarks = $_POST['remarks'] ?? '';
@@ -80,12 +102,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     mysqli_stmt_bind_param($stmt, "ssisi", $new_status, $remarks, $advisor_id, $current_time, $student_id);
     
     if (mysqli_stmt_execute($stmt)) {
-        $message = ($action == 'approve') ? "Registration approved successfully!" : "Registration rejected!";
-        echo "<script>alert('$message'); window.location.href='advisor_registrations.php';</script>";
-        exit;
+        echo json_encode(['success' => true, 'status' => $new_status, 'remarks' => $remarks]);
     } else {
-        echo "<script>alert('Error updating registration');</script>";
+        echo json_encode(['success' => false, 'error' => 'Database error: ' . mysqli_error($conn)]);
     }
+    exit;
 }
 
 // Get advisor name for topbar
@@ -95,7 +116,7 @@ mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
 mysqli_stmt_execute($stmt_advisor);
 $result_advisor = mysqli_stmt_get_result($stmt_advisor);
 $advisor = mysqli_fetch_assoc($result_advisor);
-$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
+$advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
 
 // Get student initials for avatar
 $name_parts = explode(' ', $student['student_name']);
@@ -116,6 +137,9 @@ if (empty($initials)) $initials = 'ST';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -292,11 +316,27 @@ if (empty($initials)) $initials = 'ST';
             margin-bottom: 20px;
         }
         
+        .alert-warning {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
         .action-buttons {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
             margin-top: 20px;
+        }
+        
+        .remarks-text {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f6f4;
+            border-radius: 10px;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -334,7 +374,7 @@ if (empty($initials)) $initials = 'ST';
     <!-- PAGE HEADER -->
     <div class="page-header">
         <h2>Verify Registration — <?php echo htmlspecialchars($student['student_name']); ?></h2>
-        <span class="status-badge status-<?php echo $reg_status; ?>"><?php echo ucfirst($reg_status); ?></span>
+        <span class="status-badge status-<?php echo $reg_status; ?>" id="statusBadge"><?php echo ucfirst($reg_status); ?></span>
     </div>
 
     <div class="student-card">
@@ -361,9 +401,9 @@ if (empty($initials)) $initials = 'ST';
                     <?php foreach ($courses as $course): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($course['code']); ?></td>
-                            <td><?php echo htmlspecialchars($course['name']); ?></small>
-                            <td><?php echo $course['credits']; ?></small>
-                            <td><?php echo htmlspecialchars($course['section'] ?? '01'); ?></small>
+                            <td><?php echo htmlspecialchars($course['name']); ?></td>
+                            <td><?php echo $course['credits']; ?></td>
+                            <td><?php echo htmlspecialchars($course['section'] ?? '01'); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -377,49 +417,60 @@ if (empty($initials)) $initials = 'ST';
     </div>
 
     <!-- PENDING ACTIONS -->
-    <?php if ($reg_status == 'pending'): ?>
-    <div class="action-card">
-        <form method="POST" id="verifyForm">
+    <div id="pendingActions" style="<?php echo ($reg_status == 'pending') ? 'display: block;' : 'display: none;'; ?>">
+        <div class="action-card">
             <div class="form-group">
-                <label><i class="bi bi-chat"></i> Remarks (optional)</label>
-                <textarea name="remarks" id="remarksText" rows="3" placeholder="Add a note for the student..."></textarea>
+                <label><i class="bi bi-chat"></i> Remarks (required for rejection, optional for approval)</label>
+                <textarea id="remarksText" rows="3" placeholder="Add a note for the student..."></textarea>
             </div>
             <div class="action-buttons">
-                <button type="button" onclick="submitAction('approve')" class="btn-approve"><i class="bi bi-check-circle"></i> Approve</button>
-                <button type="button" onclick="submitAction('reject')" class="btn-reject"><i class="bi bi-x-circle"></i> Reject</button>
+                <button onclick="submitAction('approve')" class="btn-approve"><i class="bi bi-check-circle"></i> Approve</button>
+                <button onclick="submitAction('reject')" class="btn-reject"><i class="bi bi-x-circle"></i> Reject</button>
+                <a href="advisor_registrations.php" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Registrations</a>
             </div>
-        </form>
+        </div>
     </div>
-    <?php endif; ?>
 
     <!-- APPROVED ACTIONS -->
-    <?php if ($reg_status == 'approved'): ?>
-    <div class="action-card">
-        <div class="alert-info">
-            <i class="bi bi-check-circle-fill"></i> This registration has been <strong>APPROVED</strong>.
-        </div>
-        <div class="action-buttons">
-            <button onclick="printPDF()" class="btn-pdf">
-                <i class="bi bi-file-earmark-pdf"></i> Print Registration Slip (PDF)
-            </button>
-            <a href="advisor_registrations.php" class="btn-back">
-                <i class="bi bi-arrow-left"></i> Back to Registrations
-            </a>
+    <div id="approvedActions" style="<?php echo ($reg_status == 'approved') ? 'display: block;' : 'display: none;'; ?>">
+        <div class="action-card">
+            <div class="alert-info">
+                <i class="bi bi-check-circle-fill"></i> This registration has been <strong>APPROVED</strong>.
+            </div>
+            <?php if (!empty($advisor_remarks)): ?>
+                <div class="remarks-text">
+                    <strong>Advisor Remarks:</strong><br>
+                    <?php echo nl2br(htmlspecialchars($advisor_remarks)); ?>
+                </div>
+            <?php endif; ?>
+            <div class="action-buttons">
+                <button onclick="printPDF()" class="btn-pdf">
+                    <i class="bi bi-file-earmark-pdf"></i> Print Registration Slip (PDF)
+                </button>
+                <a href="advisor_registrations.php" class="btn-back">
+                    <i class="bi bi-arrow-left"></i> Back to Registrations
+                </a>
+            </div>
         </div>
     </div>
-    <?php endif; ?>
 
     <!-- REJECTED ACTIONS -->
-    <?php if ($reg_status == 'rejected'): ?>
-    <div class="action-card">
-        <div class="alert-info" style="background: #f8d7da; color: #721c24;">
-            <i class="bi bi-x-circle-fill"></i> This registration has been <strong>REJECTED</strong>.
-        </div>
-        <div class="action-buttons">
-            <a href="advisor_registrations.php" class="btn-back">Back to Registrations</a>
+    <div id="rejectedActions" style="<?php echo ($reg_status == 'rejected') ? 'display: block;' : 'display: none;'; ?>">
+        <div class="action-card">
+            <div class="alert-warning">
+                <i class="bi bi-x-circle-fill"></i> This registration has been <strong>REJECTED</strong>.
+            </div>
+            <?php if (!empty($advisor_remarks)): ?>
+                <div class="remarks-text" style="background: #f8d7da;">
+                    <strong>Advisor Remarks:</strong><br>
+                    <?php echo nl2br(htmlspecialchars($advisor_remarks)); ?>
+                </div>
+            <?php endif; ?>
+            <div class="action-buttons">
+                <a href="advisor_registrations.php" class="btn-back">Back to Registrations</a>
+            </div>
         </div>
     </div>
-    <?php endif; ?>
 </div>
 
 <script>
@@ -440,23 +491,79 @@ if (empty($initials)) $initials = 'ST';
 
     function submitAction(action) {
         var remarks = document.getElementById('remarksText').value;
+        
         if (action === 'reject' && !remarks.trim()) {
-            alert('Please provide a reason for rejecting this registration.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Remarks Required',
+                text: 'Please provide a reason for rejecting this registration.',
+                confirmButtonColor: '#670019'
+            });
             return;
         }
         
-        var form = document.getElementById('verifyForm');
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'action';
-        input.value = action;
-        form.appendChild(input);
-        form.submit();
+        // Show loading
+        Swal.fire({
+            title: 'Processing...',
+            text: 'Please wait while we process your request.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Send AJAX request
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: action,
+                remarks: remarks
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: action === 'approve' ? 'Registration Approved!' : 'Registration Rejected!',
+                    text: action === 'approve' ? 'The registration has been approved successfully.' : 'The registration has been rejected.',
+                    confirmButtonColor: '#670019'
+                }).then(() => {
+                    // Update the page with new status
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.error || 'Failed to update registration. Please try again.',
+                    confirmButtonColor: '#670019'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred. Please try again.',
+                confirmButtonColor: '#670019'
+            });
+        });
     }
     
-    function printPDF() {
-        window.open('student_registration_slip.php?student_id=<?php echo $student_id; ?>', '_blank');
-    }
+function printPDF() {
+    // Get the registration_id from the URL or from the data
+    var registrationId = <?php 
+        // Get the registration ID from the first course
+        $reg_id = !empty($courses) ? $courses[0]['registration_id'] : 0;
+        echo $reg_id; 
+    ?>;
+    window.open('student_registration_slip.php?id=' + registrationId, '_blank');
+}
 </script>
 </body>
 </html>

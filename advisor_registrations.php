@@ -3,8 +3,28 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID from session
-$advisor_id = $_SESSION['user_id'] ?? 1;
+// Get advisor ID from session - FIX: Remove default 1
+$advisor_id = $_SESSION['user_id'] ?? null;
+
+// If not logged in, redirect to login
+if (!$advisor_id) {
+    header("Location: ../index.html");
+    exit;
+}
+
+// Verify the user is actually an advisor
+$sql_check = "SELECT role FROM users WHERE user_id = ?";
+$stmt_check = mysqli_prepare($conn, $sql_check);
+mysqli_stmt_bind_param($stmt_check, "i", $advisor_id);
+mysqli_stmt_execute($stmt_check);
+$result_check = mysqli_stmt_get_result($stmt_check);
+$user_check = mysqli_fetch_assoc($result_check);
+
+if (!$user_check || $user_check['role'] != 'advisor') {
+    session_destroy();
+    header("Location: ../index.html");
+    exit;
+}
 
 // Get all registrations for students under this advisor
 // This groups by student and shows ONE row per student
@@ -15,7 +35,7 @@ $sql = "SELECT
             COUNT(DISTINCT rc.id) as course_count,
             MIN(cr.submission_date) as submitted_date,
             cr.status,
-            -- Get the latest registration_id for this student (to use for view link)
+            -- Get the latest registration_id for this student
             (SELECT id FROM course_registrations 
              WHERE student_id = s.user_id 
              ORDER BY submission_date DESC LIMIT 1) as registration_id
@@ -45,7 +65,7 @@ mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
 mysqli_stmt_execute($stmt_advisor);
 $result_advisor = mysqli_stmt_get_result($stmt_advisor);
 $advisor = mysqli_fetch_assoc($result_advisor);
-$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
+$advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -150,11 +170,11 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
                     <?php if (!empty($registrations)): ?>
                         <?php foreach ($registrations as $reg): ?>
                             <tr data-status="<?php echo $reg['status']; ?>">
-                                <td><?php echo htmlspecialchars($reg['student_name']); ?></small>
-                                <td><?php echo htmlspecialchars($reg['student_matrix']); ?></small>
-                                <td><?php echo $reg['course_count']; ?> courses</small></small>
-                                <td><?php echo date('d M Y', strtotime($reg['submitted_date'])); ?></small></small>
-                                <td><span class="status-badge status-<?php echo $reg['status']; ?>"><?php echo ucfirst($reg['status']); ?></span></small></small>
+                                <td><?php echo htmlspecialchars($reg['student_name']); ?></td>
+                                <td><?php echo htmlspecialchars($reg['student_matrix']); ?></td>
+                                <td><?php echo $reg['course_count']; ?> courses</small></td>
+                                <td><?php echo date('d M Y', strtotime($reg['submitted_date'])); ?></small></td>
+                                <td><span class="status-badge status-<?php echo $reg['status']; ?>"><?php echo ucfirst($reg['status']); ?></span></small></td>
                                 <td>
                                     <?php if ($reg['status'] == 'pending'): ?>
                                         <button class="review-btn" onclick="location.href='advisor_verify_registration.php?student_id=<?php echo $reg['student_id']; ?>'">Review</button>
@@ -165,7 +185,7 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="6" class="text-center">No registrations found</small></tr>
+                        <tr><td colspan="6" class="text-center">No registrations found</small></td>
                     <?php endif; ?>
                 </tbody>
             </table>

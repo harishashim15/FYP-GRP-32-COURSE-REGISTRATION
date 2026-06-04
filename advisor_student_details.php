@@ -3,10 +3,33 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get student matrix from URL
-$student_matrix = isset($_GET['matrix']) ? $_GET['matrix'] : '';
+// Get advisor ID from session - FIX: Remove default 1
+$advisor_id = $_SESSION['user_id'] ?? null;
 
-if (empty($student_matrix)) {
+// If not logged in, redirect to login
+if (!$advisor_id) {
+    header("Location: ../index.html");
+    exit;
+}
+
+// Verify the user is actually an advisor
+$sql_check = "SELECT role FROM users WHERE user_id = ?";
+$stmt_check = mysqli_prepare($conn, $sql_check);
+mysqli_stmt_bind_param($stmt_check, "i", $advisor_id);
+mysqli_stmt_execute($stmt_check);
+$result_check = mysqli_stmt_get_result($stmt_check);
+$user_check = mysqli_fetch_assoc($result_check);
+
+if (!$user_check || $user_check['role'] != 'advisor') {
+    session_destroy();
+    header("Location: ../index.html");
+    exit;
+}
+
+// Get student_id from URL (using student_id instead of matrix)
+$student_id = isset($_GET['student_id']) ? (int)$_GET['student_id'] : 0;
+
+if (empty($student_id)) {
     header("Location: advisor_my_students.php");
     exit;
 }
@@ -15,9 +38,9 @@ if (empty($student_matrix)) {
 $sql = "SELECT s.*, u.matrix_number, u.user_name, u.utm_email 
         FROM students s
         JOIN users u ON s.user_id = u.user_id
-        WHERE u.matrix_number = ?";
+        WHERE s.user_id = ?";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "s", $student_matrix);
+mysqli_stmt_bind_param($stmt, "i", $student_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $student = mysqli_fetch_assoc($result);
@@ -27,8 +50,8 @@ if (!$student) {
     exit;
 }
 
-// Get student's registration status from course_registrations
-$sql_status = "SELECT status FROM course_registrations WHERE student_id = ? LIMIT 1";
+// Get student's registration status from course_registrations (most recent)
+$sql_status = "SELECT status FROM course_registrations WHERE student_id = ? ORDER BY id DESC LIMIT 1";
 $stmt_status = mysqli_prepare($conn, $sql_status);
 mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
 mysqli_stmt_execute($stmt_status);
@@ -41,7 +64,8 @@ $sql_courses = "SELECT sub.subject_code, sub.subject_name, sub.credits, rc.secti
                 FROM course_registrations cr 
                 JOIN registration_courses rc ON cr.id = rc.registration_id
                 JOIN subjects sub ON rc.subject_code = sub.subject_code
-                WHERE cr.student_id = ?";
+                WHERE cr.student_id = ?
+                ORDER BY cr.id DESC";
 $stmt_courses = mysqli_prepare($conn, $sql_courses);
 mysqli_stmt_bind_param($stmt_courses, "i", $student['user_id']);
 mysqli_stmt_execute($stmt_courses);
@@ -66,35 +90,57 @@ $result_semester = mysqli_stmt_get_result($stmt_semester);
 $semester_history = mysqli_fetch_all($result_semester, MYSQLI_ASSOC);
 
 // Get advisor name for topbar
-$advisor_id = $_SESSION['user_id'] ?? 1;
 $sql_advisor = "SELECT user_name FROM users WHERE user_id = ?";
 $stmt_advisor = mysqli_prepare($conn, $sql_advisor);
 mysqli_stmt_bind_param($stmt_advisor, "i", $advisor_id);
 mysqli_stmt_execute($stmt_advisor);
 $result_advisor = mysqli_stmt_get_result($stmt_advisor);
 $advisor = mysqli_fetch_assoc($result_advisor);
-$advisor_name = $advisor ? $advisor['user_name'] : 'Miss Nurul Asyikin';
+$advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
 
-// Get current semester info from semester_registration_periods
-$sql_current = "SELECT * FROM semester_registration_periods WHERE is_open = 1 LIMIT 1";
-$result_current = mysqli_query($conn, $sql_current);
-$current_period = mysqli_fetch_assoc($result_current);
+// Get current semester info from student's OWN data
+// Current Semester format: YYYY/YYYY + Semester Number
+// Example: If student is in Year 1, Semester 2 → "2025/20262"
 
-if ($current_period) {
-    $session_semester = $current_period['session_semester'];
-    $session_parts = explode('-', $session_semester);
-    $current_session = $session_parts[0] ?? '2025/2026';
-    $current_semester_num = $session_parts[1] ?? '2';
-    $current_semester_code = str_replace('-', '', $session_semester);
-    $current_year_programme = $student['year'] . ' / DSPD';
-    $active_code = 'A - Active';
+// Get the current academic year from semester_registration_periods or use default
+$sql_academic = "SELECT session_semester FROM semester_registration_periods WHERE is_open = 1 LIMIT 1";
+$result_academic = mysqli_query($conn, $sql_academic);
+$academic_period = mysqli_fetch_assoc($result_academic);
+
+if ($academic_period) {
+    $session_parts = explode('-', $academic_period['session_semester']);
+    $academic_year = $session_parts[0]; // e.g., "2025/2026"
 } else {
-    $current_semester_code = "20252026" . $student['year'];
-    $current_session = '2025/2026';
-    $current_semester_num = '2';
-    $current_year_programme = $student['year'] . ' / DSPD';
-    $active_code = 'A - Active';
+    $academic_year = '2025/2026';
 }
+
+// Current Semester: based on student's semester value (1, 2, or 3)
+$current_semester_num = $student['semester']; // This comes from students table
+$current_semester_code = str_replace('/', '', $academic_year) . $current_semester_num;
+// Example: "2025/2026" + "2" = "202520262"
+
+// Year / Programme - based on student's year and programme
+// Map programme to code
+$programme_code = '';
+switch ($student['programme']) {
+    case 'Computer Science':
+        $programme_code = 'DSPD';
+        break;
+    case 'Electrical Engineering':
+        $programme_code = 'DSEE';
+        break;
+    case 'Sport Science':
+        $programme_code = 'DSSS';
+        break;
+    case 'Pengajian Islam':
+        $programme_code = 'DSPI';
+        break;
+    default:
+        $programme_code = 'DSPD';
+}
+
+$current_year_programme = $student['year'] . ' / ' . $programme_code;
+$active_code = 'A - Active';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -251,26 +297,26 @@ if ($current_period) {
             background: #5a6268;
             transform: translateY(-2px);
         }
-.btn-review {
-    background: linear-gradient(to right, #670019, #8b0022);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 14px;
-    transition: 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-}
-.btn-review:hover {
-    background: linear-gradient(to right, #8b0022, #a80028);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(103,0,25,0.25);
-}
+        .btn-review {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-review:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(103,0,25,0.25);
+        }
     </style>
 </head>
 <body>
@@ -396,7 +442,7 @@ if ($current_period) {
     <!-- Action Buttons - Side by Side -->
     <div class="action-buttons">
         <a href="advisor_my_students.php" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Students</a>
-        <a href="advisor_verify_registration.php?matrix=<?php echo $student['matrix_number']; ?>" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
+        <a href="advisor_verify_registration.php?student_id=<?php echo $student['user_id']; ?>" class="btn-review"><i class="bi bi-pencil"></i> Review Registration</a>
     </div>
 </div>
 
@@ -441,7 +487,6 @@ if ($current_period) {
         tbody.innerHTML = '';
         for (var i = 0; i < pageData.length; i++) {
             var r = pageData[i];
-            // Show '-' if CPA is 0, 0.00, null, or empty, otherwise show the CPA value
             var cpaValue = (r.cpa && r.cpa != 0 && r.cpa != '0.00') ? r.cpa : '-';
             var row = '<tr>';
             row += '<td>' + escapeHtml(r.session || '-') + '</td>';

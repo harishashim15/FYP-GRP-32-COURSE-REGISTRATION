@@ -3,8 +3,28 @@ require_once 'db_connect.php';
 
 session_start();
 
-// Get advisor ID
-$advisor_id = $_SESSION['user_id'] ?? 1;
+// Get advisor ID from session - FIX: Remove default 1
+$advisor_id = $_SESSION['user_id'] ?? null;
+
+// If not logged in, redirect to login
+if (!$advisor_id) {
+    header("Location: ../index.html");
+    exit;
+}
+
+// Verify the user is actually an advisor
+$sql_check = "SELECT role FROM users WHERE user_id = ?";
+$stmt_check = mysqli_prepare($conn, $sql_check);
+mysqli_stmt_bind_param($stmt_check, "i", $advisor_id);
+mysqli_stmt_execute($stmt_check);
+$result_check = mysqli_stmt_get_result($stmt_check);
+$user_check = mysqli_fetch_assoc($result_check);
+
+if (!$user_check || $user_check['role'] != 'advisor') {
+    session_destroy();
+    header("Location: ../index.html");
+    exit;
+}
 
 // Get advisor information from users table
 $sql = "SELECT * FROM users WHERE user_id = ? AND role = 'advisor'";
@@ -48,10 +68,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Prepare profile data for display
 $profile_data = [
-    'full_name' => $advisor['user_name'] ?? $advisor_details['advisor_name'] ?? 'Miss Nurul Asyikin',
-    'staff_id' => $advisor_details['matrix_number'] ?? 'LECT_A43567',
-    'email' => $advisor['utm_email'] ?? 'nurul.asyikin@utm.my',
-    'second_email' => $advisor_details['second_email'] ?? '',
+    'full_name' => $advisor['user_name'] ?? $advisor_details['advisor_name'] ?? 'Advisor',
+    'staff_id' => $advisor_details['matrix_number'] ?? $advisor['matrix_number'] ?? 'N/A',
+    'email' => $advisor['utm_email'] ?? 'advisor@utm.my',
+    'second_email' => $advisor_details['second_email'] ?? $advisor['second_email'] ?? '',
     'phone' => $advisor['phone'] ?? '',
     'department' => $advisor_details['department'] ?? 'Computer Science',
     'role' => 'advisor'
