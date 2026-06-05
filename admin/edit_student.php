@@ -7,6 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Fetch admin name
 $admin_name = 'Admin';
 $stmt = $conn->prepare("SELECT user_name FROM users WHERE user_id = ?");
 $stmt->bind_param("i", $_SESSION['user_id']);
@@ -17,6 +18,7 @@ if ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
+// Fetch advisors for dropdown
 $advisors = [];
 $advisor_query = "SELECT user_id, user_name FROM users WHERE role = 'advisor' ORDER BY user_name";
 $advisor_result = $conn->query($advisor_query);
@@ -26,12 +28,14 @@ if ($advisor_result) {
     }
 }
 
+// Validate student ID
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header("Location: manage_students.php?msg=Invalid student ID.");
     exit();
 }
 $student_id = intval($_GET['id']);
 
+// Fetch student data from users and students
 $stmt = $conn->prepare("
     SELECT u.user_id, u.matrix_number, u.user_name, u.utm_email, u.second_email, u.phone,
            s.ic_number, s.address, s.programme, s.year, s.semester, s.advisor_id
@@ -66,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $advisor_id = intval($_POST['advisor_id']);
     $password = $_POST['password'];
 
+    $error = false;
     $errors = [];
 
     if (empty($matrix) || empty($name) || empty($utm_email) || empty($phone) || empty($programme) || empty($year) || empty($semester) || $advisor_id <= 0) {
@@ -79,18 +84,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($errors)) {
-        $check = $conn->prepare("SELECT user_id FROM users WHERE matrix_number = ? AND user_id != ?");
-        $check->bind_param("si", $matrix, $student_id);
-        $check->execute();
-        if ($check->get_result()->num_rows > 0) $errors[] = "Matrix number already exists.";
-        $check->close();
+        // Check duplicate matrix (excluding current)
+        $stmt = $conn->prepare("SELECT user_id FROM users WHERE matrix_number = ? AND user_id != ?");
+        $stmt->bind_param("si", $matrix, $student_id);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            $errors[] = "Matrix number already exists.";
+        }
+        $stmt->close();
 
+        // Check duplicate email (excluding current)
         if (empty($errors)) {
-            $check = $conn->prepare("SELECT user_id FROM users WHERE utm_email = ? AND user_id != ?");
-            $check->bind_param("si", $utm_email, $student_id);
-            $check->execute();
-            if ($check->get_result()->num_rows > 0) $errors[] = "UTM email already exists.";
-            $check->close();
+            $stmt = $conn->prepare("SELECT user_id FROM users WHERE utm_email = ? AND user_id != ?");
+            $stmt->bind_param("si", $utm_email, $student_id);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows > 0) {
+                $errors[] = "UTM email already exists.";
+            }
+            $stmt->close();
         }
     }
 
@@ -98,6 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = implode("<br>", $errors);
         $msg_type = 'danger';
     } else {
+        // Update users table
         if (!empty($password)) {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE users SET matrix_number = ?, user_name = ?, utm_email = ?, second_email = ?, phone = ?, password = ? WHERE user_id = ?");
@@ -107,6 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("sssssi", $matrix, $name, $utm_email, $second_email, $phone, $student_id);
         }
         if ($stmt->execute()) {
+            // Update students table
             $stmt2 = $conn->prepare("UPDATE students SET programme = ?, year = ?, semester = ?, advisor_id = ?, ic_number = ?, address = ? WHERE user_id = ?");
             $stmt2->bind_param("sssissi", $programme, $year, $semester, $advisor_id, $ic_number, $address, $student_id);
             $stmt2->execute();
@@ -131,7 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Same styles as add_student.php */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; display: flex; overflow-x: hidden; }
         .sidebar {
@@ -143,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 9px 20px;
@@ -193,9 +205,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
-<div class="sidebar"><?php /* same sidebar as add_student.php */ ?></div>
+<div class="sidebar">
+    <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+    <div class="menu">
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
+        <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
+        <a href="../forgot_password.php"><i class="bi bi-key-fill"></i> Forgot Password</a>
+    </div>
+    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+</div>
 <div class="main-content">
-    <div class="topbar"><?php /* same topbar */ ?></div>
+    <div class="topbar">
+        <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <div class="profile-box" onclick="location.href='profile.php'">
+            <i class="bi bi-bell fs-5"></i>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div><h6 class="mb-0"><?php echo htmlspecialchars($admin_name); ?></h6><small class="text-muted">Admin</small></div>
+        </div>
+    </div>
     <div class="page-header">
         <h2>Edit Student</h2>
         <a href="manage_students.php" class="btn-cancel"><i class="bi bi-arrow-left"></i> Back</a>

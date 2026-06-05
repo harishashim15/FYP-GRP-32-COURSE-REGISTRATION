@@ -52,7 +52,7 @@ $subjects_count = $result->fetch_row()[0];
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 9px 20px;
@@ -103,6 +103,65 @@ $subjects_count = $result->fetch_row()[0];
         .dashboard-card h2 { font-size: 36px; font-weight: 700; color: #670019; margin-bottom: 5px; }
         .dashboard-card h5 { font-size: 16px; font-weight: 600; margin-top: 5px; }
         .dashboard-card p { color: #666; margin-top: 5px; font-size: 13px; }
+        /* Quick Actions Section */
+        .quick-actions {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 35px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+        }
+        .quick-actions h3 {
+            color: #670019;
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: 20px;
+        }
+        .action-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            text-decoration: none;
+            color: black;
+            transition: 0.3s;
+        }
+        .action-btn:hover {
+            background: #fff7ef;
+            transform: translateX(5px);
+        }
+        .action-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .action-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #670019;
+            color: white;
+            font-size: 24px;
+        }
+        .action-left h5 {
+            margin-bottom: 2px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .action-left small {
+            font-size: 11px;
+            color: #888;
+        }
+        .bi-chevron-right {
+            color: #670019;
+            font-size: 18px;
+        }
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
@@ -140,7 +199,7 @@ $subjects_count = $result->fetch_row()[0];
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon yellow"><i class="bi bi-people-fill"></i></div>
-                <h2><?php echo $students_count; ?></h2>
+                <h2 id="studentsCount">0</h2>
                 <h5>Total Students</h5>
                 <p>Registered students</p>
             </div>
@@ -148,7 +207,7 @@ $subjects_count = $result->fetch_row()[0];
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon red"><i class="bi bi-person-badge-fill"></i></div>
-                <h2><?php echo $advisors_count; ?></h2>
+                <h2 id="advisorsCount">0</h2>
                 <h5>Total Advisors</h5>
                 <p>Academic advisors</p>
             </div>
@@ -156,13 +215,63 @@ $subjects_count = $result->fetch_row()[0];
         <div class="col-md-4">
             <div class="dashboard-card">
                 <div class="card-icon green"><i class="bi bi-book-fill"></i></div>
-                <h2><?php echo $subjects_count; ?></h2>
+                <h2 id="subjectsCount">0</h2>
                 <h5>Subjects</h5>
                 <p>Available courses</p>
             </div>
         </div>
     </div>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions">
+        <h3><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h3>
+        
+        <a href="manage_students.php" class="action-btn">
+            <div class="action-left">
+                <div class="action-icon"><i class="bi bi-people-fill"></i></div>
+                <div>
+                    <h5 class="mb-0">Manage Students</h5>
+                    <small>Add, edit, or remove students</small>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        
+        <a href="manage_advisors.php" class="action-btn">
+            <div class="action-left">
+                <div class="action-icon"><i class="bi bi-person-badge-fill"></i></div>
+                <div>
+                    <h5 class="mb-0">Manage Advisors</h5>
+                    <small>View and manage academic advisors</small>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        
+        <a href="manage_subjects.php" class="action-btn">
+            <div class="action-left">
+                <div class="action-icon"><i class="bi bi-book-fill"></i></div>
+                <div>
+                    <h5 class="mb-0">Manage Subjects</h5>
+                    <small>Add, edit, or remove course subjects</small>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        
+        <a href="manage_registration_period.php" class="action-btn">
+            <div class="action-left">
+                <div class="action-icon"><i class="bi bi-calendar-event"></i></div>
+                <div>
+                    <h5 class="mb-0">Registration Period</h5>
+                    <small>Set registration open/close dates</small>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </a>
+    </div>
 </div>
+<script src="../js/common.js"></script>
 <script>
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -178,51 +287,76 @@ $subjects_count = $result->fetch_row()[0];
         }
     })();
 
-        // Add this inside the existing <script> block or as a new block at the end of the page
+    // Count-up animation function
+    function animateNumber(element, target, duration = 1000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        let current = start;
+        
+        const updateNumber = () => {
+            current += increment;
+            if (current < target) {
+                element.innerText = Math.floor(current);
+                requestAnimationFrame(updateNumber);
+            } else {
+                element.innerText = target;
+            }
+        };
+        updateNumber();
+    }
 
-async function checkDefaultPassword() {
-    try {
-        const res = await apiGet('auth/check_default_password.php');
-        if (res.is_default) {
-            showDefaultPasswordModal();
+    // Animate the stat cards
+    const studentsTarget = <?php echo $students_count; ?>;
+    const advisorsTarget = <?php echo $advisors_count; ?>;
+    const subjectsTarget = <?php echo $subjects_count; ?>;
+    
+    animateNumber(document.getElementById('studentsCount'), studentsTarget);
+    animateNumber(document.getElementById('advisorsCount'), advisorsTarget);
+    animateNumber(document.getElementById('subjectsCount'), subjectsTarget);
+
+    // Default password check
+    async function checkDefaultPassword() {
+        try {
+            const res = await apiGet('auth/check_default_password.php');
+            if (res.is_default) {
+                showDefaultPasswordModal();
+            }
+        } catch(e) {
+            console.error('Failed to check default password:', e);
         }
-    } catch(e) {
-        console.error('Failed to check default password:', e);
     }
-}
 
-function showDefaultPasswordModal() {
-    let modal = document.getElementById('defaultPasswordModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'defaultPasswordModal';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = '100%';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        modal.style.display = 'flex';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        modal.style.zIndex = '2000';
-        modal.innerHTML = `
-            <div style="background: white; border-radius: 25px; padding: 30px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-                <i class="bi bi-shield-exclamation" style="font-size: 48px; color: #f4a000;"></i>
-                <h3 style="margin-top: 15px; color: #670019;">Default Password Detected</h3>
-                <p style="margin-top: 10px; color: #666;">For security reasons, please change your default password immediately.</p>
-                <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
-                    <button onclick="document.getElementById('defaultPasswordModal').remove();" style="background: #6c757d; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Remind Me Later</button>
-                    <button onclick="window.location.href='reset_password_form.html';" style="background: #670019; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Change Password Now</button>
+    function showDefaultPasswordModal() {
+        let modal = document.getElementById('defaultPasswordModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'defaultPasswordModal';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = '2000';
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 25px; padding: 30px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                    <i class="bi bi-shield-exclamation" style="font-size: 48px; color: #f4a000;"></i>
+                    <h3 style="margin-top: 15px; color: #670019;">Default Password Detected</h3>
+                    <p style="margin-top: 10px; color: #666;">For security reasons, please change your default password immediately.</p>
+                    <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="document.getElementById('defaultPasswordModal').remove();" style="background: #6c757d; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Remind Me Later</button>
+                        <button onclick="window.location.href='change_password.php';" style="background: #670019; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer;">Change Password Now</button>
+                    </div>
                 </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
+            `;
+            document.body.appendChild(modal);
+        }
     }
-}
 
-// Call this after loading dashboard data
-checkDefaultPassword();
+    checkDefaultPassword();
 </script>
 </body>
 </html>
