@@ -4,9 +4,9 @@ require_once __DIR__ . '/../config/database.php';
 $student = requireRole('student');
 $pdo = getDBConnection();
 
-// All available courses
+// All available courses – now including programme
 $stmt = $pdo->prepare("
-    SELECT subject_code AS code, subject_name AS name, credits
+    SELECT subject_code AS code, subject_name AS name, credits, programme
     FROM subjects
     ORDER BY subject_code
 ");

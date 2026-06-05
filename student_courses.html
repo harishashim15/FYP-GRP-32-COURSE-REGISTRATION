@@ -123,6 +123,42 @@
         .view-cart-btn:hover { color: white; }
         .view-cart-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; opacity: 0.6; }
         
+        /* Programme filter row */
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-row select {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 25px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .filter-row button {
+            padding: 12px 25px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 500;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .btn-filter {
+            background: #670019;
+            color: white;
+        }
+        .btn-filter:hover { background: #8b0022; }
+        .btn-reset {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-reset:hover { background: #5a6268; }
+        
         .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
         .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; }
@@ -213,7 +249,7 @@
         <p>Browse and add courses to your registration cart</p>
     </div>
 
-    <!-- PENDING BANNER - NEW -->
+    <!-- PENDING BANNER -->
     <div id="pendingBanner" class="pending-banner" style="display: none;">
         <i class="bi bi-clock-history"></i>
         <div class="pending-banner-content">
@@ -243,6 +279,15 @@
     <div id="cartSummary" class="cart-summary" style="display: none;">
         <div class="cart-info"><i class="bi bi-bag-check"></i> You have <strong id="cartCount" class="count">0</strong> course(s) in your cart</div>
         <a href="student_register.html" id="proceedBtn" class="view-cart-btn">Proceed to Register</a>
+    </div>
+
+    <!-- Programme Filter Row -->
+    <div class="filter-row">
+        <select id="programmeSelect">
+            <option value="">All Programmes</option>
+        </select>
+        <button id="filterProgrammeBtn" class="btn-filter">Filter</button>
+        <button id="resetFilterBtn" class="btn-reset">Reset</button>
     </div>
 
     <div class="search-bar">
@@ -285,6 +330,7 @@
     let hasApprovedRegistration = false;
     let hasPendingRegistration = false;
     let pendingAddCourse = null;
+    let currentProgrammeFilter = "";
 
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
@@ -327,7 +373,6 @@
         await callback(course);
     }
 
-    // Check for PENDING registration
     async function checkPendingRegistration() {
         try {
             const result = await apiGet('registrations/check_pending.php');
@@ -337,9 +382,7 @@
                 document.getElementById('pendingBanner').style.display = 'flex';
                 document.getElementById('cartSummary').style.display = 'none';
                 const proceedBtn = document.getElementById('proceedBtn');
-                if (proceedBtn) {
-                    proceedBtn.classList.add('disabled');
-                }
+                if (proceedBtn) proceedBtn.classList.add('disabled');
             }
             return hasPendingRegistration;
         } catch(e) {
@@ -348,7 +391,6 @@
         }
     }
 
-    // Check for APPROVED registration
     async function checkApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
@@ -358,9 +400,7 @@
                 document.getElementById('approvedBanner').style.display = 'flex';
                 document.getElementById('cartSummary').style.display = 'none';
                 const proceedBtn = document.getElementById('proceedBtn');
-                if (proceedBtn) {
-                    proceedBtn.classList.add('disabled');
-                }
+                if (proceedBtn) proceedBtn.classList.add('disabled');
             }
             return hasApprovedRegistration;
         } catch(e) {
@@ -388,7 +428,6 @@
             const cart = await apiGet('cart/get.php');
             const count = cart.count || 0;
             document.getElementById('cartCount').innerText = count;
-            // Only show cart summary if no pending, no approved, and registration is open
             if (!hasApprovedRegistration && !hasPendingRegistration && count > 0 && isRegistrationOpen) {
                 document.getElementById('cartSummary').style.display = 'flex';
             } else {
@@ -414,15 +453,56 @@
         }
     }
 
+    function populateProgrammeDropdown(courses) {
+        const programmes = new Set();
+        programmes.add(""); // empty value for "All Programmes"
+        courses.forEach(course => {
+            if (course.programme) programmes.add(course.programme);
+        });
+        const select = document.getElementById('programmeSelect');
+        select.innerHTML = '<option value="">All Programmes</option>';
+        Array.from(programmes).sort().forEach(prog => {
+            if (prog) {
+                const option = document.createElement('option');
+                option.value = prog;
+                option.textContent = prog;
+                select.appendChild(option);
+            }
+        });
+    }
+
+    function filterByProgramme() {
+        const selectedProgramme = document.getElementById('programmeSelect').value;
+        currentProgrammeFilter = selectedProgramme;
+        let filtered = allCourses;
+        if (selectedProgramme) {
+            filtered = allCourses.filter(c => c.programme === selectedProgramme);
+        }
+        // Apply text search if any
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        if (searchTerm) {
+            filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm) || c.code.toLowerCase().includes(searchTerm));
+        }
+        renderCourses(filtered);
+    }
+
+    function resetFilter() {
+        document.getElementById('programmeSelect').value = "";
+        document.getElementById('searchInput').value = "";
+        currentProgrammeFilter = "";
+        renderCourses(allCourses);
+    }
+
     async function loadCourses() {
         try {
-            await checkPendingRegistration();  // CHECK PENDING FIRST
-            await checkApprovedRegistration(); // THEN CHECK APPROVED
+            await checkPendingRegistration();
+            await checkApprovedRegistration();
             await checkRegistrationPeriod();
             await loadRejectedCourses();
             const data = await apiGet('courses/list.php');
             allCourses = data.courses || [];
             document.getElementById('studentName').innerText = data.student_name || 'Haris';
+            populateProgrammeDropdown(allCourses);
             await loadCartCount();
             renderCourses(allCourses);
         } catch(err) {
@@ -434,23 +514,18 @@
     function getButtonConfig(course) {
         const isInCart = cartCourses.includes(course.code);
         
-        // PRIORITY 1: If has PENDING registration - DISABLE EVERYTHING
         if (hasPendingRegistration) {
             return { text: 'Pending Approval', class: 'pending', disabled: true, icon: 'clock-history' };
         }
-        // PRIORITY 2: If has APPROVED registration - DISABLE EVERYTHING
         if (hasApprovedRegistration) {
             return { text: 'Registration Completed', class: 'approved', disabled: true, icon: 'check-circle-fill' };
         }
-        // PRIORITY 3: If registration period closed
         if (!isRegistrationOpen) {
             return { text: 'Registration Closed', class: 'disabled', disabled: true, icon: 'ban' };
         }
-        // PRIORITY 4: If already in cart
         if (isInCart) {
             return { text: 'Remove', class: 'remove', disabled: false, icon: 'dash-circle' };
         }
-        // Default: Show "Add to Cart" button
         return { text: 'Add to Cart', class: 'add', disabled: false, icon: 'plus-circle' };
     }
 
@@ -536,7 +611,6 @@
             grid.appendChild(card);
         });
 
-        // Only attach event listeners if not pending and not approved
         if (!hasPendingRegistration && !hasApprovedRegistration) {
             document.querySelectorAll('.cart-btn.add').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
@@ -565,8 +639,14 @@
     }
 
     function filterCourses() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allCourses.filter(c => c.name.toLowerCase().includes(term) || c.code.toLowerCase().includes(term));
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        let filtered = allCourses;
+        if (currentProgrammeFilter) {
+            filtered = filtered.filter(c => c.programme === currentProgrammeFilter);
+        }
+        if (searchTerm) {
+            filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm) || c.code.toLowerCase().includes(searchTerm));
+        }
         renderCourses(filtered);
     }
 
@@ -594,6 +674,8 @@
 
     document.getElementById('modalYesBtn')?.addEventListener('click', confirmAddCourse);
     document.getElementById('modalNoBtn')?.addEventListener('click', closeAddCourseModal);
+    document.getElementById('filterProgrammeBtn')?.addEventListener('click', filterByProgramme);
+    document.getElementById('resetFilterBtn')?.addEventListener('click', resetFilter);
 
     loadCourses();
 </script>
