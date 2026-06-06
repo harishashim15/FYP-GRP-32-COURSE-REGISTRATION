@@ -321,7 +321,7 @@
     </div>
 </div>
 
-<!-- REMOVE COURSE MODAL - NEW -->
+<!-- REMOVE COURSE MODAL -->
 <div id="removeCourseModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon"><i class="bi bi-exclamation-triangle-fill" style="color: #dc3545;"></i></div>
@@ -342,8 +342,6 @@
     let isRegistrationOpen = true;
     let hasApprovedRegistration = false;
     let hasPendingRegistration = false;
-    let pendingAddCourse = null;
-    let pendingRemoveCourse = null;
     let currentProgrammeFilter = "";
 
     function toggleSidebar() {
@@ -369,40 +367,42 @@
         document.getElementById('periodClosedModal').classList.add('active');
     }
 
-    // ADD COURSE MODAL FUNCTIONS
+    // MODAL FUNCTIONS
+    let pendingAddCourseCallback = null;
+    let pendingRemoveCourseData = null;
+
     function showAddCourseModal(course, callback) {
-        pendingAddCourse = { course, callback };
+        pendingAddCourseCallback = { course, callback };
         document.getElementById('modalCourseName').innerHTML = `Do you want to add <strong>${escapeHtml(course.name)}</strong> to your cart?`;
         document.getElementById('addCourseModal').classList.add('active');
     }
 
     function closeAddCourseModal() {
         document.getElementById('addCourseModal').classList.remove('active');
-        pendingAddCourse = null;
+        pendingAddCourseCallback = null;
     }
 
     async function confirmAddCourse() {
-        if (!pendingAddCourse) return;
-        const { course, callback } = pendingAddCourse;
+        if (!pendingAddCourseCallback) return;
+        const { course, callback } = pendingAddCourseCallback;
         closeAddCourseModal();
         await callback(course);
     }
 
-    // REMOVE COURSE MODAL FUNCTIONS - NEW
     function showRemoveCourseModal(course, btnElement) {
-        pendingRemoveCourse = { course, btnElement };
+        pendingRemoveCourseData = { course, btnElement };
         document.getElementById('removeModalMessage').innerHTML = `Are you sure you want to remove <strong>${escapeHtml(course.name)}</strong> from your cart?`;
         document.getElementById('removeCourseModal').classList.add('active');
     }
 
     function closeRemoveCourseModal() {
         document.getElementById('removeCourseModal').classList.remove('active');
-        pendingRemoveCourse = null;
+        pendingRemoveCourseData = null;
     }
 
     async function confirmRemoveCourse() {
-        if (!pendingRemoveCourse) return;
-        const { course, btnElement } = pendingRemoveCourse;
+        if (!pendingRemoveCourseData) return;
+        const { course, btnElement } = pendingRemoveCourseData;
         closeRemoveCourseModal();
         await removeFromCart(course, btnElement);
     }
@@ -581,6 +581,7 @@
         }
         try {
             await apiPost('cart/add.php', { course_code: course.code });
+            // Update the button directly without re-rendering
             btnElement.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Remove';
             btnElement.classList.remove('add');
             btnElement.classList.add('remove');
@@ -607,6 +608,7 @@
         }
         try {
             await apiPost('cart/remove.php', { course_code: course.code });
+            // Update the button directly without re-rendering
             btnElement.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add to Cart';
             btnElement.classList.remove('remove');
             btnElement.classList.add('add');
@@ -615,6 +617,48 @@
             showAlert('Course removed from cart', 'success');
         } catch(err) {
             showAlert(err.message || 'Failed to remove course', 'error');
+        }
+    }
+
+    // EVENT DELEGATION - SINGLE EVENT LISTENER FOR ALL BUTTONS
+    // This prevents duplicate/mixed event listeners
+    function setupEventDelegation() {
+        const coursesGrid = document.getElementById('coursesGrid');
+        
+        // Remove any existing listener first to prevent duplicates
+        coursesGrid.removeEventListener('click', handleButtonClick);
+        // Add the event listener
+        coursesGrid.addEventListener('click', handleButtonClick);
+    }
+
+    async function handleButtonClick(e) {
+        // Find the actual button that was clicked (in case the click was on the icon)
+        let btn = e.target.closest('.cart-btn');
+        if (!btn) return;
+        
+        // If button is disabled, do nothing
+        if (btn.disabled) return;
+        
+        e.stopPropagation();
+        
+        const courseCode = btn.dataset.code;
+        const courseName = btn.dataset.name;
+        const isRemoveButton = btn.classList.contains('remove');
+        const isAddButton = btn.classList.contains('add');
+        
+        // Find the full course object
+        const course = allCourses.find(c => c.code === courseCode);
+        if (!course) return;
+        
+        // Handle remove button
+        if (isRemoveButton) {
+            showRemoveCourseModal(course, btn);
+        }
+        // Handle add button
+        else if (isAddButton) {
+            showAddCourseModal(course, async (selectedCourse) => {
+                await addToCart(selectedCourse, btn);
+            });
         }
     }
 
@@ -643,34 +687,9 @@
             `;
             grid.appendChild(card);
         });
-
-        if (!hasPendingRegistration && !hasApprovedRegistration) {
-            // ADD button event listeners
-            document.querySelectorAll('.cart-btn.add').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const code = btn.dataset.code;
-                    const course = allCourses.find(c => c.code === code);
-                    if (course) {
-                        showAddCourseModal(course, async (selectedCourse) => {
-                            await addToCart(selectedCourse, btn);
-                        });
-                    }
-                });
-            });
-
-            // REMOVE button event listeners - NOW USING MODAL
-            document.querySelectorAll('.cart-btn.remove').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const code = btn.dataset.code;
-                    const course = allCourses.find(c => c.code === code);
-                    if (course) {
-                        showRemoveCourseModal(course, btn);
-                    }
-                });
-            });
-        }
+        
+        // Set up event delegation AFTER rendering
+        setupEventDelegation();
     }
 
     function filterCourses() {
