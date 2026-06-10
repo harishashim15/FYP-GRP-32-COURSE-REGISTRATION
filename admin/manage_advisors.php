@@ -146,7 +146,7 @@ if ($result) {
         <a href="manage_advisors.php" class="active"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
-        <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
+        <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
     </div>
     <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>

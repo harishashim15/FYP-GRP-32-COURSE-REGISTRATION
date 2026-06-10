@@ -4,16 +4,17 @@ require_once __DIR__ . '/../config/database.php';
 $student = requireRole('student');
 $pdo = getDBConnection();
 
-// All available courses – now including programme
+// Only show subjects that are NOT hidden
 $stmt = $pdo->prepare("
     SELECT subject_code AS code, subject_name AS name, credits, programme
     FROM subjects
+    WHERE is_hidden = 0
     ORDER BY subject_code
 ");
 $stmt->execute();
 $courses = $stmt->fetchAll();
 
-// Enrolled count for each course (optional)
+// Enrolled count for each course
 foreach ($courses as &$c) {
     $stmt = $pdo->prepare("
         SELECT COUNT(DISTINCT cr.student_id) AS enrolled
@@ -26,7 +27,7 @@ foreach ($courses as &$c) {
     $c['enrolled'] = (int)($enrolled['enrolled'] ?? 0);
 }
 
-// Courses already registered by this student (any status)
+// Courses already registered by this student
 $stmt = $pdo->prepare("
     SELECT DISTINCT rc.subject_code AS code
     FROM registration_courses rc

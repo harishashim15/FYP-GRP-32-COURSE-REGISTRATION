@@ -163,13 +163,12 @@ $stmt->close();
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
    <div class="menu">
-       <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
+       <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
         <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
-        <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
-    </div>
+        <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
     <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 <div class="main-content">

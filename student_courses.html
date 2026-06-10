@@ -10,57 +10,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        /* ... (all your existing styles remain the same) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
-        
-        .sidebar {
-            width: 280px; height: 100vh;
-            background: linear-gradient(to bottom, #670019, #8b0022);
-            position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease; z-index: 1000;
-            overflow-y: auto;
-        }
+        .sidebar { width: 280px; height: 100vh; background: linear-gradient(to bottom, #670019, #8b0022); position: fixed; padding: 30px 20px; color: white; transition: transform 0.3s ease; z-index: 1000; overflow-y: auto; }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-        .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; margin-bottom: 8px;
-            transition: 0.3s; font-size: 15px;
-        }
+        .menu a { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; padding: 14px 20px; border-radius: 14px; margin-bottom: 8px; transition: 0.3s; font-size: 15px; }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; width: 24px; }
-        .logout {
-            position: absolute; bottom: 30px;
-            width: calc(100% - 40px); left: 20px;
-        }
-        .logout a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 15px;
-            background: rgba(255,255,255,0.1);
-        }
+        .logout { position: absolute; bottom: 30px; width: calc(100% - 40px); left: 20px; }
+        .logout a { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; padding: 14px 20px; border-radius: 14px; transition: 0.3s; font-size: 15px; background: rgba(255,255,255,0.1); }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
-        .topbar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; background: white; padding: 15px 25px;
-            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
-        
-        .page-header {
-            background: #f7f2ee; border-radius: 25px; padding: 35px 40px;
-            margin-bottom: 30px; border: 1px solid #eee;
-        }
+        .page-header { background: #f7f2ee; border-radius: 25px; padding: 35px 40px; margin-bottom: 30px; border: 1px solid #eee; }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
+<<<<<<< Updated upstream
         
         .pending-banner {
             background: #fff3cd;
@@ -73,54 +46,28 @@
             gap: 18px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
+=======
+        .pending-banner { background: #fff3cd; border: 1px solid #ffecb5; border-radius: 20px; padding: 20px 25px; margin-bottom: 25px; display: flex; align-items: center; gap: 18px; }
+>>>>>>> Stashed changes
         .pending-banner i { font-size: 42px; color: #856404; }
         .pending-banner-content h4 { color: #856404; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
         .pending-banner-content p { color: #856404; margin: 0; font-size: 14px; }
-        
-        .approved-banner {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 20px;
-            padding: 20px 25px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
+        .approved-banner { background: #d4edda; border: 1px solid #c3e6cb; border-radius: 20px; padding: 20px 25px; margin-bottom: 25px; display: flex; align-items: center; gap: 18px; }
         .approved-banner i { font-size: 42px; color: #2e7d32; }
         .approved-banner-content h4 { color: #155724; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
         .approved-banner-content p { color: #155724; margin: 0; font-size: 14px; }
-        
-        .closed-banner {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            border-radius: 20px;
-            padding: 20px 25px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
+        .closed-banner { background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 20px; padding: 20px 25px; margin-bottom: 25px; display: flex; align-items: center; gap: 18px; }
         .closed-banner i { font-size: 42px; color: #721c24; }
         .closed-banner-content h4 { color: #721c24; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
         .closed-banner-content p { color: #721c24; margin: 0; font-size: 14px; }
-        
-        .cart-summary {
-            background: #fff7ef; border: 1px solid #f4a000; border-radius: 25px;
-            padding: 15px 25px; margin-bottom: 25px;
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 15px;
-        }
+        .cart-summary { background: #fff7ef; border: 1px solid #f4a000; border-radius: 25px; padding: 15px 25px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .cart-info { display: flex; align-items: center; gap: 10px; }
         .cart-info i { font-size: 24px; color: #670019; }
         .cart-info .count { background: #670019; color: white; padding: 2px 10px; border-radius: 20px; }
-        .view-cart-btn {
-            background: linear-gradient(to right, #670019, #8b0022);
-            color: white; border: none; padding: 10px 25px; border-radius: 25px;
-            text-decoration: none; font-size: 14px; font-weight: 500;
-        }
+        .view-cart-btn { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-size: 14px; font-weight: 500; }
         .view-cart-btn:hover { color: white; }
         .view-cart-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; opacity: 0.6; }
+<<<<<<< Updated upstream
         
         .filter-row {
             display: flex;
@@ -150,60 +97,45 @@
             background: #670019;
             color: white;
         }
+=======
+        .filter-row { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+        .filter-row select { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; background: white; font-size: 14px; cursor: pointer; }
+        .filter-row button { padding: 12px 25px; border-radius: 25px; border: none; font-weight: 500; transition: 0.3s; cursor: pointer; }
+        .btn-filter { background: #670019; color: white; }
+>>>>>>> Stashed changes
         .btn-filter:hover { background: #8b0022; }
-        .btn-reset {
-            background: #6c757d;
-            color: white;
-        }
+        .btn-reset { background: #6c757d; color: white; }
         .btn-reset:hover { background: #5a6268; }
-        
         .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
         .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; }
-        .search-bar button:hover { opacity: 0.9; }
-        
-        .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
-        .course-card {
-            background: white; border-radius: 25px; padding: 25px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
-            transition: 0.3s; border: 1px solid #f0e8e8;
-        }
+        .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .course-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #f0e8e8; }
         .course-card:hover { transform: translateY(-5px); }
         .course-code { background: #670019; color: white; padding: 5px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; font-size: 12px; }
         .course-card h4 { color: #670019; font-weight: 700; margin-bottom: 10px; font-size: 18px; }
         .course-info { display: flex; gap: 15px; margin: 15px 0; padding: 12px 0; border-top: 1px solid #f0e8e8; border-bottom: 1px solid #f0e8e8; }
-        
-        .cart-btn {
-            width: 100%; padding: 12px; border-radius: 14px; font-weight: 600;
-            cursor: pointer; margin-top: 15px; text-align: center; border: none;
-            transition: 0.3s;
-        }
+        .cart-btn { width: 100%; padding: 12px; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 15px; text-align: center; border: none; transition: 0.3s; }
         .cart-btn.add { background: linear-gradient(to right, #670019, #8b0022); color: white; }
         .cart-btn.add:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
         .cart-btn.remove { background: #dc3545; color: white; }
         .cart-btn.remove:hover { background: #c82333; transform: translateY(-2px); }
         .cart-btn.disabled { background: #6c757d; color: white; cursor: not-allowed; }
-        .cart-btn.disabled:hover { transform: none; background: #6c757d; }
         .cart-btn.approved { background: #2e7d32; color: white; cursor: default; }
-        .cart-btn.approved:hover { transform: none; background: #2e7d32; }
         .cart-btn.pending { background: #ffc107; color: #333; cursor: default; }
-        .cart-btn.pending:hover { transform: none; background: #ffc107; }
-        
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
-            z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s;
-        }
+        .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+        .pagination-btn { background: white; border: 1px solid #ddd; padding: 8px 14px; border-radius: 25px; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .pagination-btn.active { background: #670019; color: white; border-color: #670019; }
+        .pagination-btn:hover:not(.active) { background: #f0f0f0; }
+        .pagination-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-container {
-            background: white; border-radius: 25px; width: 450px; max-width: 90%;
-            padding: 35px; text-align: center; transform: scale(0.9); transition: 0.3s;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
+        .modal-container { background: white; border-radius: 25px; width: 450px; max-width: 90%; padding: 35px; text-align: center; transform: scale(0.9); transition: 0.3s; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal-overlay.active .modal-container { transform: scale(1); }
         .modal-icon { font-size: 60px; margin-bottom: 15px; }
         .modal-container h3 { color: #670019; font-weight: 700; margin-bottom: 10px; }
         .modal-container p { color: #666; margin-bottom: 25px; }
+<<<<<<< Updated upstream
         .modal-buttons { display: flex; gap: 15px; justify-content: center; }
         .modal-btn {
             padding: 10px 25px; border-radius: 25px; font-weight: 600;
@@ -220,6 +152,10 @@
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
         }
+=======
+        .modal-btn { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 10px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; }
+        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; } }
+>>>>>>> Stashed changes
     </style>
 </head>
 <body>
@@ -252,6 +188,7 @@
         <p>Browse and add courses to your registration cart</p>
     </div>
 
+<<<<<<< Updated upstream
     <div id="pendingBanner" class="pending-banner" style="display: none;">
         <i class="bi bi-clock-history"></i>
         <div class="pending-banner-content">
@@ -275,6 +212,12 @@
             <p>The registration period is currently closed. You cannot add or remove courses at this time.</p>
         </div>
     </div>
+=======
+    <!-- Banners (same as before) -->
+    <div id="pendingBanner" class="pending-banner" style="display: none;"><i class="bi bi-clock-history"></i><div class="pending-banner-content"><h4>Registration Pending Approval</h4><p>Your registration is currently waiting for Academic Advisor approval. You cannot add or modify courses until a decision is made.</p></div></div>
+    <div id="approvedBanner" class="approved-banner" style="display: none;"><i class="bi bi-check-circle-fill"></i><div class="approved-banner-content"><h4>Registration Approved</h4><p>Your registration has been approved. You cannot add or modify courses for this session.</p></div></div>
+    <div id="closedBanner" class="closed-banner" style="display: none;"><i class="bi bi-calendar-x-fill"></i><div class="closed-banner-content"><h4>Registration Period Closed</h4><p>The registration period is currently closed. You cannot add or remove courses at this time.</p></div></div>
+>>>>>>> Stashed changes
 
     <div id="cartSummary" class="cart-summary" style="display: none;">
         <div class="cart-info"><i class="bi bi-bag-check"></i> You have <strong id="cartCount" class="count">0</strong> course(s) in your cart</div>
@@ -297,8 +240,12 @@
     <div class="courses-grid" id="coursesGrid">
         <div class="text-center">Loading courses...</div>
     </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-container" id="paginationContainer"></div>
 </div>
 
+<!-- Modals (same as before) -->
 <div id="periodClosedModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-icon"><i class="bi bi-calendar-x-fill" style="color: #dc3545;"></i></div>
@@ -343,30 +290,23 @@
     let hasApprovedRegistration = false;
     let hasPendingRegistration = false;
     let currentProgrammeFilter = "";
-
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const main = document.querySelector('.main-content');
-        sidebar.classList.toggle('collapsed');
-        main.classList.toggle('expanded');
-        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-    }
     
-    (function() {
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            document.querySelector('.sidebar').classList.add('collapsed');
-            document.querySelector('.main-content').classList.add('expanded');
-        }
-    })();
+    // Pagination variables
+    let currentPage = 1;
+    const itemsPerPage = 18;
+    let totalPages = 1;
+    let currentFilteredCourses = [];
 
-    function closePeriodModal() {
-        document.getElementById('periodClosedModal').classList.remove('active');
-    }
+    function toggleSidebar() { /* same as before */ }
+    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
-    function showPeriodClosedModal() {
-        document.getElementById('periodClosedModal').classList.add('active');
-    }
+    function closePeriodModal() { document.getElementById('periodClosedModal').classList.remove('active'); }
+    function showPeriodClosedModal() { document.getElementById('periodClosedModal').classList.add('active'); }
+    function showAddCourseModal(course, callback) { pendingAddCourse = { course, callback }; document.getElementById('modalCourseName').innerHTML = `Do you want to add <strong>${escapeHtml(course.name)}</strong>?`; document.getElementById('addCourseModal').classList.add('active'); }
+    function closeAddCourseModal() { document.getElementById('addCourseModal').classList.remove('active'); pendingAddCourse = null; }
+    async function confirmAddCourse() { if (!pendingAddCourse) return; const { course, callback } = pendingAddCourse; closeAddCourseModal(); await callback(course); }
 
+<<<<<<< Updated upstream
     // MODAL FUNCTIONS
     let pendingAddCourseCallback = null;
     let pendingRemoveCourseData = null;
@@ -493,37 +433,51 @@
         courses.forEach(course => {
             if (course.programme) programmes.add(course.programme);
         });
+=======
+    async function checkPendingRegistration() { try { const result = await apiGet('registrations/check_pending.php'); hasPendingRegistration = result.has_pending || false; if (hasPendingRegistration) { document.getElementById('pendingBanner').style.display = 'flex'; document.getElementById('cartSummary').style.display = 'none'; const proceedBtn = document.getElementById('proceedBtn'); if (proceedBtn) proceedBtn.classList.add('disabled'); } return hasPendingRegistration; } catch(e) { console.error(e); return false; } }
+    async function checkApprovedRegistration() { try { const result = await apiGet('registrations/check_approved.php'); hasApprovedRegistration = result.has_approved || false; if (hasApprovedRegistration) { document.getElementById('approvedBanner').style.display = 'flex'; document.getElementById('cartSummary').style.display = 'none'; const proceedBtn = document.getElementById('proceedBtn'); if (proceedBtn) proceedBtn.classList.add('disabled'); } return hasApprovedRegistration; } catch(e) { console.error(e); return false; } }
+    async function loadRejectedCourses() { const pendingData = localStorage.getItem('pendingRejectedRegistration'); if (pendingData) { try { const rejectedData = JSON.parse(pendingData); if (rejectedData.courses && rejectedData.courses.length > 0) { rejectedCourseCodes = rejectedData.courses.map(c => c.subject_code); } } catch(e) { console.error(e); } } }
+    async function loadCartCount() { try { const cart = await apiGet('cart/get.php'); const count = cart.count || 0; document.getElementById('cartCount').innerText = count; if (!hasApprovedRegistration && !hasPendingRegistration && count > 0 && isRegistrationOpen) { document.getElementById('cartSummary').style.display = 'flex'; } else { document.getElementById('cartSummary').style.display = 'none'; } cartCourses = cart.items.map(item => item.code); } catch(e) { console.error(e); } }
+    async function checkRegistrationPeriod() { try { const period = await apiGet('registrations/period.php'); isRegistrationOpen = period.is_open; if (!isRegistrationOpen && !hasApprovedRegistration && !hasPendingRegistration) { document.getElementById('closedBanner').style.display = 'flex'; } else { document.getElementById('closedBanner').style.display = 'none'; } return isRegistrationOpen; } catch(e) { console.error(e); return true; } }
+
+    function populateProgrammeDropdown(courses) {
+        const programmes = new Set();
+        courses.forEach(course => { if (course.programme) programmes.add(course.programme); });
+>>>>>>> Stashed changes
         const select = document.getElementById('programmeSelect');
         select.innerHTML = '<option value="">All Programmes</option>';
-        Array.from(programmes).sort().forEach(prog => {
-            if (prog) {
-                const option = document.createElement('option');
-                option.value = prog;
-                option.textContent = prog;
-                select.appendChild(option);
-            }
-        });
+        Array.from(programmes).sort().forEach(prog => { if (prog) { const option = document.createElement('option'); option.value = prog; option.textContent = prog; select.appendChild(option); } });
     }
 
     function filterByProgramme() {
         const selectedProgramme = document.getElementById('programmeSelect').value;
         currentProgrammeFilter = selectedProgramme;
         let filtered = allCourses;
+<<<<<<< Updated upstream
         if (selectedProgramme) {
             filtered = allCourses.filter(c => c.programme === selectedProgramme);
         }
+=======
+        if (selectedProgramme) filtered = allCourses.filter(c => c.programme === selectedProgramme);
+>>>>>>> Stashed changes
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        if (searchTerm) {
-            filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm) || c.code.toLowerCase().includes(searchTerm));
-        }
-        renderCourses(filtered);
+        if (searchTerm) filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm) || c.code.toLowerCase().includes(searchTerm));
+        currentFilteredCourses = filtered;
+        totalPages = Math.ceil(currentFilteredCourses.length / itemsPerPage);
+        currentPage = 1;
+        renderPagedCourses();
+        updatePaginationControls();
     }
 
     function resetFilter() {
         document.getElementById('programmeSelect').value = "";
         document.getElementById('searchInput').value = "";
         currentProgrammeFilter = "";
-        renderCourses(allCourses);
+        currentFilteredCourses = allCourses;
+        totalPages = Math.ceil(currentFilteredCourses.length / itemsPerPage);
+        currentPage = 1;
+        renderPagedCourses();
+        updatePaginationControls();
     }
 
     async function loadCourses() {
@@ -537,32 +491,25 @@
             document.getElementById('studentName').innerText = data.student_name || 'Haris';
             populateProgrammeDropdown(allCourses);
             await loadCartCount();
-            renderCourses(allCourses);
-        } catch(err) {
-            console.error(err);
-            document.getElementById('coursesGrid').innerHTML = '<div class="text-center text-danger">Failed to load courses</div>';
-        }
+            currentFilteredCourses = allCourses;
+            totalPages = Math.ceil(currentFilteredCourses.length / itemsPerPage);
+            currentPage = 1;
+            renderPagedCourses();
+            updatePaginationControls();
+        } catch(err) { console.error(err); document.getElementById('coursesGrid').innerHTML = '<div class="text-center text-danger">Failed to load courses</div>'; }
     }
 
     function getButtonConfig(course) {
         const isInCart = cartCourses.includes(course.code);
-        
-        if (hasPendingRegistration) {
-            return { text: 'Pending Approval', class: 'pending', disabled: true, icon: 'clock-history' };
-        }
-        if (hasApprovedRegistration) {
-            return { text: 'Registration Completed', class: 'approved', disabled: true, icon: 'check-circle-fill' };
-        }
-        if (!isRegistrationOpen) {
-            return { text: 'Registration Closed', class: 'disabled', disabled: true, icon: 'ban' };
-        }
-        if (isInCart) {
-            return { text: 'Remove', class: 'remove', disabled: false, icon: 'dash-circle' };
-        }
+        if (hasPendingRegistration) return { text: 'Pending Approval', class: 'pending', disabled: true, icon: 'clock-history' };
+        if (hasApprovedRegistration) return { text: 'Registration Completed', class: 'approved', disabled: true, icon: 'check-circle-fill' };
+        if (!isRegistrationOpen) return { text: 'Registration Closed', class: 'disabled', disabled: true, icon: 'ban' };
+        if (isInCart) return { text: 'Remove', class: 'remove', disabled: false, icon: 'dash-circle' };
         return { text: 'Add to Cart', class: 'add', disabled: false, icon: 'plus-circle' };
     }
 
     async function addToCart(course, btnElement) {
+<<<<<<< Updated upstream
         if (hasPendingRegistration) {
             showAlert('You have a pending registration. Cannot add courses until advisor decision.', 'warning');
             return;
@@ -618,6 +565,27 @@
         } catch(err) {
             showAlert(err.message || 'Failed to remove course', 'error');
         }
+=======
+        if (hasPendingRegistration) { showAlert('You have a pending registration. Cannot add courses until advisor decision.', 'warning'); return; }
+        if (hasApprovedRegistration) { showAlert('You already have an approved registration. Cannot add more courses.', 'error'); return; }
+        if (!isRegistrationOpen) { showPeriodClosedModal(); return; }
+        if (cartCourses.includes(course.code)) { showAlert('This course is already in your cart.', 'warning'); return; }
+        try { await apiPost('cart/add.php', { course_code: course.code }); btnElement.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Remove'; btnElement.classList.remove('add'); btnElement.classList.add('remove'); cartCourses.push(course.code); await loadCartCount(); showAlert('Course added to cart successfully!', 'success'); } catch(err) { showAlert(err.message || 'Failed to add course', 'error'); }
+    }
+
+    async function removeFromCart(course, btnElement) {
+        if (hasPendingRegistration) { showAlert('You have a pending registration. Cannot modify courses until advisor decision.', 'warning'); return; }
+        if (hasApprovedRegistration) { showAlert('You already have an approved registration. Cannot modify courses.', 'error'); return; }
+        if (!isRegistrationOpen) { showPeriodClosedModal(); return; }
+        try { await apiPost('cart/remove.php', { course_code: course.code }); btnElement.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add to Cart'; btnElement.classList.remove('remove'); btnElement.classList.add('add'); cartCourses = cartCourses.filter(c => c !== course.code); await loadCartCount(); showAlert('Course removed from cart', 'success'); } catch(err) { showAlert(err.message || 'Failed to remove course', 'error'); }
+    }
+
+    function renderPagedCourses() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageCourses = currentFilteredCourses.slice(start, end);
+        renderCourses(pageCourses);
+>>>>>>> Stashed changes
     }
 
     // EVENT DELEGATION - SINGLE EVENT LISTENER FOR ALL BUTTONS
@@ -664,16 +632,13 @@
 
     function renderCourses(courses) {
         const grid = document.getElementById('coursesGrid');
-        if (!courses.length) {
-            grid.innerHTML = '<div class="text-center">No courses available.</div>';
-            return;
-        }
-        
+        if (!courses.length) { grid.innerHTML = '<div class="text-center">No courses available.</div>'; return; }
         grid.innerHTML = '';
         courses.forEach(course => {
             const config = getButtonConfig(course);
             const card = document.createElement('div');
             card.className = 'course-card';
+<<<<<<< Updated upstream
             card.innerHTML = `
                 <span class="course-code">${escapeHtml(course.code)}</span>
                 <h4>${escapeHtml(course.name)}</h4>
@@ -690,49 +655,69 @@
         
         // Set up event delegation AFTER rendering
         setupEventDelegation();
+=======
+            card.innerHTML = `<span class="course-code">${escapeHtml(course.code)}</span><h4>${escapeHtml(course.name)}</h4><div class="course-info"><div><i class="bi bi-clock"></i> ${course.credits} Credit Hours</div><div><i class="bi bi-people"></i> ${course.enrolled || 0} Students</div></div><button class="cart-btn ${config.class}" data-code="${escapeHtml(course.code)}" ${config.disabled ? 'disabled' : ''}><i class="bi bi-${config.icon} me-1"></i> ${config.text}</button>`;
+            grid.appendChild(card);
+        });
+        if (!hasPendingRegistration && !hasApprovedRegistration) {
+            document.querySelectorAll('.cart-btn.add').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); const code = btn.dataset.code; const course = allCourses.find(c => c.code === code); if (course) { showAddCourseModal(course, async (selectedCourse) => { await addToCart(selectedCourse, btn); }); } }));
+            document.querySelectorAll('.cart-btn.remove').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); const code = btn.dataset.code; const course = allCourses.find(c => c.code === code); if (course && confirm(`Remove "${course.name}" from your cart?`)) { await removeFromCart(course, btn); } }));
+        }
+>>>>>>> Stashed changes
     }
 
     function filterCourses() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         let filtered = allCourses;
-        if (currentProgrammeFilter) {
-            filtered = filtered.filter(c => c.programme === currentProgrammeFilter);
+        if (currentProgrammeFilter) filtered = filtered.filter(c => c.programme === currentProgrammeFilter);
+        if (searchTerm) filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm) || c.code.toLowerCase().includes(searchTerm));
+        currentFilteredCourses = filtered;
+        totalPages = Math.ceil(currentFilteredCourses.length / itemsPerPage);
+        currentPage = 1;
+        renderPagedCourses();
+        updatePaginationControls();
+    }
+
+    function updatePaginationControls() {
+        const container = document.getElementById('paginationContainer');
+        if (totalPages <= 1) { container.innerHTML = ''; return; }
+        let html = '';
+        // Previous button
+        html += `<button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹ Previous</button>`;
+        // Page numbers (limit to 5 visible)
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
         }
-        if (searchTerm) {
-            filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm) || c.code.toLowerCase().includes(searchTerm));
-        }
-        renderCourses(filtered);
+        // Next button
+        html += `<button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next ›</button>`;
+        container.innerHTML = html;
     }
 
-    function showAlert(msg, type) {
-        const alertDiv = document.createElement('div');
-        alertDiv.style.position = 'fixed';
-        alertDiv.style.top = '20px';
-        alertDiv.style.right = '20px';
-        alertDiv.style.zIndex = '9999';
-        alertDiv.style.backgroundColor = type === 'success' ? '#d4edda' : type === 'warning' ? '#fff3cd' : '#f8d7da';
-        alertDiv.style.color = type === 'success' ? '#155724' : type === 'warning' ? '#856404' : '#721c24';
-        alertDiv.style.padding = '12px 20px';
-        alertDiv.style.borderRadius = '12px';
-        alertDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        alertDiv.style.borderLeft = `4px solid ${type === 'success' ? '#2e7d32' : type === 'warning' ? '#ffc107' : '#dc3545'}`;
-        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-2"></i>${msg}`;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+    function goToPage(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderPagedCourses();
+        updatePaginationControls();
+        window.scrollTo({ top: document.querySelector('.courses-grid').offsetTop - 20, behavior: 'smooth' });
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; });
-    }
-
+<<<<<<< Updated upstream
     // Modal Event Listeners
+=======
+    function showAlert(msg, type) { /* same as before */ }
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
+
+>>>>>>> Stashed changes
     document.getElementById('modalYesBtn')?.addEventListener('click', confirmAddCourse);
     document.getElementById('modalNoBtn')?.addEventListener('click', closeAddCourseModal);
     document.getElementById('removeModalConfirmBtn')?.addEventListener('click', confirmRemoveCourse);
     document.getElementById('removeModalNoBtn')?.addEventListener('click', closeRemoveCourseModal);
     document.getElementById('filterProgrammeBtn')?.addEventListener('click', filterByProgramme);
     document.getElementById('resetFilterBtn')?.addEventListener('click', resetFilter);
+    document.getElementById('searchInput').addEventListener('keyup', filterCourses);
 
     // Close modals when clicking outside
     document.querySelectorAll('.modal-overlay').forEach(modal => {

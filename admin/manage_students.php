@@ -49,7 +49,6 @@ if ($result) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Same styles as before, plus search bar */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
@@ -61,10 +60,10 @@ if ($result) {
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
+            text-decoration: none; color: white; padding: 9px 20px;
             border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
@@ -98,43 +97,36 @@ if ($result) {
             transition: 0.3s;
         }
         .btn-add:hover { background: linear-gradient(to right, #8b0022, #a80028); color: white; }
-        .search-bar {
-            margin-bottom: 25px;
-        }
-        .search-bar input {
-            width: 100%;
-            padding: 12px 20px;
-            border: 1.5px solid #e0d6d6;
-            border-radius: 25px;
-            font-size: 14px;
-            outline: none;
-            transition: 0.3s;
-            font-family: 'Poppins', sans-serif;
-        }
-        .search-bar input:focus {
-            border-color: #670019;
-            box-shadow: 0 0 0 4px rgba(103,0,25,0.08);
-        }
         .table-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; background: #f8f6f4; padding: 12px 15px; color: #670019; font-weight: 600; }
         td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #333; }
         tr:hover { background: #fdf9f7; }
-        .action-btn { padding: 5px 12px; border-radius: 20px; text-decoration: none; font-size: 13px; display: inline-block; margin-right: 5px; }
+        .action-btn {
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 12px;
+            display: inline-block;
+            margin-right: 5px;
+            transition: 0.3s;
+        }
         .btn-edit { background: #f4a000; color: white; }
         .btn-edit:hover { background: #e08700; color: white; }
         .btn-delete { background: #dc2626; color: white; }
         .btn-delete:hover { background: #b91c1c; color: white; }
+        .btn-registrations { background: #17a2b8; color: white; }
+        .btn-registrations:hover { background: #138496; color: white; }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; background: #d4edda; color: #155724; }
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-            font-size: 15px;
-        }
+        .search-bar { margin-bottom: 20px; display: flex; gap: 12px; align-items: center; }
+        .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
+        .search-bar input:focus { border-color: #670019; }
+        .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; }
+        .no-results { text-align: center; padding: 40px; color: #6c757d; }
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
+            .action-btn { margin-bottom: 5px; }
         }
     </style>
 </head>
@@ -142,12 +134,12 @@ if ($result) {
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
-     <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
+       <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
         <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
-        <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
+        <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
     </div>
     <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
@@ -167,12 +159,13 @@ if ($result) {
     <?php if (isset($_GET['msg'])): ?>
         <div class="alert"><?php echo htmlspecialchars($_GET['msg']); ?></div>
     <?php endif; ?>
-    
-    <!-- Live Search Bar -->
+
+    <!-- Search Bar -->
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search by student name or matrix number">
+        <input type="text" id="searchInput" placeholder="Search by student name or matrix number...">
+        <button onclick="filterTable()"><i class="bi bi-search"></i> Search</button>
     </div>
-    
+
     <div class="table-card">
         <div style="overflow-x: auto;">
             <table id="studentsTable">
@@ -194,6 +187,7 @@ if ($result) {
                             <td><?php echo htmlspecialchars($s['utm_email']); ?></td>
                             <td>
                                 <a href="edit_student.php?id=<?php echo $s['user_id']; ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
+                                <a href="student_registrations.php?id=<?php echo $s['user_id']; ?>" class="action-btn btn-registrations"><i class="bi bi-list-ul"></i> Registrations</a>
                                 <a href="manage_students.php?delete_id=<?php echo $s['user_id']; ?>" class="action-btn btn-delete" onclick="return confirm('Delete this student?')"><i class="bi bi-trash"></i> Delete</a>
                             </td>
                         </tr>
@@ -221,28 +215,21 @@ if ($result) {
             document.querySelector('.main-content').classList.add('expanded');
         }
     })();
-    
-    // Live filtering
-    const searchInput = document.getElementById('searchInput');
-    const table = document.getElementById('studentsTable');
-    const noResultsMsg = document.getElementById('noResultsMsg');
-    const rows = table.getElementsByTagName('tr');
-    
+
     function filterTable() {
-        const filter = searchInput.value.toLowerCase().trim();
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase().trim();
+        const table = document.getElementById('studentsTable');
+        const rows = table.getElementsByTagName('tr');
         let hasVisible = false;
-        
-        // Skip the header row (index 0)
+        const noResults = document.getElementById('noResultsMsg');
+
         for (let i = 1; i < rows.length; i++) {
             const row = rows[i];
             const cells = row.getElementsByTagName('td');
             if (cells.length === 0) continue;
-            
-            const nameCell = cells[2]; // Name column (index 2)
-            const matrixCell = cells[1]; // Matrix column (index 1)
-            const name = nameCell ? nameCell.textContent.toLowerCase() : '';
-            const matrix = matrixCell ? matrixCell.textContent.toLowerCase() : '';
-            
+            const name = cells[2] ? cells[2].textContent.toLowerCase() : '';
+            const matrix = cells[1] ? cells[1].textContent.toLowerCase() : '';
             if (name.includes(filter) || matrix.includes(filter)) {
                 row.style.display = '';
                 hasVisible = true;
@@ -250,12 +237,10 @@ if ($result) {
                 row.style.display = 'none';
             }
         }
-        
-        noResultsMsg.style.display = hasVisible ? 'none' : 'block';
+        noResults.style.display = hasVisible ? 'none' : 'block';
     }
-    
-    // Attach event listener for live search
-    searchInput.addEventListener('input', filterTable);
+
+    document.getElementById('searchInput').addEventListener('keyup', filterTable);
 </script>
 </body>
 </html>

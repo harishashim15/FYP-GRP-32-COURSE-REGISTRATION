@@ -1,6 +1,18 @@
 <?php
 session_start();
-require_once '../db_connect.php';
+require_once '../db_connect.php';  // This defines $conn
+
+// Toggle subject hide/show (GET method)
+if (isset($_GET['toggle_id']) && isset($_GET['action'])) {
+    $code = $_GET['toggle_id'];
+    $action = $_GET['action'];
+    $new_hidden = ($action === 'hide') ? 1 : 0;
+    $stmt = $conn->prepare("UPDATE subjects SET is_hidden = ? WHERE subject_code = ?");
+    $stmt->bind_param("is", $new_hidden, $code);
+    $stmt->execute();
+    header("Location: manage_subjects.php?msg=Subject visibility updated.");
+    exit();
+}
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.html");
@@ -18,20 +30,18 @@ if ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Delete subject
-if (isset($_GET['delete_id'])) {
-    $delete_id = $_GET['delete_id'];
-    $stmt = $conn->prepare("DELETE FROM subjects WHERE subject_code = ?");
-    $stmt->bind_param("s", $delete_id);
-    $stmt->execute();
-    $stmt->close();
-    header("Location: manage_subjects.php?msg=Subject deleted successfully.");
-    exit();
+// Fetch distinct programmes for filter
+$programmes = [];
+$prog_result = $conn->query("SELECT DISTINCT programme FROM subjects WHERE programme IS NOT NULL AND programme != '' ORDER BY programme");
+if ($prog_result) {
+    while ($row = $prog_result->fetch_assoc()) {
+        $programmes[] = $row['programme'];
+    }
 }
 
 // Fetch all subjects
 $subjects = [];
-$query = "SELECT subject_code, subject_name, credits FROM subjects ORDER BY subject_code";
+$query = "SELECT subject_code, subject_name, credits, programme, is_hidden FROM subjects ORDER BY subject_code";
 $result = $conn->query($query);
 if ($result) {
     while ($row = $result->fetch_assoc()) {
@@ -60,10 +70,10 @@ if ($result) {
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 12px 20px;
+            text-decoration: none; color: white; padding: 9px 20px;
             border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
@@ -97,40 +107,80 @@ if ($result) {
             transition: 0.3s;
         }
         .btn-add:hover { background: linear-gradient(to right, #8b0022, #a80028); color: white; }
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-row select {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1.5px solid #e0d6d6;
+            border-radius: 25px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .filter-row button {
+            padding: 10px 25px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-filter { background: #670019; color: white; }
+        .btn-filter:hover { background: #8b0022; }
+        .btn-reset { background: #6c757d; color: white; }
+        .btn-reset:hover { background: #5a6268; }
         .search-bar {
+            display: flex;
+            gap: 12px;
             margin-bottom: 25px;
         }
         .search-bar input {
-            width: 100%;
+            flex: 1;
             padding: 12px 20px;
             border: 1.5px solid #e0d6d6;
             border-radius: 25px;
-            font-size: 14px;
             outline: none;
-            transition: 0.3s;
-            font-family: 'Poppins', sans-serif;
         }
-        .search-bar input:focus {
-            border-color: #670019;
-            box-shadow: 0 0 0 4px rgba(103,0,25,0.08);
+        .search-bar input:focus { border-color: #670019; }
+        .search-bar button {
+            padding: 12px 25px;
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
         }
         .table-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; background: #f8f6f4; padding: 12px 15px; color: #670019; font-weight: 600; }
         td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #333; }
         tr:hover { background: #fdf9f7; }
-        .action-btn { padding: 5px 12px; border-radius: 20px; text-decoration: none; font-size: 13px; display: inline-block; margin-right: 5px; }
+        .action-btn {
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 12px;
+            display: inline-block;
+            margin-right: 5px;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
         .btn-edit { background: #f4a000; color: white; }
         .btn-edit:hover { background: #e08700; color: white; }
-        .btn-delete { background: #dc2626; color: white; }
-        .btn-delete:hover { background: #b91c1c; color: white; }
+        .btn-toggle { background: #17a2b8; color: white; }
+        .btn-toggle:hover { opacity: 0.8; }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; background: #d4edda; color: #155724; }
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-            font-size: 15px;
-        }
+        .no-results { text-align: center; padding: 40px; color: #6c757d; }
+        .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; display: inline-block; }
+        .status-hidden { background: #dc3545; color: white; }
+        .status-visible { background: #28a745; color: white; }
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
@@ -141,12 +191,12 @@ if ($result) {
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
-        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
         <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php" class="active"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
-        <a href="../forgot_password.html"><i class="bi bi-key-fill"></i> Forgot Password</a>
+        <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
     </div>
     <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
@@ -166,22 +216,28 @@ if ($result) {
     <?php if (isset($_GET['msg'])): ?>
         <div class="alert"><?php echo htmlspecialchars($_GET['msg']); ?></div>
     <?php endif; ?>
-    
-    <!-- Live Search Bar -->
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search by subject code or name (live search)...">
+
+    <div class="filter-row">
+        <select id="programmeSelect">
+            <option value="">All Programmes</option>
+            <?php foreach ($programmes as $prog): ?>
+                <option value="<?php echo htmlspecialchars($prog); ?>"><?php echo htmlspecialchars($prog); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <button id="filterProgrammeBtn" class="btn-filter">Filter</button>
+        <button id="resetFilterBtn" class="btn-reset">Reset</button>
     </div>
-    
+
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by subject code or name...">
+        <button onclick="filterTable()">Search</button>
+    </div>
+
     <div class="table-card">
         <div style="overflow-x: auto;">
             <table id="subjectsTable">
                 <thead>
-                    <tr>
-                        <th>Subject Code</th>
-                        <th>Subject Name</th>
-                        <th>Credits</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>Subject Code</th><th>Subject Name</th><th>Credits</th><th>Programme</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="tableBody">
                     <?php foreach ($subjects as $s): ?>
@@ -189,22 +245,64 @@ if ($result) {
                             <td><?php echo htmlspecialchars($s['subject_code']); ?></td>
                             <td><?php echo htmlspecialchars($s['subject_name']); ?></td>
                             <td><?php echo $s['credits']; ?></td>
+                            <td><?php echo htmlspecialchars($s['programme'] ?? '-'); ?></td>
+                            <td><span class="status-badge <?php echo $s['is_hidden'] ? 'status-hidden' : 'status-visible'; ?>"><?php echo $s['is_hidden'] ? 'Hidden' : 'Visible'; ?></span></td>
                             <td>
-                                <a href="edit_subject.php?code=<?php echo urlencode($s['subject_code']); ?>" class="action-btn btn-edit"><i class="bi bi-pencil"></i> Edit</a>
-                                <a href="manage_subjects.php?delete_id=<?php echo urlencode($s['subject_code']); ?>" class="action-btn btn-delete" onclick="return confirm('Delete this subject?')"><i class="bi bi-trash"></i> Delete</a>
+                                <a href="manage_subjects.php?toggle_id=<?php echo urlencode($s['subject_code']); ?>&action=<?php echo $s['is_hidden'] ? 'show' : 'hide'; ?>" class="action-btn btn-toggle" onclick="return confirm('Toggle visibility of this subject?')">
+                                    <?php echo $s['is_hidden'] ? 'Show' : 'Hide'; ?>
+                                </a>
+                                <a href="edit_subject.php?code=<?php echo urlencode($s['subject_code']); ?>" class="action-btn btn-edit">Edit</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                     <?php if (empty($subjects)): ?>
-                        <tr><td colspan="4" class="text-center">No subjects found</td></tr>
+                        <tr><td colspan="6" class="text-center">No subjects found</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
-            <div id="noResultsMsg" class="no-results" style="display: none;">No subjects match your search.</div>
+            <div id="noResultsMsg" class="no-results" style="display: none;">No subjects match your filters.</div>
         </div>
     </div>
 </div>
+
 <script>
+    let allSubjects = [];
+    function initSubjects() {
+        const rows = document.querySelectorAll('#subjectsTable tbody tr');
+        allSubjects = [];
+        rows.forEach(row => {
+            const cells = row.cells;
+            if (cells.length < 6) return;
+            allSubjects.push({
+                code: cells[0].innerText.trim(),
+                name: cells[1].innerText.trim(),
+                programme: cells[3].innerText.trim(),
+                row: row
+            });
+        });
+    }
+    function filterTable() {
+        const programme = document.getElementById('programmeSelect').value;
+        const search = document.getElementById('searchInput').value.toLowerCase().trim();
+        let visibleCount = 0;
+        allSubjects.forEach(subj => {
+            let match = true;
+            if (programme && subj.programme !== programme) match = false;
+            if (search && !subj.code.toLowerCase().includes(search) && !subj.name.toLowerCase().includes(search)) match = false;
+            if (match) {
+                subj.row.style.display = '';
+                visibleCount++;
+            } else {
+                subj.row.style.display = 'none';
+            }
+        });
+        document.getElementById('noResultsMsg').style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+    function resetFilter() {
+        document.getElementById('programmeSelect').value = '';
+        document.getElementById('searchInput').value = '';
+        filterTable();
+    }
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const main = document.querySelector('.main-content');
@@ -218,41 +316,14 @@ if ($result) {
             document.querySelector('.main-content').classList.add('expanded');
         }
     })();
-    
-    // Live filtering
-    const searchInput = document.getElementById('searchInput');
-    const table = document.getElementById('subjectsTable');
-    const noResultsMsg = document.getElementById('noResultsMsg');
-    const rows = table.getElementsByTagName('tr');
-    
-    function filterTable() {
-        const filter = searchInput.value.toLowerCase().trim();
-        let hasVisible = false;
-        
-        // Skip header row (index 0)
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            const cells = row.getElementsByTagName('td');
-            if (cells.length === 0) continue;
-            
-            const codeCell = cells[0]; // Subject Code column
-            const nameCell = cells[1]; // Subject Name column
-            const code = codeCell ? codeCell.textContent.toLowerCase() : '';
-            const name = nameCell ? nameCell.textContent.toLowerCase() : '';
-            
-            if (code.includes(filter) || name.includes(filter)) {
-                row.style.display = '';
-                hasVisible = true;
-            } else {
-                row.style.display = 'none';
-            }
-        }
-        
-        noResultsMsg.style.display = hasVisible ? 'none' : 'block';
-    }
-    
-    // Attach event listener for live search
-    searchInput.addEventListener('input', filterTable);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initSubjects();
+        document.getElementById('filterProgrammeBtn').addEventListener('click', filterTable);
+        document.getElementById('resetFilterBtn').addEventListener('click', resetFilter);
+        document.getElementById('searchInput').addEventListener('keyup', filterTable);
+        document.getElementById('programmeSelect').addEventListener('change', filterTable);
+    });
 </script>
 </body>
 </html>
