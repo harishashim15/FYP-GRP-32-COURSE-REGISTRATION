@@ -68,11 +68,18 @@ $registrations = $stmt->get_result();
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
-        .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 9px 20px;
-            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
-        }
+       .menu a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+    color: white;
+    padding: 9px 20px;          /* ← changed from 12px to 9px */
+    border-radius: 14px;
+    margin-bottom: 12px;
+    transition: 0.3s;
+    font-size: 16px;
+}
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
