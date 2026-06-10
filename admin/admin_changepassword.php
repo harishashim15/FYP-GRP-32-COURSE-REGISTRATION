@@ -90,7 +90,7 @@ $stmt->close();
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
             text-decoration: none; color: white; padding: 12px 20px;
@@ -234,7 +234,7 @@ $stmt->close();
     </div>
 
     <div class="page-header">
-        <div><h1>Change Password 🔒</h1><p>Keep your account secure by updating your password regularly.</p></div>
+        <div><h1>Change Password </h1><p>Keep your account secure by updating your password regularly.</p></div>
     </div>
 
     <div class="d-flex-custom">
