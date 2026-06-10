@@ -50,6 +50,18 @@ if (!$student) {
     exit;
 }
 
+// Get the advisor's matrix number for display
+$advisor_matrix = '';
+if ($student['advisor_id']) {
+    $sql_advisor_matrix = "SELECT matrix_number FROM users WHERE user_id = ?";
+    $stmt_advisor_matrix = mysqli_prepare($conn, $sql_advisor_matrix);
+    mysqli_stmt_bind_param($stmt_advisor_matrix, "i", $student['advisor_id']);
+    mysqli_stmt_execute($stmt_advisor_matrix);
+    $result_advisor_matrix = mysqli_stmt_get_result($stmt_advisor_matrix);
+    $advisor_info = mysqli_fetch_assoc($result_advisor_matrix);
+    $advisor_matrix = $advisor_info ? $advisor_info['matrix_number'] : $student['advisor_id'];
+}
+
 // Get the latest registration_id for this student (for the button)
 $sql_latest_reg = "SELECT id FROM course_registrations WHERE student_id = ? ORDER BY submission_date DESC LIMIT 1";
 $stmt_latest_reg = mysqli_prepare($conn, $sql_latest_reg);
@@ -135,28 +147,31 @@ $current_semester_code = str_replace('/', '', $academic_year) . $current_semeste
 // Example: "2025/2026" + "2" = "202520262"
 
 // Year / Programme - based on student's year and programme
-// Map programme to code
+// Map programme to code (based on subjects table in database)
 $programme_code = '';
 switch ($student['programme']) {
     case 'Computer Science':
         $programme_code = 'DSPD';
         break;
     case 'Electrical Engineering':
-        $programme_code = 'DSPK';
+        $programme_code = 'DSPK';  // Electrical Engineering
         break;
     case 'Sport Science':
-        $programme_code = 'DSPU';
+        $programme_code = 'DSPU';  // Sport and Fitness
         break;
     case 'Pengajian Islam':
-        $programme_code = 'DDWI';
+        $programme_code = 'DDWI';  // Islamic Studies Education
         break;
     default:
-        $programme_code = 'DSPD';
+        // If programme not found, use first 4 letters or default
+        $programme_code = substr($student['programme'], 0, 4);
+        if (empty($programme_code)) $programme_code = 'DSPD';
 }
 
 $current_year_programme = $student['year'] . ' / ' . $programme_code;
 $active_code = 'A - Active';
 ?>
+<!-- Rest of the HTML remains exactly the same... -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -384,7 +399,7 @@ $active_code = 'A - Active';
             <div class="detail-item"><div class="detail-icon"><i class="bi bi-card-text"></i></div><div class="detail-text"><small>Student ID</small><strong><?php echo htmlspecialchars($student['matrix_number']); ?></strong></div></div>
             <div class="detail-item"><div class="detail-icon"><i class="bi bi-mortarboard"></i></div><div class="detail-text"><small>Programme</small><strong><?php echo htmlspecialchars($student['programme']); ?></strong></div></div>
             <div class="detail-item"><div class="detail-icon"><i class="bi bi-calendar"></i></div><div class="detail-text"><small>Year</small><strong>Year <?php echo $student['year']; ?></strong></div></div>
-            <div class="detail-item"><div class="detail-icon"><i class="bi bi-person-badge"></i></div><div class="detail-text"><small>Advisor ID</small><strong><?php echo $student['advisor_id']; ?></strong></div></div>
+            <div class="detail-item"><div class="detail-icon"><i class="bi bi-person-badge"></i></div><div class="detail-text"><small>Advisor</small><strong><?php echo htmlspecialchars($advisor_matrix ?: 'Not Assigned'); ?></strong></div></div>
         </div>
     </div>
 

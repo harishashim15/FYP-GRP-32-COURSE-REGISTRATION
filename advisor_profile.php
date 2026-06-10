@@ -42,11 +42,10 @@ mysqli_stmt_execute($stmt_advisor);
 $result_advisor = mysqli_stmt_get_result($stmt_advisor);
 $advisor_details = mysqli_fetch_assoc($result_advisor);
 
-// Handle POST request for updating profile
+// Handle POST request for updating profile (only second_email and phone)
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $second_email = $_POST['second_email'] ?? '';
     $phone = $_POST['phone'] ?? '';
-    $department = $_POST['department'] ?? '';
     
     // Update users table phone
     $sql = "UPDATE users SET phone = ? WHERE user_id = ?";
@@ -54,10 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     mysqli_stmt_bind_param($stmt, "si", $phone, $advisor_id);
     mysqli_stmt_execute($stmt);
     
-    // Update advisor table second_email and department
-    $sql2 = "UPDATE advisor SET second_email = ?, department = ? WHERE user_id = ?";
+    // Update advisor table second_email only (department removed from update)
+    $sql2 = "UPDATE advisor SET second_email = ? WHERE user_id = ?";
     $stmt2 = mysqli_prepare($conn, $sql2);
-    mysqli_stmt_bind_param($stmt2, "ssi", $second_email, $department, $advisor_id);
+    mysqli_stmt_bind_param($stmt2, "si", $second_email, $advisor_id);
     mysqli_stmt_execute($stmt2);
     
     // Return JSON response for AJAX
@@ -232,7 +231,7 @@ $profile_data = [
 
         <div class="row-custom">
             <div class="form-group">
-                <label>Full Name (cannot be changed)</label>
+                <label>Full Name</label>
                 <input type="text" id="fullName" value="<?php echo htmlspecialchars($profile_data['full_name']); ?>" disabled>
             </div>
             <div class="form-group">
@@ -240,7 +239,7 @@ $profile_data = [
                 <input type="text" id="staffId" value="<?php echo htmlspecialchars($profile_data['staff_id']); ?>" disabled>
             </div>
             <div class="form-group">
-                <label>UTM Email (cannot be changed)</label>
+                <label>UTM Email</label>
                 <input type="email" id="email" value="<?php echo htmlspecialchars($profile_data['email']); ?>" disabled>
             </div>
             <div class="form-group">
@@ -253,7 +252,7 @@ $profile_data = [
             </div>
             <div class="form-group">
                 <label>Department</label>
-                <input type="text" id="department" value="<?php echo htmlspecialchars($profile_data['department']); ?>" placeholder="Department">
+                <input type="text" id="department" value="<?php echo htmlspecialchars($profile_data['department']); ?>" disabled>
             </div>
             <div class="form-group">
                 <label>Role</label>
@@ -280,12 +279,11 @@ $profile_data = [
         }
     })();
 
-    // Save profile changes
+    // Save profile changes (only second_email and phone - department removed)
     document.getElementById('saveBtn').addEventListener('click', async () => {
         const formData = {
             second_email: document.getElementById('secondEmail').value,
-            phone: document.getElementById('phone').value,
-            department: document.getElementById('department').value
+            phone: document.getElementById('phone').value
         };
         
         try {

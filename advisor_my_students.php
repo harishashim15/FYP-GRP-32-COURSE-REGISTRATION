@@ -311,7 +311,7 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
     <!-- PAGE HEADER - REMOVED IMAGE -->
     <div class="page-header">
         <div>
-            <h2>My Students 👩‍🎓</h2>
+            <h2>My Students</h2>
             <p>View and manage all students under your guidance</p>
         </div>
     </div>
