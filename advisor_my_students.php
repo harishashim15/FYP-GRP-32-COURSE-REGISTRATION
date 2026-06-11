@@ -45,7 +45,7 @@ $pending_registration_count = 0;
 $pending_approval_count = 0;
 
 foreach ($students as $student) {
-    // Get student's registration status from course_registrations
+    // Get student's registration status from course_registrations (most recent)
     $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? ORDER BY id DESC LIMIT 1";
     $stmt_status = mysqli_prepare($conn, $sql_status);
     mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
@@ -57,12 +57,12 @@ foreach ($students as $student) {
         if ($reg['status'] == 'approved') {
             $completed_count++;
         } elseif ($reg['status'] == 'pending') {
-            $pending_registration_count++;
+            $pending_approval_count++;  // Has submitted, waiting for approval
         } else {
             $pending_approval_count++;
         }
     } else {
-        $pending_registration_count++;
+        $pending_registration_count++;  // Has not submitted any registration
     }
 }
 
@@ -223,9 +223,9 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
             font-weight: 500;
             display: inline-block;
         }
-        .status-active { background: #d4edda; color: #155724; }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-approval { background: #ffe0e0; color: #b00020; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-pending-reg { background: #fff3cd; color: #856404; }
+        .status-pending-app { background: #fff3cd; color: #856404; }
 
         /* VIEW BUTTON */
         .view-btn {
@@ -349,6 +349,7 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
                     <?php if (!empty($students)): ?>
                         <?php foreach ($students as $student): ?>
                             <?php
+                            // Get the most recent registration status
                             $sql_status = "SELECT status FROM course_registrations WHERE student_id = ? ORDER BY id DESC LIMIT 1";
                             $stmt_status = mysqli_prepare($conn, $sql_status);
                             mysqli_stmt_bind_param($stmt_status, "i", $student['user_id']);
@@ -356,19 +357,20 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
                             $result_status = mysqli_stmt_get_result($stmt_status);
                             $reg = mysqli_fetch_assoc($result_status);
                             
+                            // Determine status
                             if ($reg) {
                                 if ($reg['status'] == 'approved') { 
-                                    $status_class = 'status-active'; 
+                                    $status_class = 'status-completed'; 
                                     $status_text = 'Completed'; 
                                 } elseif ($reg['status'] == 'pending') { 
-                                    $status_class = 'status-pending'; 
-                                    $status_text = 'Pending Registration'; 
+                                    $status_class = 'status-pending-app'; 
+                                    $status_text = 'Pending Approval'; 
                                 } else { 
-                                    $status_class = 'status-approval'; 
+                                    $status_class = 'status-pending-app'; 
                                     $status_text = 'Pending Approval'; 
                                 }
                             } else { 
-                                $status_class = 'status-pending'; 
+                                $status_class = 'status-pending-reg'; 
                                 $status_text = 'Pending Registration'; 
                             }
                             ?>
