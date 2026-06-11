@@ -22,6 +22,7 @@
             overflow-x: hidden;
         }
         
+        /* SIDEBAR */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -33,7 +34,6 @@
             z-index: 1000;
             overflow-y: auto;
         }
-        
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
@@ -44,14 +44,14 @@
             gap: 15px;
             text-decoration: none;
             color: white;
-            padding: 14px 20px;
+            padding: 12px 20px;
             border-radius: 14px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             transition: 0.3s;
-            font-size: 15px;
+            font-size: 16px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
-        .menu i { font-size: 20px; width: 24px; }
+        .menu i { font-size: 20px; }
         .logout {
             position: absolute;
             bottom: 30px;
@@ -64,16 +64,22 @@
             gap: 15px;
             text-decoration: none;
             color: white;
-            padding: 14px 20px;
+            padding: 12px 20px;
             border-radius: 14px;
             transition: 0.3s;
-            font-size: 15px;
+            font-size: 16px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
         
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
         .main-content.expanded { margin-left: 0; }
+        
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -88,16 +94,29 @@
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
         
+        /* HERO SECTION - UPDATED TO MATCH ADVISOR */
         .hero {
             background: #f7f2ee;
             border-radius: 25px;
-            padding: 35px 40px;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 35px;
             border: 1px solid #eee;
         }
-        .hero h1 { font-size: 34px; font-weight: 700; color: #670019; }
-        .hero p { color: #666; margin-top: 8px; font-size: 15px; }
+        .hero h1 {
+            font-size: 34px;
+            font-weight: 700;
+            color: #670019;
+        }
+        .hero p {
+            color: #666;
+            margin-top: 10px;
+            font-size: 15px;
+        }
         
+        /* DASHBOARD CARDS */
         .dashboard-card {
             border: none;
             border-radius: 25px;
@@ -123,7 +142,10 @@
         .card-icon.green { background: #e4f7df; color: #2e7d32; }
         .card-icon.purple { background: #eee3ff; color: #7b1fa2; }
         .dashboard-card h2 { font-size: 36px; font-weight: 700; color: #670019; margin-bottom: 5px; }
+        .dashboard-card h5 { font-size: 16px; font-weight: 600; margin-top: 5px; }
+        .dashboard-card p { color: #666; margin-top: 5px; font-size: 13px; }
         
+        /* PERIOD CARD */
         .period-card {
             background: white;
             border-radius: 25px;
@@ -131,30 +153,101 @@
             margin-top: 20px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
+        .period-card h4 {
+            color: #670019;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .period-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        
+        /* QUICK ACTIONS - UPDATED TO MATCH ADVISOR */
         .quick-actions {
             background: white;
             border-radius: 25px;
-            padding: 30px;
+            padding: 25px;
             margin-top: 35px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+        }
+        .quick-actions h3 {
+            color: #670019;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 20px;
         }
         .action-btn {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             border: 1px solid #eee;
             border-radius: 18px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-decoration: none;
             color: black;
             transition: 0.3s;
         }
-        .action-btn:hover { background: #fff7ef; transform: translateX(5px); }
+        .action-btn:hover {
+            background: #fff7ef;
+            transform: translateX(5px);
+        }
+        .action-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .action-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #670019;
+            color: white;
+            font-size: 20px;
+        }
+        .action-left h5 {
+            font-size: 15px;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+        .action-left small {
+            font-size: 11px;
+            color: #888;
+        }
+        .bi-chevron-right {
+            color: #670019;
+            font-size: 18px;
+        }
         
+        /* RESPONSIVE */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
-            .hero { text-align: center; }
+            .hero { 
+                text-align: center;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .hero img {
+                width: 150px;
+            }
+        }
+        
+        @media (min-width: 993px) {
+            .main-content {
+                margin-left: 280px;
+            }
+            .main-content.expanded {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -184,27 +277,110 @@
         <div class="profile-box" onclick="location.href='student_profile.html'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-            <div><h6 class="mb-0" id="studentName">Haris</h6><small class="text-muted">Student</small></div>
+            <div>
+                <h6 class="mb-0" id="studentName">Haris</h6>
+                <small class="text-muted">Student</small>
+            </div>
         </div>
     </div>
 
+    <!-- HERO SECTION - UPDATED LAYOUT -->
     <div class="hero">
-        <div><h1 id="heroGreeting">Welcome back, Haris!</h1><p>Manage your course registration and academic progress here.</p></div>
+        <div>
+            <h1 id="heroGreeting">Welcome back, Haris!</h1>
+            <p>Manage your course registration and academic progress here.</p>
+        </div>
     </div>
 
+    <!-- STATS CARDS -->
     <div class="row g-4">
-        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon yellow"><i class="bi bi-book"></i></div><h2 id="registeredCourses">0</h2><h5>Registered Courses</h5><p>Total courses registered</p></div></div>
-        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon red"><i class="bi bi-clock-history"></i></div><h2 id="pendingApprovals">0</h2><h5>Pending Approval</h5><p>Waiting for advisor review</p></div></div>
-        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon green"><i class="bi bi-check-circle"></i></div><h2 id="approvedCourses">0</h2><h5>Approved Courses</h5><p>Successfully approved</p></div></div>
-        <div class="col-md-3"><div class="dashboard-card"><div class="card-icon purple"><i class="bi bi-calendar-event"></i></div><h2 id="currentSession">2025/2026</h2><h5>Current Session</h5><p id="currentSemester">Semester 2</p></div></div>
+        <div class="col-md-3">
+            <div class="dashboard-card">
+                <div class="card-icon yellow"><i class="bi bi-book"></i></div>
+                <h2 id="registeredCourses">0</h2>
+                <h5>Registered Courses</h5>
+                <p>Total courses registered</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card">
+                <div class="card-icon red"><i class="bi bi-clock-history"></i></div>
+                <h2 id="pendingApprovals">0</h2>
+                <h5>Pending Approval</h5>
+                <p>Waiting for advisor review</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card">
+                <div class="card-icon green"><i class="bi bi-check-circle"></i></div>
+                <h2 id="approvedCourses">0</h2>
+                <h5>Approved Courses</h5>
+                <p>Successfully approved</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card">
+                <div class="card-icon purple"><i class="bi bi-calendar-event"></i></div>
+                <h2 id="currentSession">2025/2026</h2>
+                <h5>Current Session</h5>
+                <p id="currentSemester">Semester 2</p>
+            </div>
+        </div>
     </div>
 
-    <div class="period-card"><h4><i class="bi bi-calendar-event"></i> Registration Period</h4><span class="badge bg-success" id="periodStatus">Open</span><div class="mt-3"><strong id="periodDates">1 May - 15 May 2026</strong><div class="mt-2"><span class="badge bg-light text-dark me-1" id="semesterLabel">Semester 2</span><span class="badge bg-light text-dark me-1" id="sessionLabel">2025/2026</span></div></div></div>
+    <!-- REGISTRATION PERIOD CARD -->
+    <div class="row g-4 mt-2">
+        <div class="col-md-12">
+            <div class="period-card">
+                <h4><i class="bi bi-calendar-event"></i> Registration Period</h4>
+                <span class="period-status" id="periodStatus">Open</span>
+                <div class="mt-3">
+                    <strong id="periodDates">1 May - 15 May 2026</strong>
+                    <div class="mt-2">
+                        <span class="badge bg-light text-dark me-1" id="semesterLabel">Semester 2</span>
+                        <span class="badge bg-light text-dark me-1" id="sessionLabel">2025/2026</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="quick-actions"><h3>Quick Actions</h3>
-        <a href="student_courses.html" class="action-btn"><div><strong>Browse Courses</strong><br><small>Register for courses</small></div><i class="bi bi-chevron-right"></i></a>
-        <a href="student_register.html" class="action-btn"><div><strong>Register</strong><br><small>Review and submit registration</small></div><i class="bi bi-chevron-right"></i></a>
-        <a href="student_profile.html" class="action-btn"><div><strong>My Profile</strong><br><small>Update info</small></div><i class="bi bi-chevron-right"></i></a>
+    <!-- QUICK ACTIONS - UPDATED WITH ICONS LIKE ADVISOR -->
+    <div class="quick-actions">
+        <h3><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h3>
+        
+        <a href="student_courses.html" class="action-btn">
+            <div class="action-left">
+                <div class="action-icon"><i class="bi bi-book"></i></div>
+                <div>
+                    <h5 class="mb-0">Browse Courses</h5>
+                    <small>View and register for available courses</small>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        
+        <a href="student_register.html" class="action-btn">
+            <div class="action-left">
+                <div class="action-icon"><i class="bi bi-journal-text"></i></div>
+                <div>
+                    <h5 class="mb-0">My Registration</h5>
+                    <small>Review and submit your registration</small>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        
+        <a href="student_profile.html" class="action-btn">
+            <div class="action-left">
+                <div class="action-icon"><i class="bi bi-person"></i></div>
+                <div>
+                    <h5 class="mb-0">My Profile</h5>
+                    <small>Update your personal information</small>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </a>
     </div>
 </div>
 
@@ -212,12 +388,13 @@
 <script>
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
-        const main = document.querySelector('.main-content');
+        const mainContent = document.querySelector('.main-content');
         sidebar.classList.toggle('collapsed');
-        main.classList.toggle('expanded');
+        mainContent.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
     
+    // Initialize sidebar state
     (function() {
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.querySelector('.sidebar').classList.add('collapsed');
@@ -252,14 +429,20 @@
             animateNumber(document.getElementById('approvedCourses'), stats.approved_courses || 0);
             document.getElementById('currentSession').innerText = stats.current_session || '2025/2026';
             document.getElementById('currentSemester').innerHTML = `Semester ${stats.current_semester || 2}`;
+            
             const period = await apiGet('registrations/period.php');
-            document.getElementById('periodStatus').innerText = period.is_open ? 'Open' : 'Closed';
-            document.getElementById('periodStatus').className = `badge ${period.is_open ? 'bg-success' : 'bg-secondary'}`;
+            const periodStatus = document.getElementById('periodStatus');
+            periodStatus.innerText = period.is_open ? 'Open' : 'Closed';
+            periodStatus.style.background = period.is_open ? '#d4edda' : '#f8d7da';
+            periodStatus.style.color = period.is_open ? '#155724' : '#721c24';
             document.getElementById('periodDates').innerText = `${period.start_date} – ${period.end_date}`;
             document.getElementById('semesterLabel').innerText = period.semester || 'Semester 2';
             document.getElementById('sessionLabel').innerText = period.session || '2025/2026';
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error(err); 
+        }
     }
+    
     loadDashboard();
 </script>
 </body>
