@@ -58,6 +58,7 @@ if ($result) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../images/logoWebsite.png"/>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
@@ -71,18 +72,18 @@ if ($result) {
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-       .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
@@ -168,6 +169,11 @@ if ($result) {
         th { text-align: left; background: #f8f6f4; padding: 12px 15px; color: #670019; font-weight: 600; }
         td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #333; }
         tr:hover { background: #fdf9f7; }
+
+        /* ✅ Ensure Toggle & Edit buttons stay side by side */
+        .action-cell {
+            white-space: nowrap;
+        }
         .action-btn {
             padding: 5px 12px;
             border-radius: 20px;
@@ -179,9 +185,13 @@ if ($result) {
             border: none;
             cursor: pointer;
         }
+        .action-btn:last-child {
+            margin-right: 0;
+        }
+
         .btn-edit { background: #f4a000; color: white; }
         .btn-edit:hover { background: #e08700; color: white; }
-        .btn-toggle { background: #17a2b8; color: white; }
+        .btn-toggle { background: #670019; color: white; }
         .btn-toggle:hover { opacity: 0.8; }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; background: #d4edda; color: #155724; }
         .no-results { text-align: center; padding: 40px; color: #6c757d; }
@@ -191,6 +201,15 @@ if ($result) {
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
+        }
+        /* On very small screens, allow buttons to wrap but keep them side by side as much as possible */
+        @media (max-width: 576px) {
+            .action-cell {
+                white-space: normal;
+            }
+            .action-btn {
+                margin-bottom: 5px;
+            }
         }
     </style>
 </head>
@@ -254,7 +273,7 @@ if ($result) {
                             <td><?php echo $s['credits']; ?></td>
                             <td><?php echo htmlspecialchars($s['programme'] ?? '-'); ?></td>
                             <td><span class="status-badge <?php echo $s['is_hidden'] ? 'status-hidden' : 'status-visible'; ?>"><?php echo $s['is_hidden'] ? 'Hidden' : 'Visible'; ?></span></td>
-                            <td>
+                            <td class="action-cell">
                                 <a href="manage_subjects.php?toggle_id=<?php echo urlencode($s['subject_code']); ?>&action=<?php echo $s['is_hidden'] ? 'show' : 'hide'; ?>" class="action-btn btn-toggle" onclick="return confirm('Toggle visibility of this subject?')">
                                     <?php echo $s['is_hidden'] ? 'Show' : 'Hide'; ?>
                                 </a>
