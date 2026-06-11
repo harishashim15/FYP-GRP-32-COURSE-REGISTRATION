@@ -257,10 +257,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         <div class="verification-row"><div class="verification-label">Date Verified</div><div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________'; ?></div></div>
         <div class="verification-row"><div class="verification-label">Remarks</div><div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div></div>
         
-        <div class="signature-row">
-            <div class="signature-box"><span>STUDENT SIGNATURE</span><div class="signature-line"></div></div>
-            <div class="signature-box"><span>ADVISOR SIGNATURE</span><div class="signature-line"></div></div>
-        </div>
+        
         <div class="footer">DATE: <?php echo date('d-m-Y'); ?> | This is an official registration slip. Please keep for your records.</div>
     </div>
 
