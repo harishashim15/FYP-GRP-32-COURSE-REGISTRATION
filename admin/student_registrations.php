@@ -122,7 +122,7 @@ $registrations = $stmt->get_result();
 </head>
 <body>
 <div class="sidebar">
-    <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+    <div class="logo"><img src="../images/logoutm.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
          <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>

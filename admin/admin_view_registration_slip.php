@@ -209,7 +209,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 
     <div class="registration-slip" id="printSection">
         <div class="slip-header">
-            <img src="../images/utmlogo.png" alt="UTM Logo">
+            <img src="../images/logoutm.png" alt="UTM Logo">
             <h3>COURSE REGISTRATION SLIP</h3>
             <p>Universiti Teknologi Malaysia</p>
         </div>
