@@ -70,13 +70,16 @@ while ($row = mysqli_fetch_assoc($courses_result)) {
 }
 
 $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
+
+// Get matrix number for filename
+$matrix_number = $registration['matrix_number'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Registration Slip</title>
+    <title>Registration_Slip_<?php echo $matrix_number; ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -195,27 +198,6 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             color: #333;
         }
         
-        .signature-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            padding-top: 6px;
-            border-top: 1px dashed #ccc;
-        }
-        .signature-box {
-            text-align: center;
-            width: 45%;
-        }
-        .signature-box span {
-            font-size: 8px;
-            color: #888;
-        }
-        .signature-line {
-            margin-top: 3px;
-            border-top: 1px dashed #999;
-            padding-top: 10px;
-        }
-        
         .footer {
             margin-top: 8px;
             text-align: center;
@@ -242,7 +224,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 <body>
     <div class="registration-slip" id="printSection">
         <div class="slip-header">
-            <img src="images/utmlogo.png" alt="UTM Logo">
+            <img src="images/logoutm.png" alt="UTM Logo">
             <h3>COURSE REGISTRATION SLIP</h3>
             <p>Universiti Teknologi Malaysia</p>
         </div>
@@ -281,7 +263,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
                     </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="5" style="text-align: center;">No courses found</td></tr>
+                    <td><td colspan="5" style="text-align: center;">No courses found</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -291,11 +273,6 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         <div class="verification-row"><div class="verification-label">Verified By</div><div class="verification-value"><?php echo htmlspecialchars($registration['advisor_name'] ?? '_________________'); ?></div></div>
         <div class="verification-row"><div class="verification-label">Date Verified</div><div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________'; ?></div></div>
         <div class="verification-row"><div class="verification-label">Remarks</div><div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div></div>
-        
-        <div class="signature-row">
-            <div class="signature-box"><span>STUDENT SIGNATURE</span><div class="signature-line"></div></div>
-            <div class="signature-box"><span>ADVISOR SIGNATURE</span><div class="signature-line"></div></div>
-        </div>
         
         <div class="footer">DATE: <?php echo date('d-m-Y'); ?> | This is an official registration slip. Please keep for your records.</div>
     </div>

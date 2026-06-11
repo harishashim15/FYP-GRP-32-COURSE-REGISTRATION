@@ -558,52 +558,76 @@ if (empty($initials)) $initials = 'ST';
         });
     }
     
-    function printPDF() {
-        // Use the current registration_id
-        var registrationId = <?php echo $registration_id; ?>;
+function printPDF() {
+    // Use the current registration_id
+    var registrationId = <?php echo $registration_id; ?>;
+    
+    if (registrationId > 0) {
+        // Show loading indicator
+        Swal.fire({
+            title: 'Preparing PDF...',
+            text: 'Please wait while we prepare your registration slip.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
         
-        if (registrationId > 0) {
-            // Show loading indicator
-            Swal.fire({
-                title: 'Preparing PDF...',
-                text: 'Please wait while we prepare your registration slip.',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
+        // Create hidden iframe
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'advisor_print_slip.php?registration_id=' + registrationId;
+        document.body.appendChild(iframe);
+        
+        iframe.onload = function() {
+            Swal.close();
+            
+            // Get the matrix number from the iframe content
+            var matrixNumber = '';
+            try {
+                var titleText = iframe.contentDocument.title;
+                // Extract matrix number from title (Registration_Slip_XXXXX)
+                var match = titleText.match(/Registration_Slip_(.+)/);
+                if (match) {
+                    matrixNumber = match[1];
                 }
-            });
+            } catch(e) {
+                console.log('Could not get matrix number');
+            }
             
-            // Create hidden iframe
-            var iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = 'advisor_print_slip.php?registration_id=' + registrationId;
-            document.body.appendChild(iframe);
+            // Temporarily change parent page title for printing
+            var originalTitle = document.title;
+            if (matrixNumber) {
+                document.title = 'Registration_Slip_' + matrixNumber;
+            }
             
-            iframe.onload = function() {
-                Swal.close();
-                iframe.contentWindow.print();
-                setTimeout(function() {
-                    document.body.removeChild(iframe);
-                }, 1000);
-            };
+            // Print the iframe content
+            iframe.contentWindow.print();
             
-            iframe.onerror = function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Unable to generate registration slip. Please try again.',
-                    confirmButtonColor: '#670019'
-                });
-            };
-        } else {
+            // Restore original title after print
+            setTimeout(function() {
+                document.title = originalTitle;
+                document.body.removeChild(iframe);
+            }, 1000);
+        };
+        
+        iframe.onerror = function() {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Unable to generate registration slip. Registration ID not found.',
+                text: 'Unable to generate registration slip. Please try again.',
                 confirmButtonColor: '#670019'
             });
-        }
+        };
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Unable to generate registration slip. Registration ID not found.',
+            confirmButtonColor: '#670019'
+        });
     }
+}
 </script>
 </body>
 </html>
