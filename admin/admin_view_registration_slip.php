@@ -86,29 +86,30 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
     <link rel="icon" type="image/png" href="../images/logoWebsite.png"/>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #f8f6f4; display: flex; overflow-x: hidden; }
+        body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
-       .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
@@ -121,7 +122,11 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease;  }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -188,9 +193,9 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
-         <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php" class="active"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php" class="active"><i class="bi bi-calendar-event"></i> Registration Period</a>
         <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
@@ -257,7 +262,6 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         <div class="verification-row"><div class="verification-label">Verified By</div><div class="verification-value"><?php echo htmlspecialchars($registration['reviewed_by'] ?? '_________________'); ?></div></div>
         <div class="verification-row"><div class="verification-label">Date Verified</div><div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________'; ?></div></div>
         <div class="verification-row"><div class="verification-label">Remarks</div><div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div></div>
-        
         
         <div class="footer">DATE: <?php echo date('d-m-Y'); ?> | This is an official registration slip. Please keep for your records.</div>
     </div>

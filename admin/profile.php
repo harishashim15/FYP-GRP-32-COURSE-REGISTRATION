@@ -85,23 +85,24 @@ $stmt->close();
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-      .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
@@ -114,7 +115,11 @@ $stmt->close();
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -170,13 +175,14 @@ $stmt->close();
 <body>
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
-   <div class="menu">
-       <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
+    <div class="menu">
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
         <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
+    </div>
     <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 <div class="main-content">
@@ -198,8 +204,8 @@ $stmt->close();
                 <a href="#" id="changePhotoLink" style="color: #670019;">Change Photo</a>
             </div>
         </div>
-        <?php if ($message): ?>
-            <div class="alert alert-<?php echo $msg_type; ?>"><?php echo htmlspecialchars($message); ?></div>
+        <?php if ($message && $msg_type !== 'success'): ?>
+            <div class="alert alert-danger"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
         <div id="successAlert" class="alert-success">
             <i class="bi bi-check-circle-fill me-2"></i> Profile updated successfully!
@@ -226,10 +232,10 @@ $stmt->close();
                     <label>Phone Number</label>
                     <input type="text" name="phone" value="<?php echo htmlspecialchars($admin_data['phone'] ?? ''); ?>">
                 </div>
-               <div class="form-group">
-    <label>Role</label>
-    <input type="text" value="<?php echo ucfirst(htmlspecialchars($admin_data['role'] ?? 'admin')); ?>" disabled>
-</div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" value="<?php echo ucfirst(htmlspecialchars($admin_data['role'] ?? 'admin')); ?>" disabled>
+                </div>
             </div>
             <button type="submit" class="save-btn"><i class="bi bi-save"></i> Save Changes</button>
         </form>
