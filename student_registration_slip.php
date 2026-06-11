@@ -264,26 +264,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             color: #333;
         }
         
-        .signature-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px dashed #ccc;
-        }
-        .signature-box {
-            text-align: center;
-            width: 45%;
-        }
-        .signature-box span {
-            font-size: 10px;
-            color: #888;
-        }
-        .signature-line {
-            margin-top: 5px;
-            border-top: 1px dashed #999;
-            padding-top: 12px;
-        }
+        /* SIGNATURE SECTION REMOVED */
         
         .footer {
             margin-top: 12px;
@@ -403,10 +384,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
         <div class="verification-row"><div class="verification-label">Date Verified</div><div class="verification-value"><?php echo $registration['reviewed_at'] ? date('d-m-Y', strtotime($registration['reviewed_at'])) : '_________________'; ?></div></div>
         <div class="verification-row"><div class="verification-label">Remarks</div><div class="verification-value"><?php echo htmlspecialchars($registration['advisor_remarks'] ?? '-'); ?></div></div>
         
-        <div class="signature-row">
-            <div class="signature-box"><span>STUDENT SIGNATURE</span><div class="signature-line"></div></div>
-            <div class="signature-box"><span>ADVISOR SIGNATURE</span><div class="signature-line"></div></div>
-        </div>
+        <!-- SIGNATURE SECTION REMOVED -->
         
         <div class="footer">DATE: <?php echo date('d-m-Y'); ?> | This is an official registration slip. Please keep for your records.</div>
     </div>
@@ -559,27 +537,6 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             margin-left: 105px;
             font-size: 9px;
             color: #333;
-        }
-        
-        .signature-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            padding-top: 6px;
-            border-top: 1px dashed #ccc;
-        }
-        .signature-box {
-            text-align: center;
-            width: 45%;
-        }
-        .signature-box span {
-            font-size: 8px;
-            color: #888;
-        }
-        .signature-line {
-            margin-top: 3px;
-            border-top: 1px dashed #999;
-            padding-top: 10px;
         }
         
         .footer {
