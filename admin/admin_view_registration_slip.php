@@ -120,7 +120,7 @@ $total_credits_formatted = str_pad($total_credits, 3, '0', STR_PAD_LEFT);
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; width: calc(100% - 280px); }
+        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease;  }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;

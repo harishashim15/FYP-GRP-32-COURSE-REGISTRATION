@@ -75,29 +75,30 @@ if ($current_period) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #f8f6f4; display: flex; overflow-x: hidden; }
+        body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-      .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
@@ -110,7 +111,11 @@ if ($current_period) {
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; width: calc(100% - 280px); }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -126,7 +131,7 @@ if ($current_period) {
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333; }
         .form-group input { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 12px; }
-        .btn-submit { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer;position: center; display: block; margin: 0 auto; transition: 0.3s; }
+        .btn-submit { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; display: block; margin: 0 auto; transition: 0.3s; }
         .btn-submit:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; }
         .alert-success { background: #d4edda; color: #155724; }
@@ -204,7 +209,7 @@ if ($current_period) {
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
-         <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
         <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
@@ -252,7 +257,6 @@ if ($current_period) {
             </div>
             <button type="button" class="btn-submit" id="showConfirmBtn">Save Registration Period</button>
         </form>
-      
     </div>
 </div>
 

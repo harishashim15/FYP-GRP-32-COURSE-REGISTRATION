@@ -57,29 +57,30 @@ $registrations = $stmt->get_result();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #f8f6f4; display: flex; }
+        body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
-        .system-title { color: #ffc107; font-size: 16px; font-weight: 600; margin-top: 12px; }
-       .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
@@ -92,7 +93,11 @@ $registrations = $stmt->get_result();
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; width: calc(100% - 280px); }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -117,21 +122,24 @@ $registrations = $stmt->get_result();
         .status-approved { background: #d4edda; color: #155724; }
         .status-pending { background: #fff3cd; color: #856404; }
         .status-rejected { background: #f8d7da; color: #721c24; }
-        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; width: 100%; } }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
-         <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php" class="active"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
         <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
     </div>
-    <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout"><a href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 <div class="main-content">
     <div class="topbar">
@@ -163,7 +171,7 @@ $registrations = $stmt->get_result();
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <tr><td colspan="5" class="text-center">No registrations found for this student.<?php echo ' '; ?></td></tr>
+                    <tr><td colspan="5" class="text-center">No registrations found for this student.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

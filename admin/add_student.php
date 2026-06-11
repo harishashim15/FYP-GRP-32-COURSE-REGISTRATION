@@ -159,29 +159,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #f8f6f4; display: flex; overflow-x: hidden; }
+        body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-       .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
@@ -194,7 +195,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; width: calc(100% - 280px); }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            /* No width property – allows full expansion when sidebar collapses */
+        }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -208,7 +214,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .page-header h2 { color: #670019; font-weight: 700; }
         .btn-cancel { background: #6c757d; color: white; padding: 8px 20px; border-radius: 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .btn-cancel:hover { background: #5a6268; color: white; }
-        .form-card { background: white; border-radius: 25px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 900px; }
+        .form-card { background: white; border-radius: 25px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 1500px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; }
@@ -273,6 +279,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <option value="Electrical Engineering">Electrical Engineering</option>
                         <option value="Sport Science">Sport Science</option>
                         <option value="Pengajian Islam">Pengajian Islam</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                        <option value="Electronic Engineering">Electronic Engineering</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Chemical Engineering">Chemical Engineering</option>
+                        <option value="Sport and Fitness">Sport and Fitness</option>
+                        <option value="Technology Management">Technology Management</option>
+                        <option value="Accounting">Accounting</option>
+                        <option value="Islamic Studies Education">Islamic Studies Education</option>
+                        <option value="Land Surveying">Land Surveying</option>
+                        <option value="Urban Planning">Urban Planning</option>
+                        <option value="Quantity Surveying">Quantity Surveying</option>
+                        <option value="Architecture">Architecture</option>
+                        <option value="Property Management">Property Management</option>
                     </select>
                 </div>
                 <div class="form-group"><label>Year</label>

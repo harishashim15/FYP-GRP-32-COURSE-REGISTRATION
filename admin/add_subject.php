@@ -21,6 +21,8 @@ if ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
+$duplicate = false; // Track duplicate for modal
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $code = trim($_POST['code']);
     $name = trim($_POST['name']);
@@ -47,7 +49,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $check->execute();
         $check_result = $check->get_result();
         if ($check_result->num_rows > 0) {
-            // Set flag for modal (will be used in JavaScript)
             $duplicate = true;
         } else {
             $insert = $conn->prepare("INSERT INTO subjects (subject_code, subject_name, credits) VALUES (?, ?, ?)");
@@ -76,29 +77,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #f8f6f4; display: flex; overflow-x: hidden; }
+        body { background: #f8f6f4; overflow-x: hidden; }
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-      .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; width: 24px;}
         .logout {
@@ -111,7 +113,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; width: calc(100% - 280px); }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -199,9 +205,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
-         <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
-        <a href="manage_advisors.php" ><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
+        <a href="manage_advisors.php"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php" class="active"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
         <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
@@ -221,7 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Add New Subject</h2>
         <a href="manage_subjects.php" class="btn-cancel"><i class="bi bi-arrow-left"></i> Back</a>
     </div>
-    <?php if ($message): ?>
+    <?php if ($message && !$duplicate): ?>
         <div class="alert alert-danger"><?php echo nl2br(htmlspecialchars($message)); ?></div>
     <?php endif; ?>
     <div class="form-card">
@@ -238,13 +244,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label>Credits</label>
                 <input type="number" name="credits" min="1" max="5" required>
             </div>
-            <button type="button" class="btn-submit" id="showConfirmBtn"><i class="bi bi-save"></i> Add Subject</button>
+            <button type="submit" class="btn-submit" id="submitBtn"><i class="bi bi-save"></i> Add Subject</button>
         </form>
     </div>
 </div>
 
 <!-- Custom Modal for Duplicate Subject -->
-<div id="duplicateModal" class="custom-modal">
+<div id="duplicateModal" class="custom-modal" <?php if ($duplicate) echo 'style="display: flex;"'; ?>>
     <div class="custom-modal-content">
         <i class="bi bi-exclamation-triangle-fill"></i>
         <h3>Subject Already Exists</h3>
@@ -270,44 +276,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     })();
 
-    const form = document.getElementById('addSubjectForm');
-    const showBtn = document.getElementById('showConfirmBtn');
+    // Modal handling
     const modal = document.getElementById('duplicateModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
-
-    showBtn.addEventListener('click', function() {
-        // Validate fields
-        const code = form.querySelector('input[name="code"]').value.trim();
-        const name = form.querySelector('input[name="name"]').value.trim();
-        const credits = form.querySelector('input[name="credits"]').value.trim();
-        if (!code || !name || !credits) {
-            alert('Please fill all fields.');
-            return;
-        }
-        // Submit the form via AJAX to check for duplicate without page reload
-        const formData = new FormData(form);
-        fetch(window.location.href, {
-            method: 'POST',
-            body: formData
-        }).then(response => response.text()).then(html => {
-            // Check if the response contains the modal trigger flag
-            if (html.includes('duplicate_modal_trigger')) {
-                // This is a hack; better to use AJAX JSON response
-                modal.style.display = 'flex';
-            } else {
-                // No duplicate, likely redirect or show success
-                document.write(html);
-            }
-        }).catch(err => {
-            console.error(err);
-            alert('An error occurred. Please try again.');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
         });
-    });
-
-    closeModalBtn.addEventListener('click', function() {
-        modal.style.display = 'none';
-    });
-
+    }
     window.addEventListener('click', function(event) {
         if (event.target === modal) {
             modal.style.display = 'none';

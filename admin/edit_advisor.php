@@ -99,8 +99,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("sssssi", $matrix, $name, $utm_email, $second_email, $phone, $advisor_id);
         }
         if ($stmt->execute()) {
-            $stmt2 = $conn->prepare("UPDATE advisor SET advisor_name = ?, matrix_number = ?, utm_email = ?, second_email = ?, faculty = ?, department = ? WHERE user_id = ?");
-            $stmt2->bind_param("ssssssi", $name, $matrix, $utm_email, $second_email, $faculty, $department, $advisor_id);
+            $stmt2 = $conn->prepare("UPDATE advisor SET faculty = ?, department = ? WHERE user_id = ?");
+            $stmt2->bind_param("ssi", $faculty, $department, $advisor_id);
             $stmt2->execute();
             $stmt2->close();
 
@@ -124,7 +124,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Same styles as edit_student.php (copy the entire style section) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; display: flex; overflow-x: hidden; }
         .sidebar {
@@ -132,23 +131,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
             transition: transform 0.3s ease;
+            z-index: 1000;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
-       .menu a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-decoration: none;
-    color: white;
-    padding: 9px 20px;          /* ← changed from 12px to 9px */
-    border-radius: 14px;
-    margin-bottom: 12px;
-    transition: 0.3s;
-    font-size: 16px;
-}
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 9px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; }
         .logout {
@@ -161,7 +161,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 14px; background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; width: calc(100% - 280px); }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
         .main-content.expanded { margin-left: 0; }
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -185,19 +189,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .btn-submit:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; }
         .alert-danger { background: #f8d7da; color: #721c24; }
-        @media (max-width: 992px) { .sidebar { transform: translateX(-280px); } .main-content { margin-left: 0; width: 100%; } .row-custom { grid-template-columns: 1fr; } }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-280px); }
+            .main-content { margin-left: 0; width: 100%; }
+            .row-custom { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <div class="logo"><img src="../images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
-   <div class="menu">
-        <a href="admin_dashboard.php" ><i class="bi bi-house-fill"></i> Dashboard</a>
+    <div class="menu">
+        <a href="admin_dashboard.php"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="manage_students.php"><i class="bi bi-people-fill"></i> Manage Students</a>
         <a href="manage_advisors.php" class="active"><i class="bi bi-person-badge-fill"></i> Manage Advisors</a>
         <a href="manage_subjects.php"><i class="bi bi-book-fill"></i> Manage Subjects</a>
         <a href="manage_registration_period.php"><i class="bi bi-calendar-event"></i> Registration Period</a>
         <a href="admin_changepassword.php"><i class="bi bi-key-fill"></i> Change Password</a>
+    </div>
     <div class="logout"><a href="../index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 <div class="main-content">
