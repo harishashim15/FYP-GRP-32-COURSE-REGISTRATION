@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
 
         <div class="page-header">
-            <div><h1>Change Password 🔒</h1><p>Keep your account secure by updating your password regularly.</p></div>
+            <div><h1>Change Password</h1><p>Keep your account secure by updating your password regularly.</p></div>
         </div>
 
         <div class="d-flex-custom">
