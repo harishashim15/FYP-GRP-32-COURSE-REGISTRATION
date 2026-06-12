@@ -191,7 +191,7 @@ if ($result) {
 
         .btn-edit { background: #f4a000; color: white; }
         .btn-edit:hover { background: #e08700; color: white; }
-        .btn-toggle { background: #670019; color: white; }
+        .btn-toggle { background: black; color: white; }
         .btn-toggle:hover { opacity: 0.8; }
         .alert { padding: 12px 20px; border-radius: 20px; margin-bottom: 20px; background: #d4edda; color: #155724; }
         .no-results { text-align: center; padding: 40px; color: #6c757d; }
