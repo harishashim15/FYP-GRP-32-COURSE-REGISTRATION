@@ -52,8 +52,36 @@
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        
+        /* PROFILE BOX - FIXED */
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        .profile-box .profile-text {
+            text-align: right;
+        }
+        .profile-box .profile-text h6 {
+            margin-bottom: 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            white-space: nowrap;
+        }
+        .profile-box .profile-text small {
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+        }
+        .profile-box img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
         
         .page-header { margin-bottom: 30px; }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
@@ -170,6 +198,9 @@
             .main-content { margin-left: 0; }
             .action-buttons { flex-direction: column; align-items: center; }
             .edit-btn, .back-btn { width: 100%; justify-content: center; }
+            .profile-box .profile-text h6 { font-size: 12px; }
+            .profile-box .profile-text small { font-size: 10px; }
+            .profile-box img { width: 40px; height: 40px; }
         }
     </style>
 </head>
@@ -193,8 +224,11 @@
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='student_profile.html'">
             <i class="bi bi-bell fs-5"></i>
+            <div class="profile-text">
+                <h6 class="mb-0" id="studentName">Loading...</h6>
+                <small class="text-muted">Student</small>
+            </div>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-            <div><h6 class="mb-0" id="studentName">Haris</h6><small>Student</small></div>
         </div>
     </div>
 
@@ -216,10 +250,30 @@
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
+    (function() { 
+        if (localStorage.getItem('sidebarCollapsed') === 'true') { 
+            document.querySelector('.sidebar').classList.add('collapsed'); 
+            document.querySelector('.main-content').classList.add('expanded'); 
+        } 
+    })();
 
     const urlParams = new URLSearchParams(window.location.search);
     const registrationId = urlParams.get('id');
+
+    // Load student name from session (FIXED)
+    async function loadStudentName() {
+        try {
+            const user = await getCurrentUser();
+            if (user && user.name) {
+                document.getElementById('studentName').innerText = user.name;
+            } else {
+                document.getElementById('studentName').innerText = 'Student';
+            }
+        } catch(e) {
+            console.error('Failed to load student name:', e);
+            document.getElementById('studentName').innerText = 'Student';
+        }
+    }
 
     async function loadRejectedDetails() {
         if (!registrationId) {
@@ -229,7 +283,16 @@
         
         try {
             const data = await apiGet(`registrations/rejected_details.php?id=${registrationId}`);
-            document.getElementById('studentName').innerText = data.student.user_name || 'Haris';
+            
+            // Check if data is valid
+            if (!data || data.error) {
+                throw new Error(data.error || 'No data received');
+            }
+            
+            // Update profile name from API data if available (fallback)
+            if (data.student && data.student.user_name) {
+                document.getElementById('studentName').innerText = data.student.user_name;
+            }
             
             let coursesHtml = '';
             let totalCredits = 0;
@@ -249,22 +312,37 @@
                 coursesHtml = `<tr><td colspan="5" class="text-center">No courses found</td></tr>`;
             }
             
-            const advisorRemark = data.registration.advisor_remarks || 'No specific reason provided. Please contact your academic advisor.';
+            const advisorRemark = (data.registration && data.registration.advisor_remarks) 
+                ? data.registration.advisor_remarks 
+                : 'No specific reason provided. Please contact your academic advisor.';
             
             // Store the rejected registration data in localStorage
             const rejectedData = {
                 registration_id: registrationId,
-                courses: data.courses.map(course => ({
+                courses: (data.courses || []).map(course => ({
                     subject_code: course.subject_code,
                     subject_name: course.subject_name,
                     credits: course.credits,
                     section: course.section || '1'
                 })),
-                session: data.registration.session || '2025/2026 - Semester 2'
+                session: (data.registration && data.registration.session) || '2025/2026 - Semester 2'
             };
             
             localStorage.setItem('pendingRejectedRegistration', JSON.stringify(rejectedData));
             localStorage.setItem('isEditingRejectedRegistration', 'true');
+            
+            // Safely get student data with fallbacks
+            const studentName = (data.student && data.student.user_name) ? escapeHtml(data.student.user_name) : 'Not available';
+            const matrixNumber = (data.student && data.student.matrix_number) ? escapeHtml(data.student.matrix_number) : 'Not available';
+            const icNumber = (data.student && data.student.ic_number) ? escapeHtml(data.student.ic_number) : 'Not provided';
+            const programme = (data.student && data.student.programme) ? escapeHtml(data.student.programme) : 'Not available';
+            const year = (data.student && data.student.year) ? escapeHtml(data.student.year) : 'Not available';
+            const email = (data.student && data.student.utm_email) ? escapeHtml(data.student.utm_email) : 'Not available';
+            const phone = (data.student && data.student.phone) ? escapeHtml(data.student.phone) : '-';
+            const address = (data.student && data.student.address) ? escapeHtml(data.student.address) : '-';
+            
+            const sessionValue = (data.registration && data.registration.session) ? escapeHtml(data.registration.session) : '2025/2026 - Semester 2';
+            const submissionDate = (data.registration && data.registration.submission_date) ? new Date(data.registration.submission_date).toLocaleString() : 'Not available';
             
             const containerHtml = `
                 <div class="slip-header">
@@ -274,18 +352,18 @@
                 </div>
                 
                 <div class="section-title">STUDENT INFORMATION</div>
-                <div class="info-row"><div class="info-label">Name</div><div class="info-value">${escapeHtml(data.student.user_name)}</div></div>
-                <div class="info-row"><div class="info-label">Matric No.</div><div class="info-value">${escapeHtml(data.student.matrix_number)}</div></div>
-                <div class="info-row"><div class="info-label">IC/Passport</div><div class="info-value">${escapeHtml(data.student.ic_number || 'Not provided')}</div></div>
-                <div class="info-row"><div class="info-label">Programme</div><div class="info-value">${escapeHtml(data.student.programme)}</div></div>
-                <div class="info-row"><div class="info-label">Year</div><div class="info-value">${escapeHtml(data.student.year)}</div></div>
-                <div class="info-row"><div class="info-label">Email</div><div class="info-value">${escapeHtml(data.student.utm_email)}</div></div>
-                <div class="info-row"><div class="info-label">Phone</div><div class="info-value">${escapeHtml(data.student.phone || '-')}</div></div>
-                <div class="info-row"><div class="info-label">Address</div><div class="info-value">${escapeHtml(data.student.address || '-')}</div></div>
+                <div class="info-row"><div class="info-label">Name</div><div class="info-value">${studentName}</div></div>
+                <div class="info-row"><div class="info-label">Matric No.</div><div class="info-value">${matrixNumber}</div></div>
+                <div class="info-row"><div class="info-label">IC/Passport</div><div class="info-value">${icNumber}</div></div>
+                <div class="info-row"><div class="info-label">Programme</div><div class="info-value">${programme}</div></div>
+                <div class="info-row"><div class="info-label">Year</div><div class="info-value">${year}</div></div>
+                <div class="info-row"><div class="info-label">Email</div><div class="info-value">${email}</div></div>
+                <div class="info-row"><div class="info-label">Phone</div><div class="info-value">${phone}</div></div>
+                <div class="info-row"><div class="info-label">Address</div><div class="info-value">${address}</div></div>
                 
                 <div class="section-title">REGISTRATION DETAILS</div>
-                <div class="info-row"><div class="info-label">Session</div><div class="info-value">${escapeHtml(data.registration.session || '2025/2026 - Semester 2')}</div></div>
-                <div class="info-row"><div class="info-label">Submitted Date</div><div class="info-value">${new Date(data.registration.submission_date).toLocaleString()}</div></div>
+                <div class="info-row"><div class="info-label">Session</div><div class="info-value">${sessionValue}</div></div>
+                <div class="info-row"><div class="info-label">Submitted Date</div><div class="info-value">${submissionDate}</div></div>
                 <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span style="background:#f8d7da; color:#721c24; padding:4px 14px; border-radius:20px; font-weight:600;">REJECTED</span></div></div>
                 
                 <div class="section-title">REGISTERED COURSES</div>
@@ -324,12 +402,27 @@
             });
             
         } catch (err) {
-            console.error(err);
-            document.getElementById('contentContainer').innerHTML = '<div class="text-center text-danger">Failed to load registration details. Please try again.</div>';
+            console.error('Error loading rejected details:', err);
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="text-center text-danger py-4">
+                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                    <p class="mt-3">Failed to load registration details. Please try again.</p>
+                    <p class="small text-muted">Error: ${err.message}</p>
+                    <button class="btn btn-primary mt-2" onclick="location.reload()" style="background:#670019; border:none;">Retry</button>
+                </div>
+            `;
         }
     }
     
-    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
+    function escapeHtml(str) { 
+        if (!str) return ''; 
+        return String(str).replace(/[&<>]/g, function(m) { 
+            return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; 
+        }); 
+    }
+    
+    // Initialize - load both student name and rejected details
+    loadStudentName();
     loadRejectedDetails();
 </script>
 </body>

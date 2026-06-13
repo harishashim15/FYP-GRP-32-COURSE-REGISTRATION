@@ -1,6 +1,8 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['error' => 'Not logged in']);
@@ -23,20 +25,40 @@ $pass = "";
 $conn = new mysqli($host, $user, $pass, $db);
 
 if ($conn->connect_error) {
-    echo json_encode(['error' => 'Database connection failed']);
+    echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
     exit();
 }
 
-// Get student info
-$student_query = "SELECT u.user_name, u.matrix_number, u.utm_email, u.phone,
-                         s.programme, s.year, s.ic_number, s.address
-                  FROM users u
-                  LEFT JOIN students s ON u.user_id = s.user_id
-                  WHERE u.user_id = ?";
+// First, verify this registration belongs to the logged-in student and is rejected
+$verify_query = "SELECT id, status FROM course_registrations WHERE id = ? AND student_id = ? AND status = 'rejected'";
+$stmt = $conn->prepare($verify_query);
+$stmt->bind_param("ii", $registration_id, $user_id);
+$stmt->execute();
+$verify_result = $stmt->get_result();
+
+if ($verify_result->num_rows === 0) {
+    echo json_encode(['error' => 'Registration not found or not rejected']);
+    exit();
+}
+
+// Get student info from users table directly (simpler, more reliable)
+$student_query = "SELECT user_id, user_name, matrix_number, utm_email, phone FROM users WHERE user_id = ?";
 $stmt = $conn->prepare($student_query);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
+
+// Get additional student info from students table (if exists)
+$student_details_query = "SELECT programme, year, ic_number, address FROM students WHERE user_id = ?";
+$stmt = $conn->prepare($student_details_query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$student_details = $stmt->get_result()->fetch_assoc();
+
+// Merge student data
+if ($student_details) {
+    $student = array_merge($student, $student_details);
+}
 
 // Get registration details with advisor remarks
 $reg_query = "SELECT cr.id, cr.submission_date, cr.status, cr.session, cr.reviewed_at, 
@@ -50,7 +72,7 @@ $stmt->execute();
 $registration = $stmt->get_result()->fetch_assoc();
 
 if (!$registration) {
-    echo json_encode(['error' => 'Registration not found']);
+    echo json_encode(['error' => 'Registration details not found']);
     exit();
 }
 
@@ -73,7 +95,9 @@ while ($row = $courses_result->fetch_assoc()) {
 
 $conn->close();
 
+// Return success response
 echo json_encode([
+    'success' => true,
     'student' => $student,
     'registration' => $registration,
     'courses' => $courses,
