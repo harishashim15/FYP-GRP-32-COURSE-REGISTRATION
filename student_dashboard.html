@@ -91,10 +91,43 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
         
-        /* HERO SECTION - UPDATED TO MATCH ADVISOR */
+        /* PROFILE BOX - FIXED TO SHOW FULL NAME */
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            min-width: 0; /* Allows flex shrinking */
+        }
+        .profile-box .profile-info {
+            text-align: right;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .profile-box .profile-info h6 {
+            margin-bottom: 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-box .profile-info small {
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+        }
+        .profile-box img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        /* HERO SECTION */
         .hero {
             background: #f7f2ee;
             border-radius: 25px;
@@ -167,7 +200,7 @@
             margin-bottom: 15px;
         }
         
-        /* QUICK ACTIONS - UPDATED TO MATCH ADVISOR */
+        /* QUICK ACTIONS */
         .quick-actions {
             background: white;
             border-radius: 25px;
@@ -236,8 +269,15 @@
                 flex-direction: column;
                 gap: 20px;
             }
-            .hero img {
-                width: 150px;
+            .profile-box .profile-info h6 {
+                font-size: 12px;
+            }
+            .profile-box .profile-info small {
+                font-size: 10px;
+            }
+            .profile-box img {
+                width: 40px;
+                height: 40px;
             }
         }
         
@@ -276,18 +316,18 @@
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='student_profile.html'">
             <i class="bi bi-bell fs-5"></i>
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-            <div>
-                <h6 class="mb-0" id="studentName">Haris</h6>
+            <div class="profile-info">
+                <h6 class="mb-0" id="studentName">Loading...</h6>
                 <small class="text-muted">Student</small>
             </div>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
         </div>
     </div>
 
-    <!-- HERO SECTION - UPDATED LAYOUT -->
+    <!-- HERO SECTION -->
     <div class="hero">
         <div>
-            <h1 id="heroGreeting">Welcome back, Haris!</h1>
+            <h1 id="heroGreeting">Welcome back, Student!</h1>
             <p>Manage your course registration and academic progress here.</p>
         </div>
     </div>
@@ -345,7 +385,7 @@
         </div>
     </div>
 
-    <!-- QUICK ACTIONS - UPDATED WITH ICONS LIKE ADVISOR -->
+    <!-- QUICK ACTIONS -->
     <div class="quick-actions">
         <h3><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h3>
         
@@ -421,9 +461,17 @@
     async function loadDashboard() {
         try {
             const stats = await apiGet('dashboard/student_stats.php');
-            document.getElementById('studentName').innerText = stats.student_name || 'Haris';
-            const firstName = (stats.student_name || 'Haris').split(' ')[0];
+            
+            // Get FULL student name from API
+            const fullName = stats.student_name || 'Student';
+            const firstName = fullName.split(' ')[0];
+            
+            // Display FULL name in top-right profile section
+            document.getElementById('studentName').innerText = fullName;
+            
+            // Display first name in hero greeting
             document.getElementById('heroGreeting').innerText = `Welcome back, ${firstName}!`;
+            
             animateNumber(document.getElementById('registeredCourses'), stats.registered_courses || 0);
             animateNumber(document.getElementById('pendingApprovals'), stats.pending_approvals || 0);
             animateNumber(document.getElementById('approvedCourses'), stats.approved_courses || 0);
