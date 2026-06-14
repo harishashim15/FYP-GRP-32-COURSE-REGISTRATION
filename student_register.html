@@ -52,12 +52,40 @@
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        .profile-box img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .profile-box h6 {
+            margin-bottom: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .profile-box small {
+            font-size: 11px;
+            color: #888;
+        }
+        .profile-box i {
+            font-size: 18px;
+            color: #670019;
+        }
         
         .page-header {
-            background: #f7f2ee; border-radius: 25px; padding: 35px 40px;
-            margin-bottom: 30px; border: 1px solid #eee;
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 35px 40px;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
         }
         .page-header h1 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
@@ -233,26 +261,26 @@
         <div class="profile-box" onclick="location.href='student_profile.html'">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-            <div><h6 class="mb-0" id="studentName">Loading...</h6><small>Student</small></div>
+            <div>
+                <h6 class="mb-0" id="studentName">Loading...</h6>
+                <small class="text-muted">Student</small>
+            </div>
         </div>
     </div>
 
     <div class="page-header"><h1>Register</h1><p>Review your added courses and select sections before submitting</p></div>
     <div id="alertContainer"></div>
     
-    <!-- PENDING BANNER -->
     <div id="pendingBanner" class="pending-banner" style="display: none;">
         <i class="bi bi-clock-history"></i>
         <p><strong>Registration Pending Approval</strong><br>Your registration is waiting for advisor approval. You cannot modify or submit changes until a decision is made.</p>
     </div>
     
-    <!-- APPROVED BANNER -->
     <div id="approvedBanner" class="approved-banner" style="display: none;">
         <i class="bi bi-check-circle-fill"></i>
         <p><strong>Registration Approved</strong><br>You already have an approved registration for this academic session.</p>
     </div>
     
-    <!-- REJECTED BANNER -->
     <div id="rejectedBanner" class="rejected-banner" style="display: none;">
         <i class="bi bi-exclamation-triangle-fill"></i>
         <p><strong>Editing Rejected Registration</strong><br>You are editing a previously rejected registration. Please make the necessary changes and resubmit.</p>
@@ -317,7 +345,6 @@
         }
     })();
 
-    // Check for PENDING registration
     async function checkPendingRegistration() {
         try {
             const result = await apiGet('registrations/check_pending.php');
@@ -338,7 +365,6 @@
         }
     }
 
-    // Check for APPROVED registration
     async function checkApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
@@ -369,7 +395,6 @@
                 isEditingRejected = true;
                 document.getElementById('rejectedBanner').style.display = 'flex';
                 
-                // Clear existing cart
                 const currentCart = await apiGet('cart/get.php');
                 if (currentCart.items && currentCart.items.length > 0) {
                     for (const item of currentCart.items) {
@@ -377,7 +402,6 @@
                     }
                 }
                 
-                // Add each rejected course back to cart
                 for (const course of rejectedData.courses) {
                     await apiPost('cart/add.php', { course_code: course.subject_code });
                     if (course.section) {
@@ -405,6 +429,16 @@
     }
 
     async function loadStudentName() {
+        try {
+            const profile = await apiGet('profile/student.php');
+            if (profile && profile.full_name) {
+                document.getElementById('studentName').innerText = profile.full_name;
+                return;
+            }
+        } catch(e) {
+            console.log('Profile API failed, trying session...');
+        }
+        
         try {
             const user = await getCurrentUser();
             if (user && user.name) {
@@ -464,7 +498,7 @@
                 </tr>`;
             });
             
-            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></table></tbody></table>`;
+            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></td></tbody><tr>`;
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
             
@@ -624,8 +658,8 @@
 
     async function init() {
         await loadStudentName();
-        await checkPendingRegistration();  // CHECK PENDING FIRST
-        await checkApprovedRegistration(); // THEN CHECK APPROVED
+        await checkPendingRegistration();
+        await checkApprovedRegistration();
         
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('load_rejected') === '1') {

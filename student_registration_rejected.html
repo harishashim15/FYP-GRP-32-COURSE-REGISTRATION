@@ -53,34 +53,31 @@
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         
-        /* PROFILE BOX - FIXED */
         .profile-box {
             display: flex;
             align-items: center;
             gap: 15px;
             cursor: pointer;
         }
-        .profile-box .profile-text {
-            text-align: right;
-        }
-        .profile-box .profile-text h6 {
-            margin-bottom: 0;
-            font-weight: 600;
-            font-size: 14px;
-            color: #333;
-            white-space: nowrap;
-        }
-        .profile-box .profile-text small {
-            font-size: 11px;
-            color: #888;
-            white-space: nowrap;
-        }
         .profile-box img {
             width: 45px;
             height: 45px;
             border-radius: 50%;
             object-fit: cover;
-            flex-shrink: 0;
+        }
+        .profile-box h6 {
+            margin-bottom: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .profile-box small {
+            font-size: 11px;
+            color: #888;
+        }
+        .profile-box i {
+            font-size: 18px;
+            color: #670019;
         }
         
         .page-header { margin-bottom: 30px; }
@@ -198,8 +195,8 @@
             .main-content { margin-left: 0; }
             .action-buttons { flex-direction: column; align-items: center; }
             .edit-btn, .back-btn { width: 100%; justify-content: center; }
-            .profile-box .profile-text h6 { font-size: 12px; }
-            .profile-box .profile-text small { font-size: 10px; }
+            .profile-box h6 { font-size: 12px; }
+            .profile-box small { font-size: 10px; }
             .profile-box img { width: 40px; height: 40px; }
         }
     </style>
@@ -224,11 +221,11 @@
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='student_profile.html'">
             <i class="bi bi-bell fs-5"></i>
-            <div class="profile-text">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div>
                 <h6 class="mb-0" id="studentName">Loading...</h6>
                 <small class="text-muted">Student</small>
             </div>
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
         </div>
     </div>
 
@@ -260,8 +257,17 @@
     const urlParams = new URLSearchParams(window.location.search);
     const registrationId = urlParams.get('id');
 
-    // Load student name from session (FIXED)
     async function loadStudentName() {
+        try {
+            const profile = await apiGet('profile/student.php');
+            if (profile && profile.full_name) {
+                document.getElementById('studentName').innerText = profile.full_name;
+                return;
+            }
+        } catch(e) {
+            console.log('Profile API failed, trying session...');
+        }
+        
         try {
             const user = await getCurrentUser();
             if (user && user.name) {
@@ -284,12 +290,10 @@
         try {
             const data = await apiGet(`registrations/rejected_details.php?id=${registrationId}`);
             
-            // Check if data is valid
             if (!data || data.error) {
                 throw new Error(data.error || 'No data received');
             }
             
-            // Update profile name from API data if available (fallback)
             if (data.student && data.student.user_name) {
                 document.getElementById('studentName').innerText = data.student.user_name;
             }
@@ -316,7 +320,6 @@
                 ? data.registration.advisor_remarks 
                 : 'No specific reason provided. Please contact your academic advisor.';
             
-            // Store the rejected registration data in localStorage
             const rejectedData = {
                 registration_id: registrationId,
                 courses: (data.courses || []).map(course => ({
@@ -331,7 +334,6 @@
             localStorage.setItem('pendingRejectedRegistration', JSON.stringify(rejectedData));
             localStorage.setItem('isEditingRejectedRegistration', 'true');
             
-            // Safely get student data with fallbacks
             const studentName = (data.student && data.student.user_name) ? escapeHtml(data.student.user_name) : 'Not available';
             const matrixNumber = (data.student && data.student.matrix_number) ? escapeHtml(data.student.matrix_number) : 'Not available';
             const icNumber = (data.student && data.student.ic_number) ? escapeHtml(data.student.ic_number) : 'Not provided';
@@ -421,7 +423,6 @@
         }); 
     }
     
-    // Initialize - load both student name and rejected details
     loadStudentName();
     loadRejectedDetails();
 </script>

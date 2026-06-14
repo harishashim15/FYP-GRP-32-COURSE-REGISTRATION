@@ -92,39 +92,32 @@
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         
-        /* PROFILE BOX - FIXED TO SHOW FULL NAME */
+        /* PROFILE BOX - MATCHING ADVISOR LAYOUT */
         .profile-box {
             display: flex;
             align-items: center;
             gap: 15px;
             cursor: pointer;
-            min-width: 0; /* Allows flex shrinking */
-        }
-        .profile-box .profile-info {
-            text-align: right;
-            min-width: 0;
-            overflow: hidden;
-        }
-        .profile-box .profile-info h6 {
-            margin-bottom: 0;
-            font-weight: 600;
-            font-size: 14px;
-            color: #333;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .profile-box .profile-info small {
-            font-size: 11px;
-            color: #888;
-            white-space: nowrap;
         }
         .profile-box img {
             width: 45px;
             height: 45px;
             border-radius: 50%;
             object-fit: cover;
-            flex-shrink: 0;
+        }
+        .profile-box h6 {
+            margin-bottom: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .profile-box small {
+            font-size: 11px;
+            color: #888;
+        }
+        .profile-box i {
+            font-size: 18px;
+            color: #670019;
         }
         
         /* HERO SECTION */
@@ -269,16 +262,9 @@
                 flex-direction: column;
                 gap: 20px;
             }
-            .profile-box .profile-info h6 {
-                font-size: 12px;
-            }
-            .profile-box .profile-info small {
-                font-size: 10px;
-            }
-            .profile-box img {
-                width: 40px;
-                height: 40px;
-            }
+            .profile-box h6 { font-size: 12px; }
+            .profile-box small { font-size: 10px; }
+            .profile-box img { width: 40px; height: 40px; }
         }
         
         @media (min-width: 993px) {
@@ -316,11 +302,11 @@
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='student_profile.html'">
             <i class="bi bi-bell fs-5"></i>
-            <div class="profile-info">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            <div>
                 <h6 class="mb-0" id="studentName">Loading...</h6>
                 <small class="text-muted">Student</small>
             </div>
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
         </div>
     </div>
 
@@ -462,14 +448,10 @@
         try {
             const stats = await apiGet('dashboard/student_stats.php');
             
-            // Get FULL student name from API
             const fullName = stats.student_name || 'Student';
             const firstName = fullName.split(' ')[0];
             
-            // Display FULL name in top-right profile section
             document.getElementById('studentName').innerText = fullName;
-            
-            // Display first name in hero greeting
             document.getElementById('heroGreeting').innerText = `Welcome back, ${firstName}!`;
             
             animateNumber(document.getElementById('registeredCourses'), stats.registered_courses || 0);
