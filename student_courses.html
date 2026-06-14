@@ -44,20 +44,117 @@
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
         
-        .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
+        /* MAIN CONTENT - Position relative for overlay */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            position: relative;
+        }
         .main-content.expanded { margin-left: 0; }
+        
+        /* REGISTRATION CLOSED OVERLAY - Covers ONLY main content */
+        .registration-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(3px);
+            border-radius: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .registration-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .overlay-content {
+            background: white;
+            border-radius: 32px;
+            padding: 40px 50px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: fadeInUp 0.4s ease-out;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .overlay-icon {
+            font-size: 64px;
+            color: #670019;
+            background: #f7f2ee;
+            width: 110px;
+            height: 110px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+        }
+        .overlay-content h3 {
+            color: #670019;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .overlay-content p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .overlay-content .btn-ok {
+            background: linear-gradient(to right, #670019, #8b0022);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .overlay-content .btn-ok:hover {
+            background: linear-gradient(to right, #8b0022, #a80028);
+            transform: translateY(-2px);
+        }
+        
         .topbar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; background: white; padding: 15px 25px;
-            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
         .profile-box img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
         
         .page-header {
-            background: #f7f2ee; border-radius: 25px; padding: 35px 40px;
-            margin-bottom: 30px; border: 1px solid #eee;
+            background: #f7f2ee;
+            border-radius: 25px;
+            padding: 35px 40px;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
         }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
@@ -108,7 +205,9 @@
         .cart-summary {
             background: #fff7ef; border: 1px solid #f4a000; border-radius: 25px;
             padding: 15px 25px; margin-bottom: 25px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap; gap: 15px;
         }
         .cart-info { display: flex; align-items: center; gap: 10px; }
@@ -268,14 +367,6 @@
         </div>
     </div>
 
-    <div id="closedBanner" class="closed-banner" style="display: none;">
-        <i class="bi bi-calendar-x-fill"></i>
-        <div class="closed-banner-content">
-            <h4>Registration Period Closed</h4>
-            <p>The registration period is currently closed. You cannot add or remove courses at this time.</p>
-        </div>
-    </div>
-
     <div id="cartSummary" class="cart-summary" style="display: none;">
         <div class="cart-info"><i class="bi bi-bag-check"></i> You have <strong id="cartCount" class="count">0</strong> course(s) in your cart</div>
         <a href="student_register.html" id="proceedBtn" class="view-cart-btn">Proceed to Register</a>
@@ -296,6 +387,18 @@
     
     <div class="courses-grid" id="coursesGrid">
         <div class="text-center">Loading courses...</div>
+    </div>
+
+    <!-- REGISTRATION PERIOD CLOSED OVERLAY -->
+    <div id="registrationOverlay" class="registration-overlay">
+        <div class="overlay-content">
+            <div class="overlay-icon">
+                <i class="bi bi-lock-fill"></i>
+            </div>
+            <h3>Registration Period Closed</h3>
+            <p>The registration period is currently closed.<br>You cannot add or remove courses at this time.</p>
+            <button class="btn-ok" onclick="document.getElementById('registrationOverlay').classList.remove('active')">OK</button>
+        </div>
     </div>
 </div>
 
@@ -475,11 +578,15 @@
         try {
             const period = await apiGet('registrations/period.php');
             isRegistrationOpen = period.is_open;
+            
+            // Show/hide the overlay based on registration period status
+            const overlay = document.getElementById('registrationOverlay');
             if (!isRegistrationOpen && !hasApprovedRegistration && !hasPendingRegistration) {
-                document.getElementById('closedBanner').style.display = 'flex';
+                overlay.classList.add('active');
             } else {
-                document.getElementById('closedBanner').style.display = 'none';
+                overlay.classList.remove('active');
             }
+            
             return isRegistrationOpen;
         } catch(e) {
             console.error('Failed to check registration period:', e);
@@ -581,7 +688,6 @@
         }
         try {
             await apiPost('cart/add.php', { course_code: course.code });
-            // Update the button directly without re-rendering
             btnElement.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Remove';
             btnElement.classList.remove('add');
             btnElement.classList.add('remove');
@@ -608,7 +714,6 @@
         }
         try {
             await apiPost('cart/remove.php', { course_code: course.code });
-            // Update the button directly without re-rendering
             btnElement.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Add to Cart';
             btnElement.classList.remove('remove');
             btnElement.classList.add('add');
@@ -621,40 +726,28 @@
     }
 
     // EVENT DELEGATION - SINGLE EVENT LISTENER FOR ALL BUTTONS
-    // This prevents duplicate/mixed event listeners
     function setupEventDelegation() {
         const coursesGrid = document.getElementById('coursesGrid');
-        
-        // Remove any existing listener first to prevent duplicates
         coursesGrid.removeEventListener('click', handleButtonClick);
-        // Add the event listener
         coursesGrid.addEventListener('click', handleButtonClick);
     }
 
     async function handleButtonClick(e) {
-        // Find the actual button that was clicked (in case the click was on the icon)
         let btn = e.target.closest('.cart-btn');
         if (!btn) return;
-        
-        // If button is disabled, do nothing
         if (btn.disabled) return;
-        
         e.stopPropagation();
         
         const courseCode = btn.dataset.code;
-        const courseName = btn.dataset.name;
         const isRemoveButton = btn.classList.contains('remove');
         const isAddButton = btn.classList.contains('add');
         
-        // Find the full course object
         const course = allCourses.find(c => c.code === courseCode);
         if (!course) return;
         
-        // Handle remove button
         if (isRemoveButton) {
             showRemoveCourseModal(course, btn);
         }
-        // Handle add button
         else if (isAddButton) {
             showAddCourseModal(course, async (selectedCourse) => {
                 await addToCart(selectedCourse, btn);
@@ -688,7 +781,6 @@
             grid.appendChild(card);
         });
         
-        // Set up event delegation AFTER rendering
         setupEventDelegation();
     }
 
