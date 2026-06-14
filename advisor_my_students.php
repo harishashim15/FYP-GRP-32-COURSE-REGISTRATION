@@ -26,12 +26,12 @@ if (!$user_check || $user_check['role'] != 'advisor') {
     exit;
 }
 
-// Get all students under this advisor
+// Get all students under this advisor - Sorted by Programme, then Year, then Name
 $sql = "SELECT s.*, u.matrix_number, u.user_name, u.utm_email 
         FROM students s
         JOIN users u ON s.user_id = u.user_id
         WHERE s.advisor_id = ? 
-        ORDER BY u.user_name";
+        ORDER BY s.year, s.programme, u.user_name";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $advisor_id);
 mysqli_stmt_execute($stmt);
@@ -299,7 +299,6 @@ $advisor_name = $advisor ? $advisor['user_name'] : 'Advisor';
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='advisor_profile.php'">
-            <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
                 <h6 class="mb-0" id="advisorName"><?php echo htmlspecialchars($advisor_name); ?></h6>

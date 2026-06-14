@@ -5,6 +5,64 @@ date_default_timezone_set('Asia/Kuala_Lumpur');
 
 session_start();
 
+// Function to update semester history when registration is approved
+function updateSemesterHistory($conn, $student_id, $submission_date, $year, $semester, $programme) {
+    // Get programme code based on programme name
+    $programme_code = '';
+    switch ($programme) {
+        case 'Computer Science':
+            $programme_code = 'DSPD';
+            break;
+        case 'Electrical Engineering':
+            $programme_code = 'DSPK';
+            break;
+        case 'Sport Science':
+            $programme_code = 'DSPU';
+            break;
+        case 'Pengajian Islam':
+            $programme_code = 'DDWI';
+            break;
+        default:
+            $programme_code = 'DSPD';
+    }
+    
+    // Get current active semester from registration periods
+    $sql_period = "SELECT session_semester FROM semester_registration_periods WHERE is_open = 1 LIMIT 1";
+    $result_period = mysqli_query($conn, $sql_period);
+    $session_semester = '2025/2026-2'; // default fallback
+    if ($result_period && $period = mysqli_fetch_assoc($result_period)) {
+        $session_semester = $period['session_semester'];
+    }
+    
+    // Calculate no_semester based on year and semester
+    $no_semester = ((int)$year - 1) * 3 + (int)$semester;
+    
+    // Programme format: e.g., "2 / DSPD"
+    $programme_format = $year . ' / ' . $programme_code;
+    
+    // Check if record already exists for this student and semester
+    $sql_check = "SELECT id FROM student_semesters WHERE student_id = ? AND session_semester = ?";
+    $stmt_check = mysqli_prepare($conn, $sql_check);
+    mysqli_stmt_bind_param($stmt_check, "is", $student_id, $session_semester);
+    mysqli_stmt_execute($stmt_check);
+    $result_check = mysqli_stmt_get_result($stmt_check);
+    
+    if (mysqli_fetch_assoc($result_check)) {
+        // Update existing record
+        $sql_update = "UPDATE student_semesters SET reg_date = ?, active_code = 'A-Active' WHERE student_id = ? AND session_semester = ?";
+        $stmt_update = mysqli_prepare($conn, $sql_update);
+        mysqli_stmt_bind_param($stmt_update, "sis", $submission_date, $student_id, $session_semester);
+        mysqli_stmt_execute($stmt_update);
+    } else {
+        // Insert new record
+        $sql_insert = "INSERT INTO student_semesters (student_id, session_semester, programme, no_semester, reg_date, active_code, cpa) 
+                       VALUES (?, ?, ?, ?, ?, 'A-Active', NULL)";
+        $stmt_insert = mysqli_prepare($conn, $sql_insert);
+        mysqli_stmt_bind_param($stmt_insert, "issis", $student_id, $session_semester, $programme_format, $no_semester, $submission_date);
+        mysqli_stmt_execute($stmt_insert);
+    }
+}
+
 // Get advisor ID from session
 $advisor_id = $_SESSION['user_id'] ?? null;
 
@@ -28,7 +86,7 @@ if (!$user_check || $user_check['role'] != 'advisor') {
     exit;
 }
 
-// Get registration_id from URL (CHANGED from student_id to registration_id)
+// Get registration_id from URL
 $registration_id = isset($_GET['registration_id']) ? (int)$_GET['registration_id'] : 0;
 
 if (empty($registration_id)) {
@@ -60,7 +118,7 @@ if (!$student) {
     exit;
 }
 
-// Get courses for this SPECIFIC registration (NOT the latest one)
+// Get courses for this SPECIFIC registration
 $sql = "SELECT 
             sub.subject_code as code,
             sub.subject_name as name,
@@ -105,6 +163,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     mysqli_stmt_bind_param($stmt, "ssisi", $new_status, $remarks, $advisor_id, $current_time, $registration_id);
     
     if (mysqli_stmt_execute($stmt)) {
+        // If approved, update semester history
+        if ($new_status == 'approved') {
+            updateSemesterHistory(
+                $conn, 
+                $student['student_id'], 
+                date('Y-m-d', strtotime($submission_date)), 
+                $student['year'], 
+                $student['current_semester'], 
+                $student['programme']
+            );
+        }
         echo json_encode(['success' => true, 'status' => $new_status, 'remarks' => $remarks]);
     } else {
         echo json_encode(['success' => false, 'error' => 'Database error: ' . mysqli_error($conn)]);
@@ -368,7 +437,7 @@ if (empty($initials)) $initials = 'ST';
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='advisor_profile.php'">
-            <i class="bi bi-bell fs-5"></i>
+        
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
             <div><h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6><small class="text-muted">Academic Advisor</small></div>
         </div>
@@ -558,76 +627,76 @@ if (empty($initials)) $initials = 'ST';
         });
     }
     
-function printPDF() {
-    // Use the current registration_id
-    var registrationId = <?php echo $registration_id; ?>;
-    
-    if (registrationId > 0) {
-        // Show loading indicator
-        Swal.fire({
-            title: 'Preparing PDF...',
-            text: 'Please wait while we prepare your registration slip.',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
+    function printPDF() {
+        // Use the current registration_id
+        var registrationId = <?php echo $registration_id; ?>;
         
-        // Create hidden iframe
-        var iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = 'advisor_print_slip.php?registration_id=' + registrationId;
-        document.body.appendChild(iframe);
-        
-        iframe.onload = function() {
-            Swal.close();
-            
-            // Get the matrix number from the iframe content
-            var matrixNumber = '';
-            try {
-                var titleText = iframe.contentDocument.title;
-                // Extract matrix number from title (Registration_Slip_XXXXX)
-                var match = titleText.match(/Registration_Slip_(.+)/);
-                if (match) {
-                    matrixNumber = match[1];
+        if (registrationId > 0) {
+            // Show loading indicator
+            Swal.fire({
+                title: 'Preparing PDF...',
+                text: 'Please wait while we prepare your registration slip.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
-            } catch(e) {
-                console.log('Could not get matrix number');
-            }
+            });
             
-            // Temporarily change parent page title for printing
-            var originalTitle = document.title;
-            if (matrixNumber) {
-                document.title = 'Registration_Slip_' + matrixNumber;
-            }
+            // Create hidden iframe
+            var iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'advisor_print_slip.php?registration_id=' + registrationId;
+            document.body.appendChild(iframe);
             
-            // Print the iframe content
-            iframe.contentWindow.print();
+            iframe.onload = function() {
+                Swal.close();
+                
+                // Get the matrix number from the iframe content
+                var matrixNumber = '';
+                try {
+                    var titleText = iframe.contentDocument.title;
+                    // Extract matrix number from title (Registration_Slip_XXXXX)
+                    var match = titleText.match(/Registration_Slip_(.+)/);
+                    if (match) {
+                        matrixNumber = match[1];
+                    }
+                } catch(e) {
+                    console.log('Could not get matrix number');
+                }
+                
+                // Temporarily change parent page title for printing
+                var originalTitle = document.title;
+                if (matrixNumber) {
+                    document.title = 'Registration_Slip_' + matrixNumber;
+                }
+                
+                // Print the iframe content
+                iframe.contentWindow.print();
+                
+                // Restore original title after print
+                setTimeout(function() {
+                    document.title = originalTitle;
+                    document.body.removeChild(iframe);
+                }, 1000);
+            };
             
-            // Restore original title after print
-            setTimeout(function() {
-                document.title = originalTitle;
-                document.body.removeChild(iframe);
-            }, 1000);
-        };
-        
-        iframe.onerror = function() {
+            iframe.onerror = function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to generate registration slip. Please try again.',
+                    confirmButtonColor: '#670019'
+                });
+            };
+        } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Unable to generate registration slip. Please try again.',
+                text: 'Unable to generate registration slip. Registration ID not found.',
                 confirmButtonColor: '#670019'
             });
-        };
-    } else {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Unable to generate registration slip. Registration ID not found.',
-            confirmButtonColor: '#670019'
-        });
+        }
     }
-}
 </script>
 </body>
 </html>

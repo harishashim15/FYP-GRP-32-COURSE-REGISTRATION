@@ -374,7 +374,6 @@ $active_code = 'A - Active';
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='advisor_profile.php'">
-            <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
             <div><h6 class="mb-0"><?php echo htmlspecialchars($advisor_name); ?></h6><small class="text-muted">Academic Advisor</small></div>
         </div>

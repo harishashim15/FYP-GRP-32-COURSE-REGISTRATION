@@ -221,7 +221,7 @@ $profile_data = [
         <div class="profile-pic">
             <img id="profilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Photo">
             <div class="mt-2">
-                <a href="#" id="changePhotoLink" style="color: #670019;">Change Photo</a>
+
             </div>
         </div>
 
