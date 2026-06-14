@@ -14,10 +14,16 @@
         body { background: #f8f6f4; overflow-x: hidden; }
         
         .sidebar {
-            width: 280px; height: 100vh;
+            width: 280px;
+            height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
-            position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease; z-index: 1000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 30px 20px;
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
             overflow-y: auto;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
@@ -25,71 +31,85 @@
         .logo img { width: 130px; }
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; margin-bottom: 8px;
-            transition: 0.3s; font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+            font-size: 15px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
         .menu i { font-size: 20px; width: 24px; }
         .logout {
-            position: absolute; bottom: 30px;
-            width: calc(100% - 40px); left: 20px;
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 40px);
+            left: 20px;
         }
         .logout a {
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            transition: 0.3s;
+            font-size: 15px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
         
+        /* MAIN CONTENT - Will be overlayed */
         .main-content {
             margin-left: 280px;
             padding: 30px;
             transition: margin-left 0.3s ease;
+            position: relative;
         }
         .main-content.expanded { margin-left: 0; }
         
-        /* COURSES CONTAINER - Position relative for overlay */
-        .courses-container {
-            position: relative;
-            min-height: 400px;
-        }
-        
-        /* REGISTRATION CLOSED OVERLAY - Covers ONLY the courses grid area */
-        .courses-overlay {
-            position: absolute;
+        /* FULL PAGE CONTENT OVERLAY - Covers everything except sidebar */
+        .page-overlay {
+            position: fixed;
             top: 0;
-            left: 0;
+            left: 280px;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(2px);
-            border-radius: 25px;
-            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            visibility: hidden;
             transition: all 0.3s ease;
         }
-        .courses-overlay.active {
-            opacity: 1;
-            visibility: visible;
+        /* When sidebar is collapsed, overlay needs to start at left: 0 */
+        .sidebar.collapsed ~ .main-content .page-overlay,
+        .sidebar.collapsed + .main-content .page-overlay {
+            left: 0;
         }
-        .overlay-card {
+        /* Alternative selector for when sidebar is collapsed */
+        body:has(.sidebar.collapsed) .page-overlay {
+            left: 0;
+        }
+        
+        /* MODAL CARD - Centered, static, no close button */
+        .overlay-modal {
             background: white;
-            border-radius: 28px;
-            padding: 35px 45px;
+            border-radius: 32px;
+            padding: 45px 55px;
             text-align: center;
-            max-width: 450px;
+            max-width: 480px;
             width: 90%;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25);
-            animation: fadeScale 0.35s ease-out;
+            box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.4s ease-out;
         }
-        @keyframes fadeScale {
+        @keyframes modalFadeIn {
             from {
                 opacity: 0;
                 transform: scale(0.95);
@@ -99,44 +119,34 @@
                 transform: scale(1);
             }
         }
-        .overlay-icon {
-            font-size: 58px;
+        .modal-icon {
+            font-size: 64px;
             color: #670019;
             background: #f7f2ee;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            border-radius: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 25px auto;
         }
-        .overlay-card h3 {
+        .overlay-modal h3 {
             color: #670019;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
-        .overlay-card p {
+        .overlay-modal p {
             color: #666;
             font-size: 15px;
             line-height: 1.6;
-            margin-bottom: 25px;
+            margin-bottom: 0;
         }
-        .overlay-card .btn-ok {
-            background: linear-gradient(to right, #670019, #8b0022);
-            color: white;
-            border: none;
-            padding: 10px 32px;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .overlay-card .btn-ok:hover {
-            background: linear-gradient(to right, #8b0022, #a80028);
-            transform: translateY(-2px);
+        
+        /* Hide overlay when registration is open */
+        .page-overlay.hidden {
+            display: none;
         }
         
         .topbar {
@@ -148,6 +158,8 @@
             padding: 15px 25px;
             border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 1;
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
         .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
@@ -159,6 +171,8 @@
             padding: 35px 40px;
             margin-bottom: 30px;
             border: 1px solid #eee;
+            position: relative;
+            z-index: 1;
         }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
         .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
@@ -173,6 +187,8 @@
             align-items: center;
             gap: 18px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 1;
         }
         .pending-banner i { font-size: 42px; color: #856404; }
         .pending-banner-content h4 { color: #856404; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
@@ -187,6 +203,8 @@
             display: flex;
             align-items: center;
             gap: 18px;
+            position: relative;
+            z-index: 1;
         }
         .approved-banner i { font-size: 42px; color: #2e7d32; }
         .approved-banner-content h4 { color: #155724; font-size: 18px; font-weight: 700; margin-bottom: 5px; }
@@ -199,6 +217,8 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap; gap: 15px;
+            position: relative;
+            z-index: 1;
         }
         .cart-info { display: flex; align-items: center; gap: 10px; }
         .cart-info i { font-size: 24px; color: #670019; }
@@ -217,6 +237,8 @@
             margin-bottom: 20px;
             align-items: center;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
         }
         .filter-row select {
             flex: 1;
@@ -235,18 +257,12 @@
             transition: 0.3s;
             cursor: pointer;
         }
-        .btn-filter {
-            background: #670019;
-            color: white;
-        }
+        .btn-filter { background: #670019; color: white; }
         .btn-filter:hover { background: #8b0022; }
-        .btn-reset {
-            background: #6c757d;
-            color: white;
-        }
+        .btn-reset { background: #6c757d; color: white; }
         .btn-reset:hover { background: #5a6268; }
         
-        .search-bar { display: flex; gap: 12px; margin-bottom: 25px; }
+        .search-bar { display: flex; gap: 12px; margin-bottom: 25px; position: relative; z-index: 1; }
         .search-bar input { flex: 1; padding: 12px 20px; border: 1.5px solid #e0d6d6; border-radius: 25px; outline: none; }
         .search-bar button { padding: 12px 25px; background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; border-radius: 25px; cursor: pointer; }
         .search-bar button:hover { opacity: 0.9; }
@@ -256,6 +272,8 @@
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
             min-height: 300px;
+            position: relative;
+            z-index: 1;
         }
         .course-card {
             background: white;
@@ -313,9 +331,19 @@
         .modal-btn.remove-confirm { background: #dc3545; color: white; }
         .modal-btn.remove-confirm:hover { background: #c82333; transform: translateY(-2px); }
         
+        /* Adjust overlay position when sidebar is collapsed */
+        @media (min-width: 993px) {
+            body:has(.sidebar.collapsed) .page-overlay {
+                left: 0;
+            }
+        }
+        
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
+            .page-overlay {
+                left: 0;
+            }
         }
     </style>
 </head>
@@ -335,6 +363,17 @@
 </div>
 
 <div class="main-content">
+    <!-- FULL PAGE OVERLAY - Covers all content except sidebar -->
+    <div id="pageOverlay" class="page-overlay hidden">
+        <div class="overlay-modal">
+            <div class="modal-icon">
+                <i class="bi bi-lock-fill"></i>
+            </div>
+            <h3>Registration Period Closed</h3>
+            <p>The registration period is currently closed.<br>You cannot add or remove courses at this time.</p>
+        </div>
+    </div>
+
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
         <div class="profile-box" onclick="location.href='student_profile.html'">
@@ -383,23 +422,8 @@
         <button onclick="filterCourses()">Search</button>
     </div>
     
-    <!-- COURSES CONTAINER WITH OVERLAY -->
-    <div class="courses-container">
-        <div class="courses-grid" id="coursesGrid">
-            <div class="text-center">Loading courses...</div>
-        </div>
-        
-        <!-- REGISTRATION PERIOD CLOSED OVERLAY - ONLY COVERS COURSES GRID -->
-        <div id="coursesOverlay" class="courses-overlay">
-            <div class="overlay-card">
-                <div class="overlay-icon">
-                    <i class="bi bi-lock-fill"></i>
-                </div>
-                <h3>Registration Period Closed</h3>
-                <p>The registration period is currently closed.<br>You cannot add or remove courses at this time.</p>
-                <button class="btn-ok" onclick="document.getElementById('coursesOverlay').classList.remove('active')">OK</button>
-            </div>
-        </div>
+    <div class="courses-grid" id="coursesGrid">
+        <div class="text-center">Loading courses...</div>
     </div>
 </div>
 
@@ -454,12 +478,26 @@
         sidebar.classList.toggle('collapsed');
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        
+        // Update overlay position when sidebar toggles
+        updateOverlayPosition();
+    }
+    
+    function updateOverlayPosition() {
+        const overlay = document.getElementById('pageOverlay');
+        const sidebar = document.querySelector('.sidebar');
+        if (overlay && sidebar.classList.contains('collapsed')) {
+            overlay.style.left = '0';
+        } else if (overlay) {
+            overlay.style.left = '280px';
+        }
     }
     
     (function() {
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.querySelector('.sidebar').classList.add('collapsed');
             document.querySelector('.main-content').classList.add('expanded');
+            updateOverlayPosition();
         }
     })();
 
@@ -580,12 +618,12 @@
             const period = await apiGet('registrations/period.php');
             isRegistrationOpen = period.is_open;
             
-            // Show/hide the overlay based on registration period status
-            const overlay = document.getElementById('coursesOverlay');
+            // Show/hide the FULL PAGE overlay based on registration period status
+            const overlay = document.getElementById('pageOverlay');
             if (!isRegistrationOpen && !hasApprovedRegistration && !hasPendingRegistration) {
-                overlay.classList.add('active');
+                overlay.classList.remove('hidden');
             } else {
-                overlay.classList.remove('active');
+                overlay.classList.add('hidden');
             }
             
             return isRegistrationOpen;
