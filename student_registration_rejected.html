@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Rejected - UTM Student</title>
-    <link rel="icon" type="image/png" href="images/logoWebsite.png"/>
+    <title>UTM Student - Registration Rejected</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
-        
+
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease; z-index: 1000;
-            overflow-y: auto;
+            transition: transform 0.3s ease;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
@@ -26,24 +28,23 @@
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; margin-bottom: 8px;
-            transition: 0.3s; font-size: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
-        .menu i { font-size: 20px; width: 24px; }
+        .menu i { font-size: 20px; }
         .logout {
             position: absolute; bottom: 30px;
             width: calc(100% - 40px); left: 20px;
         }
         .logout a {
             display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; transition: 0.3s; font-size: 16px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        
+
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
         .topbar {
@@ -52,37 +53,12 @@
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        
-        .profile-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-        }
-        .profile-box img {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .profile-box h6 {
-            margin-bottom: 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-        }
-        .profile-box small {
-            font-size: 11px;
-            color: #888;
-        }
-        .profile-box i {
-            font-size: 18px;
-            color: #670019;
-        }
-        
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
+
         .page-header { margin-bottom: 30px; }
         .page-header h2 { font-size: 34px; font-weight: 700; color: #670019; }
-        
+
         .rejected-container {
             background: white;
             border-radius: 25px;
@@ -90,24 +66,24 @@
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
             margin-bottom: 30px;
         }
-        
+
         .slip-header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #670019; }
         .slip-header img { width: 55px; margin-bottom: 8px; }
         .slip-header h3 { color: #670019; font-size: 18px; font-weight: 700; }
         .slip-header p { color: #666; font-size: 11px; }
-        
+
         .section-title { color: #670019; font-size: 14px; font-weight: 600; margin: 18px 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid #eee; }
-        
+
         .info-row { margin-bottom: 8px; display: flex; flex-wrap: wrap; }
         .info-label { width: 130px; font-size: 12px; color: #888; }
         .info-value { flex: 1; font-size: 12px; color: #333; font-weight: 500; }
-        
+
         .courses-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
         .courses-table th { background: #f8f6f4; padding: 10px; text-align: left; border: 1px solid #ddd; color: #670019; font-weight: 600; }
         .courses-table td { padding: 8px 10px; border: 1px solid #ddd; }
-        
+
         .total-credits { text-align: right; margin-top: 12px; padding-top: 8px; border-top: 1px solid #ddd; font-weight: 600; color: #670019; font-size: 13px; }
-        
+
         .warning-banner {
             background: #f8d7da;
             border-left: 5px solid #dc3545;
@@ -121,7 +97,7 @@
         .warning-banner i { font-size: 28px; color: #dc3545; }
         .warning-banner h4 { color: #721c24; margin: 0 0 5px 0; font-size: 16px; font-weight: 700; }
         .warning-banner p { color: #721c24; margin: 0; font-size: 13px; }
-        
+
         .advisor-comment {
             background: #fff3cd;
             border-left: 5px solid #ffc107;
@@ -129,82 +105,28 @@
             border-radius: 16px;
             margin: 25px 0;
         }
-        .advisor-comment h4 {
-            color: #856404;
-            margin-bottom: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .advisor-comment h4 { color: #856404; margin-bottom: 12px; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         .advisor-comment h4 i { font-size: 20px; }
-        .advisor-comment p {
-            color: #856404;
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.6;
-            font-weight: 500;
-            background: rgba(255,255,255,0.5);
-            padding: 12px;
-            border-radius: 10px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 15px;
-        }
-        .edit-btn {
-            background: linear-gradient(to right, #670019, #8b0022);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .advisor-comment p { color: #856404; margin: 0; font-size: 14px; line-height: 1.6; font-weight: 500; background: rgba(255,255,255,0.5); padding: 12px; border-radius: 10px; }
+
+        .action-buttons { display: flex; gap: 20px; justify-content: center; margin-top: 15px; }
+        .edit-btn { background: linear-gradient(to right, #670019, #8b0022); color: white; border: none; padding: 12px 35px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
         .edit-btn:hover { background: linear-gradient(to right, #8b0022, #a80028); transform: translateY(-2px); color: white; }
-        
-        .back-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .back-btn { background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
         .back-btn:hover { background: #5a6268; transform: translateY(-2px); color: white; }
-        
+
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
             .action-buttons { flex-direction: column; align-items: center; }
             .edit-btn, .back-btn { width: 100%; justify-content: center; }
-            .profile-box h6 { font-size: 12px; }
-            .profile-box small { font-size: 10px; }
-            .profile-box img { width: 40px; height: 40px; }
         }
     </style>
 </head>
 <body>
 
-<div class="sidebar" id="sidebar">
-    <div class="logo"><img src="images/utmlogo.png" alt="UTM"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+<div class="sidebar">
+    <div class="logo"><img src="images/utmlogo.png" alt="UTM Logo"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
     <div class="menu">
         <a href="student_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="student_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
@@ -213,13 +135,13 @@
         <a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
-    <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout"><a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
 </div>
 
-<div class="main-content" id="mainContent">
+<div class="main-content">
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-        <div class="profile-box" onclick="location.href='student_profile.html'">
+        <div class="profile-box" onclick="location.href='student_profile.html'" style="cursor: pointer;">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
@@ -231,10 +153,7 @@
 
     <div class="page-header"><h2>Registration Status: Rejected</h2></div>
 
-    <div id="contentContainer" class="rejected-container">
-        <div class="text-center py-5">Loading registration details...</div>
-    </div>
-
+    <div id="contentContainer" class="rejected-container"><div class="text-center py-5">Loading registration details...</div></div>
     <div id="actionButtons" style="display: none;"></div>
 </div>
 
@@ -247,12 +166,7 @@
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-    (function() { 
-        if (localStorage.getItem('sidebarCollapsed') === 'true') { 
-            document.querySelector('.sidebar').classList.add('collapsed'); 
-            document.querySelector('.main-content').classList.add('expanded'); 
-        } 
-    })();
+    (function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.querySelector('.sidebar').classList.add('collapsed'); document.querySelector('.main-content').classList.add('expanded'); } })();
 
     const urlParams = new URLSearchParams(window.location.search);
     const registrationId = urlParams.get('id');
@@ -260,25 +174,13 @@
     async function loadStudentName() {
         try {
             const profile = await apiGet('profile/student.php');
-            if (profile && profile.full_name) {
-                document.getElementById('studentName').innerText = profile.full_name;
-                return;
-            }
-        } catch(e) {
-            console.log('Profile API failed, trying session...');
-        }
-        
+            if (profile && profile.full_name) { document.getElementById('studentName').innerText = profile.full_name; return; }
+        } catch(e) {}
         try {
             const user = await getCurrentUser();
-            if (user && user.name) {
-                document.getElementById('studentName').innerText = user.name;
-            } else {
-                document.getElementById('studentName').innerText = 'Student';
-            }
-        } catch(e) {
-            console.error('Failed to load student name:', e);
-            document.getElementById('studentName').innerText = 'Student';
-        }
+            if (user && user.name) { document.getElementById('studentName').innerText = user.name; }
+            else { document.getElementById('studentName').innerText = 'Student'; }
+        } catch(e) { document.getElementById('studentName').innerText = 'Student'; }
     }
 
     async function loadRejectedDetails() {
@@ -286,143 +188,58 @@
             document.getElementById('contentContainer').innerHTML = '<div class="text-center text-danger">No registration ID provided.</div>';
             return;
         }
-        
         try {
             const data = await apiGet(`registrations/rejected_details.php?id=${registrationId}`);
-            
-            if (!data || data.error) {
-                throw new Error(data.error || 'No data received');
-            }
-            
-            if (data.student && data.student.user_name) {
-                document.getElementById('studentName').innerText = data.student.user_name;
-            }
-            
-            let coursesHtml = '';
-            let totalCredits = 0;
-            
+            if (!data || data.error) throw new Error(data.error || 'No data received');
+            if (data.student && data.student.user_name) document.getElementById('studentName').innerText = data.student.user_name;
+
+            let coursesHtml = '', totalCredits = 0;
             if (data.courses && data.courses.length > 0) {
                 data.courses.forEach((course, idx) => {
-                    coursesHtml += `<tr>
-                        <td>${idx + 1}</td>
-                        <td><strong>${escapeHtml(course.subject_code)}</strong></td>
-                        <td>${escapeHtml(course.subject_name)}</strong></td>
-                        <td>${course.credits}</td>
-                        <td>${escapeHtml(course.section || 'TBD')}</strong></td>
-                    </tr>`;
+                    coursesHtml += `<tr><td>${idx+1}</td><td><strong>${escapeHtml(course.subject_code)}</strong></td><td>${escapeHtml(course.subject_name)}</td><td>${course.credits}</td><td>${escapeHtml(course.section || 'TBD')}</td></tr>`;
                     totalCredits += course.credits;
                 });
-            } else {
-                coursesHtml = `<tr><td colspan="5" class="text-center">No courses found</td></tr>`;
-            }
-            
-            const advisorRemark = (data.registration && data.registration.advisor_remarks) 
-                ? data.registration.advisor_remarks 
-                : 'No specific reason provided. Please contact your academic advisor.';
-            
-            const rejectedData = {
-                registration_id: registrationId,
-                courses: (data.courses || []).map(course => ({
-                    subject_code: course.subject_code,
-                    subject_name: course.subject_name,
-                    credits: course.credits,
-                    section: course.section || '1'
-                })),
-                session: (data.registration && data.registration.session) || '2025/2026 - Semester 2'
-            };
-            
+            } else { coursesHtml = '<tr><td colspan="5" class="text-center">No courses found</td></tr>'; }
+
+            const advisorRemark = (data.registration && data.registration.advisor_remarks) || 'No specific reason provided. Please contact your academic advisor.';
+            const rejectedData = { registration_id: registrationId, courses: (data.courses || []).map(c => ({ subject_code: c.subject_code, subject_name: c.subject_name, credits: c.credits, section: c.section || '1' })), session: (data.registration && data.registration.session) || '2025/2026 - Semester 2' };
             localStorage.setItem('pendingRejectedRegistration', JSON.stringify(rejectedData));
             localStorage.setItem('isEditingRejectedRegistration', 'true');
-            
-            const studentName = (data.student && data.student.user_name) ? escapeHtml(data.student.user_name) : 'Not available';
-            const matrixNumber = (data.student && data.student.matrix_number) ? escapeHtml(data.student.matrix_number) : 'Not available';
-            const icNumber = (data.student && data.student.ic_number) ? escapeHtml(data.student.ic_number) : 'Not provided';
-            const programme = (data.student && data.student.programme) ? escapeHtml(data.student.programme) : 'Not available';
-            const year = (data.student && data.student.year) ? escapeHtml(data.student.year) : 'Not available';
-            const email = (data.student && data.student.utm_email) ? escapeHtml(data.student.utm_email) : 'Not available';
-            const phone = (data.student && data.student.phone) ? escapeHtml(data.student.phone) : '-';
-            const address = (data.student && data.student.address) ? escapeHtml(data.student.address) : '-';
-            
-            const sessionValue = (data.registration && data.registration.session) ? escapeHtml(data.registration.session) : '2025/2026 - Semester 2';
-            const submissionDate = (data.registration && data.registration.submission_date) ? new Date(data.registration.submission_date).toLocaleString() : 'Not available';
-            
-            const containerHtml = `
-                <div class="slip-header">
-                    <img src="images/utmlogo.png" alt="UTM Logo">
-                    <h3>COURSE REGISTRATION SLIP</h3>
-                    <p>Universiti Teknologi Malaysia</p>
-                </div>
-                
-                <div class="section-title">STUDENT INFORMATION</div>
-                <div class="info-row"><div class="info-label">Name</div><div class="info-value">${studentName}</div></div>
-                <div class="info-row"><div class="info-label">Matric No.</div><div class="info-value">${matrixNumber}</div></div>
-                <div class="info-row"><div class="info-label">IC/Passport</div><div class="info-value">${icNumber}</div></div>
-                <div class="info-row"><div class="info-label">Programme</div><div class="info-value">${programme}</div></div>
-                <div class="info-row"><div class="info-label">Year</div><div class="info-value">${year}</div></div>
-                <div class="info-row"><div class="info-label">Email</div><div class="info-value">${email}</div></div>
-                <div class="info-row"><div class="info-label">Phone</div><div class="info-value">${phone}</div></div>
-                <div class="info-row"><div class="info-label">Address</div><div class="info-value">${address}</div></div>
-                
-                <div class="section-title">REGISTRATION DETAILS</div>
-                <div class="info-row"><div class="info-label">Session</div><div class="info-value">${sessionValue}</div></div>
-                <div class="info-row"><div class="info-label">Submitted Date</div><div class="info-value">${submissionDate}</div></div>
-                <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span style="background:#f8d7da; color:#721c24; padding:4px 14px; border-radius:20px; font-weight:600;">REJECTED</span></div></div>
-                
-                <div class="section-title">REGISTERED COURSES</div>
-                <table class="courses-table">
-                    <thead><tr><th>#</th><th>Code</th><th>Course Title</th><th>Cr</th><th>Section</th></tr></thead>
-                    <tbody>${coursesHtml}</tbody>
-                </table>
-                <div class="total-credits">TOTAL CREDIT: ${String(totalCredits).padStart(3, '0')}</div>
-                
-                <div class="warning-banner">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    <div>
-                        <h4>Registration Rejected</h4>
-                        <p>Your course registration has been rejected by your academic advisor. Please review the advisor's comment below and edit your registration.</p>
-                    </div>
-                </div>
-                
-                <div class="advisor-comment">
-                    <h4><i class="bi bi-chat-left-text-fill"></i> Academic Advisor Comment</h4>
-                    <p>${escapeHtml(advisorRemark)}</p>
-                </div>
-            `;
-            
-            document.getElementById('contentContainer').innerHTML = containerHtml;
-            
-            document.getElementById('actionButtons').innerHTML = `
-                <div class="action-buttons">
-                    <button class="edit-btn" id="editBtn"><i class="bi bi-pencil-square"></i> Edit Registration</button>
-                    <a href="student_registration_history.html" class="back-btn"><i class="bi bi-arrow-left"></i> Back to History</a>
-                </div>
-            `;
-            document.getElementById('actionButtons').style.display = 'block';
-            
-            document.getElementById('editBtn').addEventListener('click', function() {
-                window.location.href = 'student_register.html?load_rejected=1';
-            });
-            
-        } catch (err) {
-            console.error('Error loading rejected details:', err);
+
+            const s = data.student || {};
+            const r = data.registration || {};
+
             document.getElementById('contentContainer').innerHTML = `
-                <div class="text-center text-danger py-4">
-                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
-                    <p class="mt-3">Failed to load registration details. Please try again.</p>
-                    <p class="small text-muted">Error: ${err.message}</p>
-                    <button class="btn btn-primary mt-2" onclick="location.reload()" style="background:#670019; border:none;">Retry</button>
-                </div>
+                <div class="slip-header"><img src="images/utmlogo.png" alt="UTM Logo"><h3>COURSE REGISTRATION SLIP</h3><p>Universiti Teknologi Malaysia</p></div>
+                <div class="section-title">STUDENT INFORMATION</div>
+                <div class="info-row"><div class="info-label">Name</div><div class="info-value">${escapeHtml(s.user_name || 'Not available')}</div></div>
+                <div class="info-row"><div class="info-label">Matric No.</div><div class="info-value">${escapeHtml(s.matrix_number || 'Not available')}</div></div>
+                <div class="info-row"><div class="info-label">IC/Passport</div><div class="info-value">${escapeHtml(s.ic_number || 'Not provided')}</div></div>
+                <div class="info-row"><div class="info-label">Programme</div><div class="info-value">${escapeHtml(s.programme || 'Not available')}</div></div>
+                <div class="info-row"><div class="info-label">Year</div><div class="info-value">${escapeHtml(s.year || 'Not available')}</div></div>
+                <div class="info-row"><div class="info-label">Email</div><div class="info-value">${escapeHtml(s.utm_email || 'Not available')}</div></div>
+                <div class="info-row"><div class="info-label">Phone</div><div class="info-value">${escapeHtml(s.phone || '-')}</div></div>
+                <div class="info-row"><div class="info-label">Address</div><div class="info-value">${escapeHtml(s.address || '-')}</div></div>
+                <div class="section-title">REGISTRATION DETAILS</div>
+                <div class="info-row"><div class="info-label">Session</div><div class="info-value">${escapeHtml(r.session || '2025/2026 - Semester 2')}</div></div>
+                <div class="info-row"><div class="info-label">Submitted Date</div><div class="info-value">${r.submission_date ? new Date(r.submission_date).toLocaleString() : 'Not available'}</div></div>
+                <div class="info-row"><div class="info-label">Status</div><div class="info-value"><span style="background:#f8d7da; color:#721c24; padding:4px 14px; border-radius:20px; font-weight:600;">REJECTED</span></div></div>
+                <div class="section-title">REGISTERED COURSES</div>
+                <table class="courses-table"><thead><tr><th>#</th><th>Code</th><th>Course Title</th><th>Cr</th><th>Section</th></tr></thead><tbody>${coursesHtml}</tbody></table>
+                <div class="total-credits">TOTAL CREDIT: ${String(totalCredits).padStart(3, '0')}</div>
+                <div class="warning-banner"><i class="bi bi-exclamation-triangle-fill"></i><div><h4>Registration Rejected</h4><p>Your course registration has been rejected by your academic advisor. Please review the advisor's comment below and edit your registration.</p></div></div>
+                <div class="advisor-comment"><h4><i class="bi bi-chat-left-text-fill"></i> Academic Advisor Comment</h4><p>${escapeHtml(advisorRemark)}</p></div>
             `;
+
+            document.getElementById('actionButtons').innerHTML = `<div class="action-buttons"><button class="edit-btn" id="editBtn"><i class="bi bi-pencil-square"></i> Edit Registration</button><a href="student_registration_history.html" class="back-btn"><i class="bi bi-arrow-left"></i> Back to History</a></div>`;
+            document.getElementById('actionButtons').style.display = 'block';
+            document.getElementById('editBtn').addEventListener('click', () => { window.location.href = 'student_register.html?load_rejected=1'; });
+        } catch (err) {
+            document.getElementById('contentContainer').innerHTML = `<div class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill fs-1"></i><p class="mt-3">Failed to load registration details. Please try again.</p><p class="small text-muted">Error: ${err.message}</p><button class="btn btn-primary mt-2" onclick="location.reload()" style="background:#670019; border:none;">Retry</button></div>`;
         }
     }
-    
-    function escapeHtml(str) { 
-        if (!str) return ''; 
-        return String(str).replace(/[&<>]/g, function(m) { 
-            return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; 
-        }); 
-    }
-    
+
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
     loadStudentName();
     loadRejectedDetails();
 </script>

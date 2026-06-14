@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - UTM Student</title>
-    <link rel="icon" type="image/png" href="images/logoWebsite.png"/>
+    <title>UTM Student - Register Courses</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: #f8f6f4; overflow-x: hidden; }
-        
+
         .sidebar {
             width: 280px; height: 100vh;
             background: linear-gradient(to bottom, #670019, #8b0022);
             position: fixed; padding: 30px 20px; color: white;
-            transition: transform 0.3s ease; z-index: 1000;
-            overflow-y: auto;
+            transition: transform 0.3s ease;
         }
         .sidebar.collapsed { transform: translateX(-280px); }
         .logo { text-align: center; margin-bottom: 50px; }
@@ -26,24 +28,23 @@
         .system-title { color: white; font-size: 16px; font-weight: 600; margin-top: 12px; }
         .menu a {
             display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; margin-bottom: 8px;
-            transition: 0.3s; font-size: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; margin-bottom: 12px; transition: 0.3s; font-size: 16px;
         }
         .menu a:hover, .menu .active { background: linear-gradient(to right, #f4a000, #e08700); }
-        .menu i { font-size: 20px; width: 24px; }
+        .menu i { font-size: 20px; }
         .logout {
             position: absolute; bottom: 30px;
             width: calc(100% - 40px); left: 20px;
         }
         .logout a {
             display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: white; padding: 14px 20px;
-            border-radius: 14px; transition: 0.3s; font-size: 15px;
+            text-decoration: none; color: white; padding: 12px 20px;
+            border-radius: 14px; transition: 0.3s; font-size: 16px;
             background: rgba(255,255,255,0.1);
         }
         .logout a:hover { background: linear-gradient(to right, #f4a000, #e08700); }
-        
+
         .main-content { margin-left: 280px; padding: 30px; transition: margin-left 0.3s ease; }
         .main-content.expanded { margin-left: 0; }
         .topbar {
@@ -52,198 +53,154 @@
             border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .toggle-btn { background: none; border: none; font-size: 22px; color: #333; cursor: pointer; }
-        
-        .profile-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-        }
-        .profile-box img {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .profile-box h6 {
-            margin-bottom: 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-        }
-        .profile-box small {
-            font-size: 11px;
-            color: #888;
-        }
-        .profile-box i {
-            font-size: 18px;
-            color: #670019;
-        }
-        
+        .profile-box { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .profile-box img { width: 50px; height: 50px; border-radius: 50%; }
+
         .page-header {
             background: #f7f2ee;
             border-radius: 25px;
-            padding: 35px 40px;
-            margin-bottom: 30px;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
             border: 1px solid #eee;
         }
         .page-header h1 { font-size: 34px; font-weight: 700; color: #670019; }
-        .page-header p { color: #666; margin-top: 8px; font-size: 15px; }
-        
+        .page-header p { color: #666; margin-top: 10px; font-size: 15px; }
+
         .info-card {
-            background: #fff7ef; border-left: 4px solid #f4a000;
-            border-radius: 15px; padding: 20px; margin-bottom: 25px;
+            background: #fff7ef;
+            border-left: 4px solid #f4a000;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
         }
         .info-card p { margin: 0; color: #856404; font-size: 14px; }
-        
+
         .registration-table {
-            background: white; border-radius: 25px; padding: 30px;
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
         }
-        .registration-table h3 { color: #670019; font-weight: 700; font-size: 20px; margin-bottom: 25px; border-bottom: 2px solid #f0e8e8; padding-bottom: 15px; }
-        
+        .registration-table h3 { color: #670019; font-weight: 700; margin-bottom: 20px; font-size: 20px; }
+
         .cart-table {
             width: 100%;
             border-collapse: collapse;
         }
         .cart-table th {
-            background: #f8f6f4;
-            padding: 12px 15px;
-            color: #670019;
             text-align: left;
-            font-weight: 600;
-            font-size: 13px;
+            padding: 12px 8px;
+            border-bottom: 1px solid #eee;
+            color: #666;
+            font-size: 12px;
         }
         .cart-table td {
-            padding: 12px 15px;
+            padding: 12px 8px;
             border-bottom: 1px solid #eee;
-            font-size: 14px;
+            font-size: 13px;
             color: #333;
-            vertical-align: middle;
         }
-        .cart-table tr:last-child td { border-bottom: none; }
-        .cart-table tbody tr:hover td { background: #fdf9f7; }
-        
         .section-select {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 1.5px solid #e0d6d6;
             border-radius: 10px;
             background: white;
-            cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-family: 'Poppins', sans-serif;
         }
-        .section-select:focus { outline: none; border-color: #670019; }
-        .section-select:disabled { background: #f5f5f5; cursor: not-allowed; }
-        
         .remove-btn {
             background: none;
             border: none;
             color: #dc3545;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
-            transition: 0.3s;
             padding: 5px;
         }
-        .remove-btn:hover { color: #c82333; transform: scale(1.1); }
-        .remove-btn:disabled { color: #ccc; cursor: not-allowed; transform: none; }
-        
-        .total-row td {
-            font-weight: 600;
-            color: #670019;
-            background: #f8f6f4;
-        }
+        .remove-btn:hover { color: #c82333; }
+        .total-row td { background: #f8f6f4; font-weight: 600; color: #670019; }
         
         .submit-btn {
             background: linear-gradient(to right, #2e7d32, #1b5e20);
             color: white;
             border: none;
-            padding: 15px 40px;
-            border-radius: 14px;
-            font-size: 16px;
+            padding: 12px 35px;
+            border-radius: 25px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
             margin-top: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
         }
         .submit-btn:hover { background: linear-gradient(to right, #1b5e20, #0d3b0f); transform: translateY(-2px); }
-        .submit-btn.disabled { background: #6c757d; cursor: not-allowed; transform: none; }
-        
+        .submit-btn.disabled { background: #6c757d; cursor: not-allowed; }
+
         .empty-cart { text-align: center; padding: 60px 20px; }
         .empty-cart i { font-size: 64px; color: #ddd; margin-bottom: 20px; }
         .empty-cart h4 { color: #666; margin-bottom: 15px; }
-        .empty-cart a { color: #670019; font-weight: 500; text-decoration: none; }
-        
-        .alert-custom { border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .alert-custom { border-radius: 14px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
         .alert-success { background: #d4edda; color: #155724; }
         .alert-error { background: #f8d7da; color: #721c24; }
         .alert-warning { background: #fff3cd; color: #856404; }
-        
-        .pending-banner {
-            background: #fff3cd; border: 1px solid #ffecb5; border-radius: 15px;
-            padding: 15px 20px; margin-bottom: 25px; display: flex;
-            align-items: center; gap: 12px; color: #856404;
+
+        .pending-banner, .approved-banner, .rejected-banner {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        .pending-banner i { font-size: 24px; }
-        .pending-banner p { margin: 0; font-size: 14px; }
-        
-        .approved-banner {
-            background: #d4edda; border: 1px solid #c3e6cb; border-radius: 15px;
-            padding: 15px 20px; margin-bottom: 25px; display: flex;
-            align-items: center; gap: 12px; color: #155724;
-        }
-        .approved-banner i { font-size: 24px; }
-        .approved-banner p { margin: 0; font-size: 14px; }
-        
-        .rejected-banner {
-            background: #fff3cd; border: 1px solid #ffecb5; border-radius: 15px;
-            padding: 15px 20px; margin-bottom: 25px; display: flex;
-            align-items: center; gap: 12px; color: #856404;
-        }
-        .rejected-banner i { font-size: 24px; }
-        .rejected-banner p { margin: 0; font-size: 14px; }
-        
+        .pending-banner i, .approved-banner i, .rejected-banner i { font-size: 24px; }
+        .pending-banner { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        .approved-banner { background: #d4edda; color: #155724; border-left-color: #2e7d32; }
+        .rejected-banner { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        .pending-banner p, .approved-banner p, .rejected-banner p { margin: 0; font-size: 13px; }
+
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
             z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-container {
             background: white; border-radius: 25px; width: 450px; max-width: 90%;
-            padding: 35px; text-align: center; transform: scale(0.9); transition: 0.3s;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            padding: 35px; text-align: center;
         }
-        .modal-overlay.active .modal-container { transform: scale(1); }
         .modal-icon { font-size: 60px; margin-bottom: 15px; }
-        .modal-container h3 { color: #670019; font-weight: 700; margin-bottom: 10px; }
-        .modal-container p { color: #666; margin-bottom: 25px; line-height: 1.6; }
+        .modal-container h3 { color: #670019; font-weight: 700; margin-bottom: 10px; font-size: 20px; }
+        .modal-container p { color: #666; margin-bottom: 25px; line-height: 1.6; font-size: 14px; }
         .modal-buttons { display: flex; gap: 15px; justify-content: center; }
         .modal-btn {
             padding: 10px 25px; border-radius: 25px; font-weight: 600;
             cursor: pointer; transition: 0.3s; border: none; font-size: 14px;
         }
         .modal-btn.cancel { background: #6c757d; color: white; }
-        .modal-btn.cancel:hover { background: #5a6268; transform: translateY(-2px); }
+        .modal-btn.cancel:hover { background: #5a6268; }
         .modal-btn.submit { background: #2e7d32; color: white; }
-        .modal-btn.submit:hover { background: #1b5e20; transform: translateY(-2px); }
+        .modal-btn.submit:hover { background: #1b5e20; }
         .modal-btn.remove-confirm { background: #dc3545; color: white; }
-        .modal-btn.remove-confirm:hover { background: #c82333; transform: translateY(-2px); }
-        
+        .modal-btn.remove-confirm:hover { background: #c82333; }
+
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-280px); }
             .main-content { margin-left: 0; }
-            .cart-table th, .cart-table td { padding: 10px; font-size: 12px; }
+            .page-header { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-<div class="sidebar" id="sidebar">
-    <div class="logo"><img src="images/utmlogo.png" alt="UTM"><div class="system-title">COURSE REGISTRATION SYSTEM</div></div>
+<div class="sidebar">
+    <div class="logo">
+        <img src="images/utmlogo.png" alt="UTM Logo">
+        <div class="system-title">COURSE REGISTRATION SYSTEM</div>
+    </div>
     <div class="menu">
         <a href="student_dashboard.html"><i class="bi bi-house-fill"></i> Dashboard</a>
         <a href="student_profile.html"><i class="bi bi-person-fill"></i> Profile</a>
@@ -252,13 +209,15 @@
         <a href="student_registration_history.html"><i class="bi bi-clock-history"></i> Registration History</a>
         <a href="student_change_password.html"><i class="bi bi-lock-fill"></i> Change Password</a>
     </div>
-    <div class="logout"><a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    <div class="logout">
+        <a href="index.html"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
 </div>
 
 <div class="main-content">
     <div class="topbar">
         <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-        <div class="profile-box" onclick="location.href='student_profile.html'">
+        <div class="profile-box" onclick="location.href='student_profile.html'" style="cursor: pointer;">
             <i class="bi bi-bell fs-5"></i>
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
             <div>
@@ -268,31 +227,37 @@
         </div>
     </div>
 
-    <div class="page-header"><h1>Register</h1><p>Review your added courses and select sections before submitting</p></div>
+    <div class="page-header">
+        <div>
+            <h1>Register</h1>
+            <p>Review your added courses and select sections before submitting</p>
+        </div>
+    </div>
+
     <div id="alertContainer"></div>
-    
+
     <div id="pendingBanner" class="pending-banner" style="display: none;">
         <i class="bi bi-clock-history"></i>
-        <p><strong>Registration Pending Approval</strong><br>Your registration is waiting for advisor approval. You cannot modify or submit changes until a decision is made.</p>
+        <div><strong>Registration Pending Approval</strong><br>Your registration is waiting for advisor approval. You cannot modify or submit changes until a decision is made.</div>
     </div>
-    
+
     <div id="approvedBanner" class="approved-banner" style="display: none;">
         <i class="bi bi-check-circle-fill"></i>
-        <p><strong>Registration Approved</strong><br>You already have an approved registration for this academic session.</p>
+        <div><strong>Registration Approved</strong><br>You already have an approved registration for this academic session.</div>
     </div>
-    
+
     <div id="rejectedBanner" class="rejected-banner" style="display: none;">
         <i class="bi bi-exclamation-triangle-fill"></i>
-        <p><strong>Editing Rejected Registration</strong><br>You are editing a previously rejected registration. Please make the necessary changes and resubmit.</p>
+        <div><strong>Editing Rejected Registration</strong><br>You are editing a previously rejected registration. Please make the necessary changes and resubmit.</div>
     </div>
-    
-    <div class="info-card"><p><i class="bi bi-info-circle-fill me-2"></i> Please select a section for each course before submitting. Your registration will be sent to your academic advisor for approval.</p></div>
-    
+
+    <div class="info-card">
+        <p><i class="bi bi-info-circle-fill me-2"></i> Please select a section for each course before submitting. Your registration will be sent to your academic advisor for approval.</p>
+    </div>
+
     <div class="registration-table">
         <h3><i class="bi bi-cart-fill me-2"></i>Your Added Courses</h3>
-        <div id="cartContainer">
-            <div class="text-center py-4">Loading your cart...</div>
-        </div>
+        <div id="cartContainer"><div class="text-center py-4">Loading your cart...</div></div>
         <div class="text-center mt-4" id="submitBtnContainer" style="display: none;">
             <button id="submitBtn" class="submit-btn"><i class="bi bi-send-check"></i> Submit Registration</button>
         </div>
@@ -301,7 +266,7 @@
 
 <div id="submitModal" class="modal-overlay">
     <div class="modal-container">
-        <div class="modal-icon" style="color: #2e7d32;"><i class="bi bi-question-circle-fill"></i></div>
+        <div class="modal-icon"><i class="bi bi-question-circle-fill" style="color: #2e7d32;"></i></div>
         <h3>Submit Registration</h3>
         <p>Are you sure you want to submit your course registration?<br><br>Once submitted, your registration will be sent to your Academic Advisor for review and approval.</p>
         <div class="modal-buttons">
@@ -313,7 +278,7 @@
 
 <div id="removeModal" class="modal-overlay">
     <div class="modal-container">
-        <div class="modal-icon" style="color: #dc3545;"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="modal-icon"><i class="bi bi-exclamation-triangle-fill" style="color: #dc3545;"></i></div>
         <h3>Remove Course</h3>
         <p id="removeModalMessage">Are you sure you want to remove this course from your registration?</p>
         <div class="modal-buttons">
@@ -337,7 +302,6 @@
         main.classList.toggle('expanded');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     }
-    
     (function() {
         if (localStorage.getItem('sidebarCollapsed') === 'true') {
             document.querySelector('.sidebar').classList.add('collapsed');
@@ -349,73 +313,51 @@
         try {
             const result = await apiGet('registrations/check_pending.php');
             hasPendingRegistration = result.has_pending || false;
-            
             if (hasPendingRegistration) {
                 document.getElementById('pendingBanner').style.display = 'flex';
                 const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('disabled');
-                }
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('disabled'); }
             }
             return hasPendingRegistration;
-        } catch(e) {
-            console.error('Failed to check pending registration:', e);
-            return false;
-        }
+        } catch(e) { return false; }
     }
 
     async function checkApprovedRegistration() {
         try {
             const result = await apiGet('registrations/check_approved.php');
             hasApprovedRegistration = result.has_approved || false;
-            
             if (hasApprovedRegistration && !hasPendingRegistration) {
                 document.getElementById('approvedBanner').style.display = 'flex';
                 const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('disabled');
-                }
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('disabled'); }
             }
             return hasApprovedRegistration;
-        } catch(e) {
-            console.error('Failed to check approved registration:', e);
-            return false;
-        }
+        } catch(e) { return false; }
     }
 
     async function loadRejectedRegistration() {
         const pendingData = localStorage.getItem('pendingRejectedRegistration');
         const isEditing = localStorage.getItem('isEditingRejectedRegistration');
-        
         if (pendingData && isEditing === 'true') {
             try {
                 const rejectedData = JSON.parse(pendingData);
                 isEditingRejected = true;
                 document.getElementById('rejectedBanner').style.display = 'flex';
-                
                 const currentCart = await apiGet('cart/get.php');
                 if (currentCart.items && currentCart.items.length > 0) {
                     for (const item of currentCart.items) {
                         await apiPost('cart/remove.php', { course_code: item.code });
                     }
                 }
-                
                 for (const course of rejectedData.courses) {
                     await apiPost('cart/add.php', { course_code: course.subject_code });
                     if (course.section) {
-                        await apiPost('cart/update_section.php', { 
-                            course_code: course.subject_code, 
-                            section: course.section 
-                        });
+                        await apiPost('cart/update_section.php', { course_code: course.subject_code, section: course.section });
                     }
                 }
-                
                 showAlert('Your previous rejected registration has been loaded. Please make necessary changes and resubmit.', 'success');
                 return true;
             } catch(e) {
-                console.error('Failed to load rejected registration:', e);
                 showAlert('Unable to load previous registration. Please add courses manually.', 'error');
                 return false;
             }
@@ -435,10 +377,7 @@
                 document.getElementById('studentName').innerText = profile.full_name;
                 return;
             }
-        } catch(e) {
-            console.log('Profile API failed, trying session...');
-        }
-        
+        } catch(e) {}
         try {
             const user = await getCurrentUser();
             if (user && user.name) {
@@ -447,7 +386,6 @@
                 document.getElementById('studentName').innerText = 'Student';
             }
         } catch(e) {
-            console.error('Failed to load student name:', e);
             document.getElementById('studentName').innerText = 'Student';
         }
     }
@@ -456,63 +394,35 @@
         try {
             const cart = await apiGet('cart/get.php');
             const container = document.getElementById('cartContainer');
-            
             if (!cart.items || cart.items.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-cart">
-                        <i class="bi bi-cart"></i>
-                        <h4>No courses added yet</h4>
-                        <p>Go to the Courses page to add courses to your registration cart.</p>
-                        <a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none; border-radius:25px; padding:10px 25px;">Browse Courses</a>
-                    </div>
-                `;
+                container.innerHTML = `<div class="empty-cart"><i class="bi bi-cart"></i><h4>No courses added yet</h4><p>Go to the Courses page to add courses to your registration cart.</p><a href="student_courses.html" class="btn btn-primary mt-2" style="background:#670019; border:none; border-radius:25px; padding:8px 20px;">Browse Courses</a></div>`;
                 document.getElementById('submitBtnContainer').style.display = 'none';
                 return;
             }
-            
-            let html = `
-                <table class="cart-table">
-                    <thead>
-                        <tr><th style="width:5%">No.</th><th style="width:15%">Code</th><th style="width:40%">Course Name</th><th style="width:10%">Credits</th><th style="width:15%">Section</th><th style="width:15%">Action</th></tr></thead>
-                    <tbody>
-            `;
-            
+            let html = `<table class="cart-table"><thead><tr><th>No.</th><th>Code</th><th>Course Name</th><th>Credits</th><th>Section</th><th>Action</th></tr></thead><tbody>`;
             const disableActions = hasPendingRegistration || hasApprovedRegistration;
-            
             cart.items.forEach((item, idx) => {
                 html += `<tr>
                     <td>${idx+1}</td>
                     <td><strong>${escapeHtml(item.code)}</strong></td>
-                    <td>${escapeHtml(item.name)}</strong></td>
+                    <td>${escapeHtml(item.name)}</td>
                     <td>${item.credits}</td>
-                    <td>
-                        <select class="section-select" data-code="${escapeHtml(item.code)}" ${disableActions ? 'disabled' : ''}>
-                            <option value="">Select Section</option>
-                            <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
-                            <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
-                            <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
-                            <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
-                        </select>
-                    </td>
+                    <td><select class="section-select" data-code="${escapeHtml(item.code)}" ${disableActions ? 'disabled' : ''}>
+                        <option value="">Select Section</option>
+                        <option value="1" ${item.section == '1' ? 'selected' : ''}>Section 1</option>
+                        <option value="2" ${item.section == '2' ? 'selected' : ''}>Section 2</option>
+                        <option value="3" ${item.section == '3' ? 'selected' : ''}>Section 3</option>
+                        <option value="4" ${item.section == '4' ? 'selected' : ''}>Section 4</option>
+                    </select></td>
                     <td><button class="remove-btn" data-code="${escapeHtml(item.code)}" data-name="${escapeHtml(item.name)}" ${disableActions ? 'disabled' : ''}><i class="bi bi-trash3"></i></button></td>
                 </tr>`;
             });
-            
-            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></td></tbody><tr>`;
+            html += `<tr class="total-row"><td colspan="3"><strong>Total Credit Hours:</strong></td><td colspan="3"><strong>${cart.total_credits}</strong></td></tr></tbody></table>`;
             container.innerHTML = html;
             document.getElementById('submitBtnContainer').style.display = 'block';
-            
-            if (!disableActions) {
-                attachEvents();
-            } else {
-                const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('disabled');
-                }
-            }
+            if (!disableActions) attachEvents();
+            else { const submitBtn = document.getElementById('submitBtn'); if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('disabled'); } }
         } catch(err) {
-            console.error(err);
             document.getElementById('cartContainer').innerHTML = '<div class="text-center text-danger py-4">Failed to load cart. Please refresh.</div>';
         }
     }
@@ -526,12 +436,9 @@
                 try {
                     await apiPost('cart/update_section.php', { course_code: courseCode, section });
                     showAlert('Section updated successfully', 'success');
-                } catch(err) {
-                    showAlert('Failed to update section', 'error');
-                }
+                } catch(err) { showAlert('Failed to update section', 'error'); }
             });
         });
-        
         document.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const courseCode = btn.dataset.code;
@@ -539,64 +446,33 @@
                 showRemoveModal(courseCode, courseName);
             });
         });
-        
         const submitBtn = document.getElementById('submitBtn');
         if (submitBtn) {
             submitBtn.onclick = () => {
                 const selects = document.querySelectorAll('.section-select');
-                const missingSections = [];
-                selects.forEach(select => {
-                    if (!select.value) {
-                        const row = select.closest('tr');
-                        const courseName = row.querySelector('td:nth-child(3)').innerText;
-                        missingSections.push(courseName);
-                    }
-                });
-                if (missingSections.length > 0) {
-                    showAlert('Please select a section for all courses:\n- ' + missingSections.join('\n- '), 'warning');
-                    return;
-                }
+                const missing = [];
+                selects.forEach(select => { if (!select.value) { const row = select.closest('tr'); missing.push(row.querySelector('td:nth-child(3)').innerText); } });
+                if (missing.length) { showAlert('Please select a section for:\n- ' + missing.join('\n- '), 'warning'); return; }
                 showSubmitModal();
             };
         }
     }
 
     function showSubmitModal() {
-        if (hasPendingRegistration) {
-            showAlert('You have a pending registration. Cannot submit until advisor decision.', 'warning');
-            return;
-        }
-        if (hasApprovedRegistration) {
-            showAlert('You already have an approved registration for this session.', 'warning');
-            return;
-        }
+        if (hasPendingRegistration) { showAlert('You have a pending registration. Cannot submit.', 'warning'); return; }
+        if (hasApprovedRegistration) { showAlert('You already have an approved registration.', 'warning'); return; }
         document.getElementById('submitModal').classList.add('active');
     }
-
-    function closeSubmitModal() {
-        document.getElementById('submitModal').classList.remove('active');
-    }
-
+    function closeSubmitModal() { document.getElementById('submitModal').classList.remove('active'); }
     async function confirmSubmitRegistration() {
         closeSubmitModal();
-        
-        if (hasPendingRegistration) {
-            showAlert('You have a pending registration. Cannot submit.', 'warning');
-            return;
-        }
-        if (hasApprovedRegistration) {
-            showAlert('You already have an approved registration.', 'warning');
-            return;
-        }
-        
+        if (hasPendingRegistration || hasApprovedRegistration) { showAlert('Cannot submit registration.', 'warning'); return; }
         try {
             await apiPost('cart/submit.php', {});
             clearRejectedStorage();
             showAlert('Registration submitted successfully! Redirecting...', 'success');
             setTimeout(() => { window.location.href = 'student_registration_history.html'; }, 2000);
-        } catch(err) {
-            showAlert('Submission failed: ' + err.message, 'error');
-        }
+        } catch(err) { showAlert('Submission failed: ' + err.message, 'error'); }
     }
 
     function showRemoveModal(courseCode, courseName) {
@@ -604,54 +480,33 @@
         document.getElementById('removeModalMessage').innerHTML = `Are you sure you want to remove <strong>${escapeHtml(courseName)}</strong> from your registration?`;
         document.getElementById('removeModal').classList.add('active');
     }
-
-    function closeRemoveModal() {
-        document.getElementById('removeModal').classList.remove('active');
-        pendingRemoveCourseCode = null;
-    }
-
+    function closeRemoveModal() { document.getElementById('removeModal').classList.remove('active'); pendingRemoveCourseCode = null; }
     async function confirmRemoveCourse() {
         if (!pendingRemoveCourseCode) return;
-        if (hasPendingRegistration) {
-            showAlert('You have a pending registration. Cannot remove courses.', 'warning');
-            closeRemoveModal();
-            return;
-        }
-        if (hasApprovedRegistration) {
-            showAlert('You already have an approved registration.', 'warning');
-            closeRemoveModal();
-            return;
-        }
+        if (hasPendingRegistration || hasApprovedRegistration) { showAlert('Cannot modify registration.', 'warning'); closeRemoveModal(); return; }
         try {
             await apiPost('cart/remove.php', { course_code: pendingRemoveCourseCode });
             showAlert('Course removed from cart', 'success');
             closeRemoveModal();
             await loadCart();
-        } catch(err) {
-            showAlert('Failed to remove course: ' + err.message, 'error');
-            closeRemoveModal();
-        }
+        } catch(err) { showAlert('Failed to remove course: ' + err.message, 'error'); closeRemoveModal(); }
     }
 
     function showAlert(msg, type) {
         const container = document.getElementById('alertContainer');
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert-custom alert-${type}`;
-        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'warning' ? 'exclamation-triangle-fill' : 'exclamation-triangle-fill'} fs-5 me-2"></i><span>${msg.replace(/\n/g, '<br>')}</span>`;
+        alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} fs-5 me-2"></i><span>${msg.replace(/\n/g, '<br>')}</span>`;
         container.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 5000);
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; });
-    }
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
 
     document.getElementById('submitModalCancelBtn')?.addEventListener('click', closeSubmitModal);
     document.getElementById('submitModalConfirmBtn')?.addEventListener('click', confirmSubmitRegistration);
     document.getElementById('removeModalCancelBtn')?.addEventListener('click', closeRemoveModal);
     document.getElementById('removeModalConfirmBtn')?.addEventListener('click', confirmRemoveCourse);
-    
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
     });
@@ -660,14 +515,10 @@
         await loadStudentName();
         await checkPendingRegistration();
         await checkApprovedRegistration();
-        
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('load_rejected') === '1') {
-            await loadRejectedRegistration();
-        }
+        if (urlParams.get('load_rejected') === '1') await loadRejectedRegistration();
         await loadCart();
     }
-    
     init();
 </script>
 </body>
